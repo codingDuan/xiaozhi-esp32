@@ -1,0 +1,811 @@
+<title>毛绒玩具眼睛设计台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --ground:   #F2F4F7;
+    --panel:    #FFFFFF;
+    --panel-2:  #E9EDF2;
+    --line:     #D2D9E2;
+    --line-2:   #BFC8D4;
+    --ink:      #161C24;
+    --ink-2:    #47525F;
+    --dim:      #78848F;
+    --accent:   #0E8C7A;
+    --accent-2: #0B6F60;
+    --warn:     #B4531B;
+    --shadow:   0 1px 2px rgba(16,24,32,.07), 0 6px 18px rgba(16,24,32,.06);
+
+    --sans: "IBM Plex Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    /* 硬件事实：GC9A01 是黑底自发光，不随主题变 */
+    --bezel:   #14161A;
+    --glass:   #000000;
+    --bezel-r: #2A2E35;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:   #0E1116;
+      --panel:    #171B22;
+      --panel-2:  #1F242C;
+      --line:     #262C36;
+      --line-2:   #333B47;
+      --ink:      #DCE3EC;
+      --ink-2:    #A4B0BF;
+      --dim:      #7C8798;
+      --accent:   #4DD8C0;
+      --accent-2: #7FE9D6;
+      --warn:     #E4915B;
+      --shadow:   0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:   #0E1116;
+    --panel:    #171B22;
+    --panel-2:  #1F242C;
+    --line:     #262C36;
+    --line-2:   #333B47;
+    --ink:      #DCE3EC;
+    --ink-2:    #A4B0BF;
+    --dim:      #7C8798;
+    --accent:   #4DD8C0;
+    --accent-2: #7FE9D6;
+    --warn:     #E4915B;
+    --shadow:   0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 96px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 0; }
+
+  /* ---------- header ---------- */
+  header {
+    display: flex; flex-wrap: wrap; align-items: baseline;
+    gap: 8px 18px; padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  h1 {
+    margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -.01em;
+    text-wrap: balance;
+  }
+  .spec {
+    font-family: var(--mono); font-size: 12px; color: var(--dim);
+    letter-spacing: .02em;
+  }
+  .spec b { color: var(--ink-2); font-weight: 500; }
+  .proto-tag {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--warn);
+    border: 1px solid currentColor; border-radius: 3px;
+    padding: 1px 6px; white-space: nowrap;
+  }
+
+  /* ---------- stage ---------- */
+  .stage {
+    margin: 26px 0 8px;
+    background: var(--bezel);
+    border: 1px solid var(--bezel-r);
+    border-radius: 14px;
+    padding: 30px 24px 22px;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  .eyes { display: flex; gap: 26px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .screen { position: relative; }
+  .screen canvas {
+    display: block; width: 240px; height: 240px;
+    border-radius: 50%;
+    background: var(--glass);
+    box-shadow: 0 0 0 6px #0A0C0F, 0 0 0 7px var(--bezel-r), 0 10px 30px rgba(0,0,0,.5);
+  }
+  .screen figcaption {
+    margin-top: 14px; text-align: center;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
+    color: #6C7683; text-transform: uppercase;
+  }
+  .stage-note {
+    font-family: var(--mono); font-size: 11px; color: #5E6773;
+    letter-spacing: .03em; text-align: center;
+  }
+  .stage-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+  /* ---------- controls ---------- */
+  .cols {
+    display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.25fr);
+    gap: 18px; margin-top: 18px;
+  }
+  @media (max-width: 800px) { .cols { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px; padding: 16px 16px 18px;
+  }
+  .card > h2 {
+    margin: 0 0 14px; font-size: 11px; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--dim);
+  }
+
+  .presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px,1fr)); gap: 7px; }
+  .preset {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 9px; border-radius: 7px; cursor: pointer;
+    background: var(--panel-2); border: 1px solid transparent;
+    color: var(--ink); font: inherit; font-size: 13px; text-align: left;
+    transition: border-color .12s, background .12s;
+  }
+  .preset:hover { border-color: var(--line-2); }
+  .preset[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--panel-2)); }
+  .preset .em { font-size: 15px; line-height: 1; }
+  .preset .nm { font-family: var(--mono); font-size: 11px; color: var(--ink-2); letter-spacing: .02em; }
+
+  .slider { display: grid; grid-template-columns: 74px 1fr 52px; align-items: center; gap: 10px; margin-bottom: 11px; }
+  .slider label { font-family: var(--mono); font-size: 11.5px; color: var(--ink-2); letter-spacing: .02em; }
+  .slider output {
+    font-family: var(--mono); font-size: 12px; color: var(--ink);
+    font-variant-numeric: tabular-nums; text-align: right;
+  }
+  .slider .hint { grid-column: 1 / -1; font-size: 11px; color: var(--dim); margin: -6px 0 4px; }
+  input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%;
+    background: transparent; cursor: pointer; height: 18px; margin: 0;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 3px; border-radius: 2px; background: var(--line-2);
+  }
+  input[type=range]::-moz-range-track { height: 3px; border-radius: 2px; background: var(--line-2); }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent); border: none; margin-top: -5.5px;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent); border: none;
+  }
+  input[type=range]:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+  .swatches { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 4px; }
+  .sw {
+    width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; padding: 0;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+  }
+  .sw[aria-pressed="true"] { border-color: var(--ink); }
+
+  .btn {
+    font: inherit; font-size: 13px; cursor: pointer;
+    padding: 7px 13px; border-radius: 7px;
+    background: var(--panel-2); color: var(--ink);
+    border: 1px solid var(--line-2);
+    transition: border-color .12s;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--ground); font-weight: 500; }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .stage .btn { background: #1E2229; color: #C9D2DD; border-color: #333B47; }
+  .stage .btn:hover { border-color: #4DD8C0; }
+  .stage .btn[aria-pressed="true"] { background: #4DD8C0; color: #0E1116; border-color: #4DD8C0; }
+
+  /* ---------- export ---------- */
+  .export { margin-top: 18px; }
+  .export pre {
+    margin: 0; padding: 14px 15px; overflow-x: auto;
+    background: var(--panel-2); border: 1px solid var(--line);
+    border-radius: 8px;
+    font-family: var(--mono); font-size: 12px; line-height: 1.65;
+    color: var(--ink);
+  }
+  .export .k { color: var(--accent); }
+  .export .c { color: var(--dim); }
+  .export .n { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .export-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .export-head h2 { margin: 0; }
+
+  .findings { margin-top: 18px; }
+  .findings ul { margin: 0; padding-left: 18px; }
+  .findings li { margin-bottom: 9px; color: var(--ink-2); font-size: 14px; }
+  .findings li b { color: var(--ink); font-weight: 600; }
+  .findings code { font-family: var(--mono); font-size: 12.5px; color: var(--accent); }
+
+  /* ---------- variant switcher ---------- */
+  .switcher {
+    position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%);
+    display: flex; align-items: stretch; gap: 0; z-index: 50;
+    background: var(--panel); border: 1px solid var(--line-2);
+    border-radius: 999px; box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .switcher button {
+    font: inherit; cursor: pointer; border: none; background: transparent;
+    color: var(--ink); padding: 9px 15px; display: flex; align-items: center;
+  }
+  .switcher button:hover { background: var(--panel-2); }
+  .switcher button:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+  .switcher .cur {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 6px; min-width: 172px; justify-content: center;
+    border-left: 1px solid var(--line); border-right: 1px solid var(--line);
+  }
+  .switcher .key {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    background: var(--accent); color: var(--ground);
+    border-radius: 4px; padding: 1px 6px;
+  }
+  .switcher .nm { font-size: 13.5px; white-space: nowrap; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>毛绒玩具眼睛设计台</h1>
+    <span class="proto-tag">Prototype</span>
+    <span class="spec">GC9A01 <b>240×240</b> 圆屏 ×2 · SPI 共总线 · RGB565</span>
+  </header>
+
+  <div class="stage">
+    <div class="eyes">
+      <figure class="screen" style="margin:0">
+        <canvas id="eyeL" width="240" height="240" aria-label="左眼预览"></canvas>
+        <figcaption>左眼 · CS = GPIO45</figcaption>
+      </figure>
+      <figure class="screen" style="margin:0">
+        <canvas id="eyeR" width="240" height="240" aria-label="右眼预览"></canvas>
+        <figcaption>右眼 · CS = GPIO43</figcaption>
+      </figure>
+    </div>
+    <p class="stage-note">画布为 1:1 真实像素尺寸 · 实际两屏间距取决于玩偶脸部开孔</p>
+    <div class="stage-actions">
+      <button class="btn" id="btnBlink" type="button">眨一次眼</button>
+      <button class="btn" id="btnAuto" type="button" aria-pressed="false">自动眨眼</button>
+      <button class="btn" id="btnIdle" type="button" aria-pressed="false">待机游走</button>
+      <button class="btn" id="btnAsym" type="button" aria-pressed="true">双眼微不对称</button>
+    </div>
+  </div>
+
+  <div class="cols">
+    <section class="card">
+      <h2>情绪预设</h2>
+      <div class="presets" id="presets"></div>
+      <p style="font-size:12px;color:var(--dim);margin:14px 0 0">
+        取自服务端 <code style="font-family:var(--mono);font-size:11.5px">EMOJI_MAP</code>（<code style="font-family:var(--mono);font-size:11.5px">textUtils.py:8</code>）的 21 种情绪，此处列出最常触发的 10 种。点击后参数会插值过渡，用于检验情绪切换是否平滑。
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>EyeState 参数</h2>
+      <div id="sliders"></div>
+      <div style="margin-top:16px">
+        <label style="font-family:var(--mono);font-size:11.5px;color:var(--ink-2);display:block;margin-bottom:7px">iris_color</label>
+        <div class="swatches" id="swatches"></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="card export">
+    <div class="export-head">
+      <h2>当前参数 · C++ 字面量</h2>
+      <button class="btn" id="btnCopy" type="button">复制</button>
+    </div>
+    <pre id="out"></pre>
+  </section>
+
+  <section class="card findings">
+    <h2>原型暴露的问题</h2>
+    <ul>
+      <li><b>设计稿的 5 个参数不够。</b>「弯月眼」（happy / laughing）需要下眼睑向上拱起，这靠 <code>openness</code> 和 <code>lid_tilt</code> 表达不出来——降低 openness 只会让眼睛变成一条横缝，不会变成笑眼。因此新增第 6 个字段 <code>curve</code>（下眼睑曲率，-1 下垂 ~ +1 上拱），三种风格都用得到。</li>
+      <li><b><code>lid_tilt</code> 必须左右镜像。</b>「内低外高」是相对鼻梁的方向，左眼取 <code>+t</code> 右眼就得取 <code>-t</code>。若两眼同号，生气会变成整张脸歪向一边。</li>
+      <li><b>变体 B / C 用不上 <code>iris_color</code>。</b>它们没有虹膜结构，情绪只能靠形状表达。若最终选 B 或 C，配色就从「每种情绪一个颜色」退化为「全局一个主色」，情绪区分度全压在形状上——这会反过来要求 <code>curve</code> 和 <code>lid_tilt</code> 的取值范围更大。</li>
+      <li><b><code>pupil_scale</code> 在小屏上不如预期显眼。</b>240px 圆屏里瞳孔本就不大，1.4× 放大肉眼几乎看不出「惊讶」。变体 A 里真正传达惊讶的是 <code>openness</code> 拉满后露出的上下眼白。</li>
+    </ul>
+  </section>
+</div>
+
+<nav class="switcher" aria-label="眼睛风格切换">
+  <button type="button" id="prev" aria-label="上一个风格">←</button>
+  <span class="cur"><span class="key" id="vkey">A</span><span class="nm" id="vname">写实圆眼</span></span>
+  <button type="button" id="next" aria-label="下一个风格">→</button>
+</nav>
+
+<script>
+(function () {
+  "use strict";
+
+  // ── 三种风格。结构上必须不同：A 分层圆、B 形变光块、C 点阵格 ──
+  const VARIANTS = [
+    { key: "A", name: "写实圆眼",  draw: drawRealistic },
+    { key: "B", name: "极简发光",  draw: drawGlow },
+    { key: "C", name: "点阵像素",  draw: drawDots }
+  ];
+
+  const IRIS = ["#35C7F5", "#4DD8C0", "#8B6BE8", "#E86A9B", "#E8B54D", "#6FE05A"];
+
+  // EyeState —— curve 是原型新增的第 6 个字段
+  const PARAMS = [
+    { k: "openness",    min: 0,   max: 1,   step: .01, def: .85, hint: "0 全闭 ~ 1 全睁" },
+    { k: "pupil_x",     min: -1,  max: 1,   step: .01, def: 0,   hint: "注视方向 · 水平" },
+    { k: "pupil_y",     min: -1,  max: 1,   step: .01, def: 0,   hint: "注视方向 · 垂直" },
+    { k: "pupil_scale", min: .5,  max: 1.6, step: .01, def: 1,   hint: "瞳孔缩放" },
+    { k: "lid_tilt",    min: -35, max: 35,  step: 1,   def: 0,   hint: "上眼睑倾角（度）· 左右自动镜像" },
+    { k: "curve",       min: -1,  max: 1,   step: .01, def: 0,   hint: "下眼睑曲率 · 原型新增" }
+  ];
+
+  const PRESETS = [
+    { em: "😶", nm: "neutral",   s: { openness: .85, pupil_x: 0,   pupil_y: 0,   pupil_scale: 1,    lid_tilt: 0,   curve: 0,   iris: 0 } },
+    { em: "🙂", nm: "happy",     s: { openness: .62, pupil_x: 0,   pupil_y: .05, pupil_scale: 1,    lid_tilt: 0,   curve: .85, iris: 1 } },
+    { em: "😆", nm: "laughing",  s: { openness: .34, pupil_x: 0,   pupil_y: .1,  pupil_scale: .95,  lid_tilt: 0,   curve: 1,   iris: 1 } },
+    { em: "😔", nm: "sad",       s: { openness: .58, pupil_x: 0,   pupil_y: .34, pupil_scale: 1,    lid_tilt: 19,  curve: -.4, iris: 0 } },
+    { em: "😭", nm: "crying",    s: { openness: .3,  pupil_x: 0,   pupil_y: .5,  pupil_scale: 1.1,  lid_tilt: 24,  curve: -.7, iris: 0 } },
+    { em: "😠", nm: "angry",     s: { openness: .68, pupil_x: 0,   pupil_y: -.1, pupil_scale: .82,  lid_tilt: -27, curve: -.25,iris: 3 } },
+    { em: "😲", nm: "surprised", s: { openness: 1,   pupil_x: 0,   pupil_y: 0,   pupil_scale: 1.45, lid_tilt: 0,   curve: 0,   iris: 0 } },
+    { em: "🤔", nm: "thinking",  s: { openness: .78, pupil_x: -.62,pupil_y: -.4, pupil_scale: 1,    lid_tilt: -9,  curve: 0,   iris: 2 } },
+    { em: "😴", nm: "sleepy",    s: { openness: .18, pupil_x: 0,   pupil_y: .25, pupil_scale: 1,    lid_tilt: 6,   curve: -.15,iris: 0 } },
+    { em: "😍", nm: "loving",    s: { openness: .66, pupil_x: 0,   pupil_y: .05, pupil_scale: 1.25, lid_tilt: 0,   curve: .8,  iris: 3 } }
+  ];
+
+  const state = { openness: .85, pupil_x: 0, pupil_y: 0, pupil_scale: 1, lid_tilt: 0, curve: 0, iris: 0 };
+  let variant = 0, activePreset = 0;
+  let autoBlink = false, idleRoam = false, asym = true;
+  let blinkT = -1;               // 眨眼进度 0..1，-1 表示未眨
+  let nextBlinkAt = performance.now() + 4000;
+  let roamX = 0, roamY = 0, roamTargetX = 0, roamTargetY = 0, nextRoamAt = 0;
+  let tween = null;              // 情绪过渡
+
+  // ───────────────────────── 绘制工具 ─────────────────────────
+  const R = 120;                 // 画布中心 / 屏幕半径
+
+  function clipRound(ctx) {
+    ctx.beginPath();
+    ctx.arc(R, R, R, 0, Math.PI * 2);
+    ctx.clip();
+  }
+
+  // 计算眼睑遮罩路径：上睑一条斜线，下睑一条二次曲线（受 curve 影响）
+  function lidPath(ctx, s, sign, halfW, halfH) {
+    const open = Math.max(0, Math.min(1, s.openness));
+    const tilt = (s.lid_tilt * sign) * Math.PI / 180;
+    const topY  = R - open * halfH;
+    const botY  = R + open * halfH;
+    const bow   = s.curve * halfH * 0.95;   // 正=下睑上拱（笑眼）
+
+    ctx.beginPath();
+    // 上睑（带倾角的直线）
+    const dx = halfW * 1.5;
+    const dy = Math.tan(tilt) * dx;
+    ctx.moveTo(R - dx, topY - dy);
+    ctx.lineTo(R + dx, topY + dy);
+    // 右侧下行
+    ctx.lineTo(R + dx, botY);
+    // 下睑（二次曲线，控制点决定拱起程度）
+    ctx.quadraticCurveTo(R, botY - bow * 2, R - dx, botY);
+    ctx.closePath();
+  }
+
+  // ── 变体 A：分层圆 —— 巩膜 / 虹膜 / 瞳孔 / 高光，眼睑裁切 ──
+  function drawRealistic(ctx, s, sign) {
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, 2 * R, 2 * R);
+
+    ctx.save();
+    lidPath(ctx, s, sign, 106, 100);
+    ctx.clip();
+
+    // 巩膜
+    const sc = ctx.createRadialGradient(R, R - 20, 10, R, R, 100);
+    sc.addColorStop(0, "#FFFFFF");
+    sc.addColorStop(1, "#C9D4DE");
+    ctx.fillStyle = sc;
+    ctx.beginPath(); ctx.arc(R, R, 100, 0, Math.PI * 2); ctx.fill();
+
+    const px = R + s.pupil_x * 36, py = R + s.pupil_y * 30;
+    const iris = IRIS[s.iris] || IRIS[0];
+
+    // 虹膜
+    const ir = 44 * (0.9 + 0.1 * s.pupil_scale);
+    const ig = ctx.createRadialGradient(px, py, 4, px, py, ir);
+    ig.addColorStop(0, shade(iris, 1.35));
+    ig.addColorStop(.65, iris);
+    ig.addColorStop(1, shade(iris, .42));
+    ctx.fillStyle = ig;
+    ctx.beginPath(); ctx.arc(px, py, ir, 0, Math.PI * 2); ctx.fill();
+
+    // 虹膜纹理（放射线）
+    ctx.save();
+    ctx.globalAlpha = .28; ctx.strokeStyle = shade(iris, .35); ctx.lineWidth = 1.6;
+    for (let i = 0; i < 28; i++) {
+      const a = (i / 28) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(px + Math.cos(a) * ir * .42, py + Math.sin(a) * ir * .42);
+      ctx.lineTo(px + Math.cos(a) * ir * .96, py + Math.sin(a) * ir * .96);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 瞳孔
+    ctx.fillStyle = "#07090C";
+    ctx.beginPath(); ctx.arc(px, py, 21 * s.pupil_scale, 0, Math.PI * 2); ctx.fill();
+
+    // 高光
+    ctx.fillStyle = "rgba(255,255,255,.92)";
+    ctx.beginPath(); ctx.arc(px - 15, py - 17, 9.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.45)";
+    ctx.beginPath(); ctx.arc(px + 13, py + 14, 5, 0, Math.PI * 2); ctx.fill();
+
+    ctx.restore();
+
+    // 眼睑边缘阴影，避免裁切边太生硬
+    ctx.save();
+    lidPath(ctx, s, sign, 106, 100);
+    ctx.strokeStyle = "rgba(0,0,0,.55)"; ctx.lineWidth = 5; ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── 变体 B：单一形变光块（Vector / Cozmo 路线），无巩膜无虹膜 ──
+  function drawGlow(ctx, s, sign) {
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, 2 * R, 2 * R);
+
+    const col = "#4DD8C0";
+    const w = 104 * (0.92 + 0.08 * s.pupil_scale);
+    const h = Math.max(6, 132 * s.openness);
+    const cx = R + s.pupil_x * 30, cy = R + s.pupil_y * 26;
+    const tilt = (s.lid_tilt * sign) * Math.PI / 180;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(tilt * .55);
+
+    ctx.shadowColor = col;
+    ctx.shadowBlur = 26;
+    ctx.fillStyle = col;
+
+    ctx.beginPath();
+    const rr = Math.min(30, h / 2, w / 2);
+    roundRect(ctx, -w / 2, -h / 2, w, h, rr);
+    ctx.fill();
+    ctx.fill();                       // 二次填充加强辉光
+
+    // curve > 0 时从下方挖掉一个圆 → 弯月笑眼
+    if (s.curve > 0.02) {
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.shadowBlur = 0;
+      const bite = h * (0.35 + 0.85 * s.curve);
+      ctx.beginPath();
+      ctx.ellipse(0, h / 2 + bite * .34, w * .78, bite, 0, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (s.curve < -0.02) {
+      // curve < 0 时从上方挖 → 下垂的难过眼
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.shadowBlur = 0;
+      const bite = h * (0.3 + 0.7 * -s.curve);
+      ctx.beginPath();
+      ctx.ellipse(0, -h / 2 - bite * .3, w * .8, bite, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // ── 变体 C：16×16 点阵，按形状点亮（复古电子宠物）──
+  function drawDots(ctx, s, sign) {
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, 2 * R, 2 * R);
+
+    const N = 15, pitch = 15.2, dot = 5.4;
+    const col = "#4DD8C0";
+    const w = 100 * (0.92 + 0.08 * s.pupil_scale);
+    const h = Math.max(8, 128 * s.openness);
+    const cx = R + s.pupil_x * 28, cy = R + s.pupil_y * 24;
+    const tilt = (s.lid_tilt * sign) * Math.PI / 180;
+    const off = (N - 1) * pitch / 2;
+
+    for (let gy = 0; gy < N; gy++) {
+      for (let gx = 0; gx < N; gx++) {
+        const X = R - off + gx * pitch;
+        const Y = R - off + gy * pitch;
+        if (Math.hypot(X - R, Y - R) > R - 8) continue;   // 圆屏外不画
+
+        // 反变换到形状本地坐标
+        let lx = X - cx, ly = Y - cy;
+        const c = Math.cos(-tilt * .55), sn = Math.sin(-tilt * .55);
+        const rx = lx * c - ly * sn, ry = lx * sn + ly * c;
+
+        let lit = Math.abs(rx) <= w / 2 && Math.abs(ry) <= h / 2;
+        if (lit && s.curve > .02) {
+          const bite = h * (0.35 + 0.85 * s.curve);
+          const ey = ry - (h / 2 + bite * .34);
+          if ((rx * rx) / ((w * .78) ** 2) + (ey * ey) / (bite * bite) <= 1) lit = false;
+        } else if (lit && s.curve < -.02) {
+          const bite = h * (0.3 + 0.7 * -s.curve);
+          const ey = ry + (h / 2 + bite * .3);
+          if ((rx * rx) / ((w * .8) ** 2) + (ey * ey) / (bite * bite) <= 1) lit = false;
+        }
+
+        ctx.beginPath();
+        ctx.arc(X, Y, dot / 2, 0, Math.PI * 2);
+        if (lit) {
+          ctx.shadowColor = col; ctx.shadowBlur = 9; ctx.fillStyle = col;
+        } else {
+          ctx.shadowBlur = 0; ctx.fillStyle = "#11181C";
+        }
+        ctx.fill();
+      }
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y,     x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x,     y + h, r);
+    ctx.arcTo(x,     y + h, x,     y,     r);
+    ctx.arcTo(x,     y,     x + w, y,     r);
+    ctx.closePath();
+  }
+
+  function shade(hex, f) {
+    const n = parseInt(hex.slice(1), 16);
+    const cl = v => Math.max(0, Math.min(255, Math.round(v)));
+    return "rgb(" + cl(((n >> 16) & 255) * f) + "," + cl(((n >> 8) & 255) * f) + "," + cl((n & 255) * f) + ")";
+  }
+
+  // ───────────────────────── 渲染循环 ─────────────────────────
+  const cL = document.getElementById("eyeL").getContext("2d");
+  const cR = document.getElementById("eyeR").getContext("2d");
+
+  function effectiveState(sign) {
+    const s = Object.assign({}, state);
+    if (blinkT >= 0) {
+      // 0→1→0 的三角波，闭合时 openness 压到 0.04
+      const k = blinkT < .5 ? blinkT * 2 : (1 - blinkT) * 2;
+      s.openness = s.openness * (1 - k) + 0.04 * k;
+    }
+    if (idleRoam) {
+      s.pupil_x = Math.max(-1, Math.min(1, s.pupil_x + roamX));
+      s.pupil_y = Math.max(-1, Math.min(1, s.pupil_y + roamY));
+    }
+    if (asym) {
+      // 双眼轻微不对称：完全对称会显得像机器
+      s.pupil_x += sign * 0.045;
+      s.openness = Math.max(0, s.openness - (sign > 0 ? 0 : 0.02));
+    }
+    return s;
+  }
+
+  function render() {
+    const d = VARIANTS[variant].draw;
+    cL.save(); clipRound(cL); d(cL, effectiveState(+1), +1); cL.restore();
+    cR.save(); clipRound(cR); d(cR, effectiveState(-1), -1); cR.restore();
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(64, now - last); last = now;
+
+    if (tween) {
+      tween.t = Math.min(1, tween.t + dt / 260);
+      const e = tween.t < .5 ? 2 * tween.t * tween.t : 1 - Math.pow(-2 * tween.t + 2, 2) / 2;
+      for (const k in tween.to) {
+        if (k === "iris") continue;
+        state[k] = tween.from[k] + (tween.to[k] - tween.from[k]) * e;
+      }
+      syncSliders();
+      if (tween.t >= 1) tween = null;
+    }
+
+    if (blinkT >= 0) {
+      blinkT += dt / 150;
+      if (blinkT > 1) blinkT = -1;
+    } else if (autoBlink && now >= nextBlinkAt) {
+      blinkT = 0;
+      nextBlinkAt = now + 2600 + Math.random() * 4200;
+    }
+
+    if (idleRoam) {
+      if (now >= nextRoamAt) {
+        roamTargetX = (Math.random() - .5) * .5;
+        roamTargetY = (Math.random() - .5) * .34;
+        nextRoamAt = now + 1100 + Math.random() * 2400;
+      }
+      roamX += (roamTargetX - roamX) * .022;
+      roamY += (roamTargetY - roamY) * .022;
+    }
+
+    render();
+    updateOut();
+    requestAnimationFrame(frame);
+  }
+
+  // ───────────────────────── UI 组装 ─────────────────────────
+  const slidersEl = document.getElementById("sliders");
+  const inputs = {};
+  PARAMS.forEach(p => {
+    const row = document.createElement("div");
+    row.className = "slider";
+    row.innerHTML =
+      '<label for="s_' + p.k + '">' + p.k + '</label>' +
+      '<input type="range" id="s_' + p.k + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '" value="' + p.def + '">' +
+      '<output id="o_' + p.k + '"></output>' +
+      '<span class="hint">' + p.hint + '</span>';
+    slidersEl.appendChild(row);
+    const inp = row.querySelector("input");
+    inputs[p.k] = inp;
+    inp.addEventListener("input", () => {
+      tween = null;
+      state[p.k] = parseFloat(inp.value);
+      setActivePreset(-1);
+      syncSliders();
+      save();
+    });
+  });
+
+  function syncSliders() {
+    PARAMS.forEach(p => {
+      inputs[p.k].value = state[p.k];
+      const v = state[p.k];
+      document.getElementById("o_" + p.k).textContent =
+        p.step >= 1 ? Math.round(v) + "°" : v.toFixed(2);
+    });
+  }
+
+  const swEl = document.getElementById("swatches");
+  IRIS.forEach((c, i) => {
+    const b = document.createElement("button");
+    b.className = "sw"; b.type = "button"; b.style.background = c;
+    b.setAttribute("aria-pressed", String(i === state.iris));
+    b.setAttribute("aria-label", "虹膜颜色 " + c);
+    b.addEventListener("click", () => {
+      state.iris = i;
+      [...swEl.children].forEach((el, j) => el.setAttribute("aria-pressed", String(j === i)));
+      save();
+    });
+    swEl.appendChild(b);
+  });
+
+  const presetsEl = document.getElementById("presets");
+  PRESETS.forEach((p, i) => {
+    const b = document.createElement("button");
+    b.className = "preset"; b.type = "button";
+    b.innerHTML = '<span class="em">' + p.em + '</span><span class="nm">' + p.nm + '</span>';
+    b.addEventListener("click", () => applyPreset(i));
+    presetsEl.appendChild(b);
+  });
+
+  function setActivePreset(i) {
+    activePreset = i;
+    [...presetsEl.children].forEach((el, j) => el.setAttribute("aria-pressed", String(j === i)));
+  }
+
+  function applyPreset(i) {
+    const p = PRESETS[i];
+    tween = { t: 0, from: Object.assign({}, state), to: p.s };
+    state.iris = p.s.iris;
+    [...swEl.children].forEach((el, j) => el.setAttribute("aria-pressed", String(j === p.s.iris)));
+    setActivePreset(i);
+    save();
+  }
+
+  // ── 导出 ──
+  const outEl = document.getElementById("out");
+  let lastOut = "";
+  function updateOut() {
+    const v = VARIANTS[variant];
+    const txt =
+      '// 风格 ' + v.key + ' — ' + v.name + '\n' +
+      'EyeState kEmotion = {\n' +
+      '    .openness    = ' + state.openness.toFixed(2) + 'f,\n' +
+      '    .pupil_x     = ' + state.pupil_x.toFixed(2) + 'f,\n' +
+      '    .pupil_y     = ' + state.pupil_y.toFixed(2) + 'f,\n' +
+      '    .pupil_scale = ' + state.pupil_scale.toFixed(2) + 'f,\n' +
+      '    .lid_tilt    = ' + Math.round(state.lid_tilt) + '.0f,   // 右眼取负值\n' +
+      '    .curve       = ' + state.curve.toFixed(2) + 'f,   // 原型新增字段\n' +
+      '    .iris_color  = 0x' + rgb565(IRIS[state.iris]) + ',   // RGB565 · ' + IRIS[state.iris] + '\n' +
+      '};';
+    if (txt === lastOut) return;
+    lastOut = txt;
+    outEl.textContent = txt;
+  }
+
+  function rgb565(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    const v = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
+    return v.toString(16).toUpperCase().padStart(4, "0");
+  }
+
+  document.getElementById("btnCopy").addEventListener("click", e => {
+    const b = e.currentTarget;
+    navigator.clipboard.writeText(outEl.textContent).then(
+      () => { b.textContent = "已复制"; setTimeout(() => b.textContent = "复制", 1400); },
+      () => { b.textContent = "复制失败"; setTimeout(() => b.textContent = "复制", 1400); }
+    );
+  });
+
+  // ── 舞台按钮 ──
+  document.getElementById("btnBlink").addEventListener("click", () => { if (blinkT < 0) blinkT = 0; });
+  toggleBtn("btnAuto", v => { autoBlink = v; nextBlinkAt = performance.now() + 600; }, () => autoBlink);
+  toggleBtn("btnIdle", v => { idleRoam = v; if (!v) { roamX = roamY = roamTargetX = roamTargetY = 0; } nextRoamAt = 0; }, () => idleRoam);
+  toggleBtn("btnAsym", v => { asym = v; }, () => asym);
+
+  function toggleBtn(id, set, get) {
+    const b = document.getElementById(id);
+    b.setAttribute("aria-pressed", String(get()));
+    b.addEventListener("click", () => { set(!get()); b.setAttribute("aria-pressed", String(get())); save(); });
+  }
+
+  // ── 变体切换 ──
+  function setVariant(i, push) {
+    variant = (i + VARIANTS.length) % VARIANTS.length;
+    document.getElementById("vkey").textContent = VARIANTS[variant].key;
+    document.getElementById("vname").textContent = VARIANTS[variant].name;
+    lastOut = "";
+    if (push) {
+      const u = new URL(location.href);
+      u.searchParams.set("variant", VARIANTS[variant].key);
+      history.replaceState(null, "", u);
+    }
+    save();
+  }
+  document.getElementById("prev").addEventListener("click", () => setVariant(variant - 1, true));
+  document.getElementById("next").addEventListener("click", () => setVariant(variant + 1, true));
+  addEventListener("keydown", e => {
+    const t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+    if (e.key === "ArrowLeft")  { setVariant(variant - 1, true); e.preventDefault(); }
+    if (e.key === "ArrowRight") { setVariant(variant + 1, true); e.preventDefault(); }
+  });
+
+  // ── 本地记忆（纯便利，失败不影响页面）──
+  function save() {
+    try {
+      localStorage.setItem("eyelab", JSON.stringify({
+        state, variant, autoBlink, idleRoam, asym, activePreset
+      }));
+    } catch (_) {}
+  }
+  function load() {
+    try {
+      const raw = localStorage.getItem("eyelab");
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (_) { return null; }
+  }
+
+  // ── 启动 ──
+  const fromUrl = new URLSearchParams(location.search).get("variant");
+  const saved = load();
+  if (saved && saved.state) {
+    Object.assign(state, saved.state);
+    autoBlink = !!saved.autoBlink; idleRoam = !!saved.idleRoam;
+    asym = saved.asym !== false;
+    variant = saved.variant || 0;
+    setActivePreset(typeof saved.activePreset === "number" ? saved.activePreset : -1);
+  } else {
+    applyPreset(1);          // 默认 happy，页面静止首帧就是一张笑脸
+  }
+  if (fromUrl) {
+    const i = VARIANTS.findIndex(v => v.key === fromUrl.toUpperCase());
+    if (i >= 0) variant = i;
+  }
+  ["btnAuto", "btnIdle", "btnAsym"].forEach(id => {
+    const g = { btnAuto: () => autoBlink, btnIdle: () => idleRoam, btnAsym: () => asym }[id];
+    document.getElementById(id).setAttribute("aria-pressed", String(g()));
+  });
+  [...swEl.children].forEach((el, j) => el.setAttribute("aria-pressed", String(j === state.iris)));
+  setVariant(variant, false);
+  syncSliders();
+  if (tween) { tween.t = 1; }
+  requestAnimationFrame(frame);
+})();
+</script>
