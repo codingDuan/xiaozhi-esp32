@@ -18,7 +18,7 @@
 - 摄像头保留，占用 GPIO4–13、15–18，且占用 `LEDC_TIMER_0` + `LEDC_CHANNEL_0`
 - 屏幕 SPI 时钟**必须 ≤ 20MHz**（面包板飞线 + 双屏并联），初值取 10MHz
 - 两块屏均为 GC9A01 240×240 圆形，共用 MOSI/CLK/DC/RST，仅 CS 独立
-- 背光不接 GPIO，两屏 BL 直连 3V3；`DISPLAY_BACKLIGHT_PIN` 恒为 `GPIO_NUM_NC`
+- 实物屏模块为 7 针 `RST/CS/DC/SDA/SCL/GND/VCC`，**无 BL 引脚**（背光内部直连 VCC 常亮）；`DISPLAY_BACKLIGHT_PIN` 恒为 `GPIO_NUM_NC`。屏 VCC 接开发板 3V3，不接 5V
 - `lid_tilt` 左眼取 `+t`、右眼取 `-t`，任何渲染路径都不得违反
 - 不得修改 `main/` 下板型目录以外的现有文件，`main/CMakeLists.txt` 与 `main/Kconfig.projbuild` 除外（仅新增分支）
 - 主机端测试代码放在 `main/boards/plush-toy/test/`；该子目录不会被固件构建 glob 收录（`main/CMakeLists.txt:869` 的 glob 不递归）
@@ -88,7 +88,7 @@
 #define XCLK_FREQ_HZ 20000000
 
 // 双眼屏：MOSI/CLK 已从 GPIO20/19 迁走，把原生 USB 还给烧录与日志
-#define DISPLAY_BACKLIGHT_PIN GPIO_NUM_NC   // 两屏 BL 直连 3V3
+#define DISPLAY_BACKLIGHT_PIN GPIO_NUM_NC   // 模块无 BL 引脚，背光内部常亮
 #define DISPLAY_MOSI_PIN      GPIO_NUM_14
 #define DISPLAY_CLK_PIN       GPIO_NUM_38
 #define DISPLAY_DC_PIN        GPIO_NUM_47
