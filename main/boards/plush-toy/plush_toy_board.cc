@@ -14,8 +14,10 @@
 #include "config.h"
 #include "led/single_led.h"
 #include "esp32_camera.h"
+#include "mcp_server.h"
 #include "pca9685.h"
 #include "limb_controller.h"
+#include "plush_behavior.h"
 
 #include <esp_log.h>
 #include <driver/spi_common.h>
@@ -40,9 +42,25 @@ class PlushToyBoard : public WifiBoard {
 private:
     Button boot_button_;
     Esp32Camera* camera_ = nullptr;
-    NoDisplay display_;
+    // 眼睛屏接上前的过渡实现：只把 emotion 转成手势。
+    // 计划一 Task 4 接入 EyeDisplay 后，这段逻辑移进 EyeDisplay::SetEmotion。
+    class LimbEmotionDisplay : public NoDisplay {
+    public:
+        void SetBehavior(PlushBehavior* b) { behavior_ = b; }
+        virtual void SetEmotion(const char* emotion) override {
+            ESP_LOGI(TAG, "SetEmotion: %s", emotion ? emotion : "(null)");
+            if (behavior_ != nullptr) {
+                behavior_->OnEmotion(emotion);
+            }
+        }
+    private:
+        PlushBehavior* behavior_ = nullptr;
+    };
+
+    LimbEmotionDisplay display_;
     Pca9685* pca_ = nullptr;
     LimbController* limbs_ = nullptr;
+    PlushBehavior* behavior_ = nullptr;
 
     // 舵机链路的任何一步失败都不得让设备崩溃 —— 没有手臂的玩具仍应能正常对话。
     // 因此全部失败路径只记日志并让 pca_ 保持 nullptr，不用 ESP_ERROR_CHECK。
@@ -124,6 +142,50 @@ private:
         camera_ = new Esp32Camera(config);
     }
 
+    // 只暴露 3 个手势工具。otto-robot 暴露了 28 个，工具过多会显著降低
+    // LLM 的选择准确率。描述写英文 —— 它是直接喂给 LLM 的提示词，
+    // 且与 mcp_server.cc 中现有工具的风格一致。
+    void InitializeTools() {
+        if (limbs_ == nullptr || !limbs_->available()) {
+            ESP_LOGW(TAG, "肢体不可用，跳过手势工具注册");
+            return;
+        }
+        auto& mcp = McpServer::GetInstance();
+        auto* limbs = limbs_;
+
+        mcp.AddTool("self.limbs.wave_hand",
+            "Wave the plush toy's hand to greet someone. Use when the user says hello, "
+            "goodbye, or explicitly asks the toy to wave.",
+            PropertyList({
+                Property("side", kPropertyTypeString, std::string("both")),
+                Property("times", kPropertyTypeInteger, 2, 1, 5)
+            }),
+            [limbs](const PropertyList& properties) -> ReturnValue {
+                auto side = properties["side"].value<std::string>();
+                Gesture g = (side == "left")    ? Gesture::kWaveLeft
+                            : (side == "right") ? Gesture::kWaveRight
+                                                : Gesture::kWaveBoth;
+                return limbs->Enqueue(g, properties["times"].value<int>());
+            });
+
+        mcp.AddTool("self.limbs.hug",
+            "Open both arms for a hug. Use when the user asks for a hug or expresses "
+            "affection toward the toy.",
+            PropertyList(),
+            [limbs](const PropertyList&) -> ReturnValue {
+                return limbs->Enqueue(Gesture::kHug, 1);
+            });
+
+        mcp.AddTool("self.limbs.cheer",
+            "Wiggle both arms happily. Use to express excitement or celebration.",
+            PropertyList({
+                Property("times", kPropertyTypeInteger, 3, 1, 5)
+            }),
+            [limbs](const PropertyList& properties) -> ReturnValue {
+                return limbs->Enqueue(Gesture::kCheer, properties["times"].value<int>());
+            });
+    }
+
     void InitializeButtons() {
         boot_button_.OnClick([this]() {
             auto& app = Application::GetInstance();
@@ -144,9 +206,11 @@ public:
         limbs_ = new LimbController(pca_);
         limbs_->Start();
 
-        // TODO(临时): 开机自检动作，用于验证 Pca9685 + LimbController 整条链路
-        // 在真实固件里能跑通。Task 3 的 MCP 工具验证通过后删除。
-        limbs_->Enqueue(Gesture::kWaveBoth, 2);
+        behavior_ = new PlushBehavior(limbs_);
+        behavior_->Start();
+        display_.SetBehavior(behavior_);
+
+        InitializeTools();
     }
 
     virtual Led* GetLed() override {
