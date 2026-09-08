@@ -4,6 +4,8 @@
 
 // 几何参数取自已归档的交互式原型（spec §8，prototype/eye-renderer 分支）。
 // 屏心 (120,120)，巩膜半径 100，虹膜 44，瞳孔 21×scale。
+bool EyeRenderer::swap_rb_ = false;
+
 namespace {
 
 constexpr int kC = EyeRenderer::kSize / 2;   // 120
@@ -16,6 +18,7 @@ constexpr float kLidHalfW = 106.0f;
 constexpr float kLidHalfH = 100.0f;
 
 inline uint16_t Rgb565(int r, int g, int b) {
+    if (EyeRenderer::swap_rb()) { const int t = r; r = b; b = t; }
     return (uint16_t)(((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3));
 }
 

@@ -136,11 +136,27 @@ private:
     // LLM 的选择准确率。描述写英文 —— 它是直接喂给 LLM 的提示词，
     // 且与 mcp_server.cc 中现有工具的风格一致。
     void InitializeTools() {
+        auto& mcp = McpServer::GetInstance();
+
+        // 眼睛颜色校正：GC9A01 模块的 RGB/BGR 排列因厂而异，配错时虹膜
+        // 会从青蓝变成橙红。做成在线开关，省掉"改宏→重编→重烧"一整轮。
+        if (display_ != nullptr) {
+            auto* eyes = display_;
+            mcp.AddTool("self.eyes.swap_colors",
+                "Swap the red and blue channels of the eyes. Use when the user says the "
+                "eye color looks wrong or inverted (for example the iris looks orange/red "
+                "instead of cyan blue). The setting is persisted.",
+                PropertyList({ Property("enabled", kPropertyTypeBoolean) }),
+                [eyes](const PropertyList& properties) -> ReturnValue {
+                    eyes->SetSwapRB(properties["enabled"].value<bool>());
+                    return true;
+                });
+        }
+
         if (limbs_ == nullptr || !limbs_->available()) {
             ESP_LOGW(TAG, "肢体不可用，跳过手势工具注册");
             return;
         }
-        auto& mcp = McpServer::GetInstance();
         auto* limbs = limbs_;
 
         mcp.AddTool("self.limbs.wave_hand",

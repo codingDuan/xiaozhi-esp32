@@ -178,7 +178,33 @@ static void TestDirtyRectCoversAllChangedPixels() {
     CHECK(covered, "脏矩形必须覆盖全部变化像素，否则屏上留残影");
 }
 
+// 红蓝互换开关必须真的只换红蓝、不动绿，且可来回切换
+static void TestSwapRB() {
+    EyeState s;
+    s.openness = 1.0f;
+    s.iris_color = 0x363E;   // #35C7F5 青蓝
+
+    EyeRenderer::SetSwapRB(false);
+    auto normal = RenderFull(s, +1);
+    EyeRenderer::SetSwapRB(true);
+    auto swapped = RenderFull(s, +1);
+    EyeRenderer::SetSwapRB(false);
+    auto back = RenderFull(s, +1);
+
+    // 取虹膜上一点（瞳孔右侧、仍在虹膜内）
+    const int x = 150, y = 120;
+    uint16_t a = At(normal, x, y), b = At(swapped, x, y);
+    const int ar = (a >> 11) & 0x1F, ag = (a >> 5) & 0x3F, ab = a & 0x1F;
+    const int br = (b >> 11) & 0x1F, bg = (b >> 5) & 0x3F, bb = b & 0x1F;
+
+    CHECK(a != b, "开关打开后颜色应改变");
+    CHECK(ag == bg, "绿通道不应受影响");
+    CHECK(ar != br || ab != bb, "红蓝通道应发生互换");
+    CHECK(normal == back, "关掉开关后应完全恢复原状");
+}
+
 int main() {
+    TestSwapRB();
     TestNoChangeYieldsEmptyRect();
     TestPupilMoveYieldsSmallRect();
     TestOpennessChangeYieldsTallRect();

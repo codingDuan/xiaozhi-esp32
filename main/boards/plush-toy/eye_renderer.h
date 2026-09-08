@@ -40,4 +40,13 @@ public:
     // 脏矩形不是优化项而是必需项：10MHz SPI 下双眼全屏重绘约 184ms（≈5fps），
     // 眨眼会变成幻灯片。只重绘变化区域后可稳定 30fps。
     static DirtyRect ComputeDirty(const EyeState& a, const EyeState& b);
+
+    // 红蓝通道互换。GC9A01 模块的 RGB/BGR 排列因厂而异，配错时虹膜会从
+    // 青蓝变成橙红。做成运行时开关是为了不必"肉眼确认→改宏→重编→重烧"
+    // 走一整轮，而是能在线翻转并持久化。
+    static void SetSwapRB(bool on) { swap_rb_ = on; }
+    static bool swap_rb() { return swap_rb_; }
+
+private:
+    static bool swap_rb_;
 };

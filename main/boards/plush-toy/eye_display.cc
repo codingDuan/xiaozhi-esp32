@@ -1,5 +1,6 @@
 #include "eye_display.h"
 #include "plush_behavior.h"
+#include "settings.h"
 
 #include <esp_heap_caps.h>
 #include <esp_log.h>
@@ -71,6 +72,10 @@ EyeDisplay::EyeDisplay(esp_lcd_panel_handle_t left, esp_lcd_panel_handle_t right
         ESP_LOGE(TAG, "PSRAM 分配失败（每块需 %u 字节），眼睛不可用", (unsigned)(n * 2));
         return;
     }
+    {
+        Settings s("plush_eye", false);
+        EyeRenderer::SetSwapRB(s.GetInt("swap_rb", 0) != 0);
+    }
     base_ = state_ = LookupEmotion("neutral");
     Flush(EyeRenderer::FullRect());
     ESP_LOGI(TAG, "双眼初始化完成");
@@ -100,15 +105,18 @@ void EyeDisplay::Flush(DirtyRect r) {
 
     // 双眼不对称偏移在此施加，不放进 EyeRenderer ——
     // 渲染器保持可精确镜像测试。完全对称的眼睛看起来像机器。
+    // 先把两只眼都渲染好，再交错传输。
+    // 双眼不对称偏移在此施加，不放进 EyeRenderer —— 渲染器保持可精确镜像测试。
+    // 完全对称的眼睛看起来像机器。
     EyeState l = state_;
     l.pupil_x += 0.045f;
     EyeRenderer::Render(buf_left_, l, +1, r);
-    BlitStrips(left_, buf_left_, r);
 
     EyeState rr = state_;
     rr.pupil_x -= 0.045f;
     EyeRenderer::Render(buf_right_, rr, -1, r);
-    BlitStrips(right_, buf_right_, r);
+
+    BlitInterleaved(r);
 
     xSemaphoreGive(mutex_);
 }
@@ -119,12 +127,20 @@ void EyeDisplay::Flush(DirtyRect r) {
 // —— 实测现象。拆成 16 行一条（7.7KB）后弹跳缓冲小到可稳定分配。
 //
 // 无竞态：各条读的是同一块 PSRAM 缓冲的不同区域，传输期间内容不变。
-void EyeDisplay::BlitStrips(esp_lcd_panel_handle_t panel, const uint16_t* buf, DirtyRect r) {
+//
+// 【必须交错，不能一只眼传完再传另一只】
+// 眨眼的脏矩形约 204x204 = 83KB，10MHz 下单眼传输约 66ms。若顺序传输，
+// 右眼会整整落后左眼 66ms，而一次眨眼总共才 150ms —— 肉眼可见的错位（实测）。
+// 按条交错后最大偏差降到一条（约 6ms），看起来就是同时眨。
+void EyeDisplay::BlitInterleaved(DirtyRect r) {
     constexpr int kStripRows = 16;
     for (int y = 0; y < r.h; y += kStripRows) {
         const int h = (y + kStripRows <= r.h) ? kStripRows : (r.h - y);
-        esp_lcd_panel_draw_bitmap(panel, r.x, r.y + y, r.x + r.w, r.y + y + h,
-                                  buf + (size_t)y * r.w);
+        const size_t off = (size_t)y * r.w;
+        esp_lcd_panel_draw_bitmap(left_,  r.x, r.y + y, r.x + r.w, r.y + y + h,
+                                  buf_left_ + off);
+        esp_lcd_panel_draw_bitmap(right_, r.x, r.y + y, r.x + r.w, r.y + y + h,
+                                  buf_right_ + off);
     }
 }
 
@@ -142,6 +158,16 @@ void EyeDisplay::SetEmotion(const char* emotion) {
         behavior_->OnEmotion(emotion);   // 同一次调用同时驱动眼睛与手势
     }
 }
+
+void EyeDisplay::SetSwapRB(bool on) {
+    Settings s("plush_eye", true);
+    s.SetInt("swap_rb", on ? 1 : 0);
+    EyeRenderer::SetSwapRB(on);
+    Flush(EyeRenderer::FullRect());   // 通道换了，整屏重绘
+    ESP_LOGI(TAG, "红蓝通道互换 = %s（已存 NVS）", on ? "开" : "关");
+}
+
+bool EyeDisplay::swap_rb() const { return EyeRenderer::swap_rb(); }
 
 void EyeDisplay::StartIdleAnimation() {
     if (!available() || buf_left_ == nullptr) {

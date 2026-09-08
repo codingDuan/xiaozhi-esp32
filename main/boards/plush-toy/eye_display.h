@@ -30,6 +30,11 @@ public:
     // 启动眨眼与待机微动任务
     void StartIdleAnimation();
 
+    // 红蓝通道互换，用于修正 GC9A01 模块的 RGB/BGR 差异。
+    // 存 NVS 并立即整屏重绘，无需重编固件。
+    void SetSwapRB(bool on);
+    bool swap_rb() const;
+
     bool available() const { return left_ != nullptr && right_ != nullptr; }
 
 private:
@@ -40,7 +45,7 @@ private:
     static void IdleTaskEntry(void* arg);
     void IdleLoop();
     void Flush(DirtyRect r);
-    static void BlitStrips(esp_lcd_panel_handle_t panel, const uint16_t* buf, DirtyRect r);
+    void BlitInterleaved(DirtyRect r);
 
     esp_lcd_panel_handle_t left_ = nullptr;
     esp_lcd_panel_handle_t right_ = nullptr;
