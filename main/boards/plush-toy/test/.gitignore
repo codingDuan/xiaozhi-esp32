@@ -1,0 +1,7 @@
+# 主机端测试产物
+test_eye_renderer
+test_overlay_qr
+preview
+*.rgb
+*.png
+*.ppm

@@ -52,7 +52,9 @@
 #define DISPLAY_DC_PIN        GPIO_NUM_47
 #define DISPLAY_RST_PIN       GPIO_NUM_21
 #define DISPLAY_CS_LEFT_PIN   GPIO_NUM_45
-#define DISPLAY_CS_RIGHT_PIN  GPIO_NUM_43   // 排针丝印 TX
+#define DISPLAY_CS_RIGHT_PIN  GPIO_NUM_46   // 原为 GPIO43(丝印TX)，但那是控制台 TX：
+                                            // esp_lcd 占用该脚后串口日志立刻变乱码，
+                                            // 实测确认。改用最后一个备用脚 GPIO46。
 
 #define DISPLAY_SPI_HOST      SPI3_HOST
 // 面包板飞线 + 双屏并联，先跑通再提速；上限 20MHz
@@ -96,7 +98,8 @@
 // 塑料齿保护 + 毛绒布料回弹力，工作行程限制在 ±30°（实测无卡滞）
 #define SERVO_MAX_ANGLE      30
 
-// GPIO46 保留：预留电池检测 / 触摸唤醒
+// GPIO43(丝印TX) 保留给控制台 TX，勿占用 —— 否则日志变乱码（实测）
+// 现已无空闲脚：3=舵机SCL 14/38=屏SPI 44=舵机SDA 45/46=两屏CS
 // GPIO19/20 保持原生 USB，勿占用
 
 // A MCP Test: Control a lamp —— 本板不使用
