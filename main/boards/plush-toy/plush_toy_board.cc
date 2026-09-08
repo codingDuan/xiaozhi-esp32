@@ -152,6 +152,22 @@ private:
                             eyes->SetSwapRB(properties["enabled"].value<bool>());
                             return true;
                         });
+
+            mcp.AddTool(
+                "self.eyes.change_theme",
+                "Change the eye theme. When the user says 换眼睛 without naming a style, call "
+                "this with an empty theme to cycle to the next theme. For a named style, use "
+                "one of: ocean, emerald, violet, amber, rose, ice, copper, jade, midnight, "
+                "pearl, void-blue, void-purple, void-rose, dragon-amber, dragon-emerald, "
+                "dragon-violet, cat-gold, cat-jade, cat-ice, cat-rose.",
+                PropertyList({Property("theme", kPropertyTypeString, std::string(""))}),
+                [eyes](const PropertyList& properties) -> ReturnValue {
+                    std::string selected;
+                    const auto requested = properties["theme"].value<std::string>();
+                    if (!eyes->ChangeTheme(requested.c_str(), selected))
+                        return std::string("unknown eye theme");
+                    return selected;
+                });
         }
 
         if (limbs_ == nullptr || !limbs_->available()) {

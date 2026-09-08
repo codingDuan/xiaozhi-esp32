@@ -200,6 +200,14 @@ class VersionTests(unittest.TestCase):
             "remain the primary console",
         )
 
+    def test_plush_toy_exposes_eye_theme_tool(self):
+        source = (ROOT / "main/boards/plush-toy/plush_toy_board.cc").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('"self.eyes.change_theme"', source)
+        self.assertIn('Property("theme", kPropertyTypeString', source)
+        self.assertIn("换眼睛", source)
+
     def test_default_flash_options_are_not_repeated(self):
         def read_defaults(path):
             values = {}
