@@ -183,6 +183,23 @@ class VersionTests(unittest.TestCase):
                         f"through menuconfig or build parameters, not {option}",
                     )
 
+    def test_plush_toy_uses_usb_console_to_keep_servo_sda_free(self):
+        config = json.loads(
+            (ROOT / "main/boards/plush-toy/config.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        build_config = next(
+            item for item in config["builds"] if item["name"] == "plush-toy"
+        )
+
+        self.assertIn(
+            "CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y",
+            build_config.get("sdkconfig_append", []),
+            "plush-toy uses GPIO44 for servo I2C SDA, so UART0 RX must not "
+            "remain the primary console",
+        )
+
     def test_default_flash_options_are_not_repeated(self):
         def read_defaults(path):
             values = {}

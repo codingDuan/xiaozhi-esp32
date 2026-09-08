@@ -186,6 +186,13 @@ private:
                     [limbs](const PropertyList& properties) -> ReturnValue {
                         return limbs->Enqueue(Gesture::kCheer, properties["times"].value<int>());
                     });
+
+        auto* pca = pca_;
+        mcp.AddTool("self.limbs.get_diagnostics",
+                    "Read the arm PWM driver's registers without moving the arms. Use when the "
+                    "user reports that the arms or servos do not move and asks to diagnose them.",
+                    PropertyList(),
+                    [pca](const PropertyList&) -> ReturnValue { return pca->Diagnostics(); });
     }
 
     esp_lcd_panel_handle_t NewPanel(gpio_num_t cs, bool owns_reset) {

@@ -2,6 +2,7 @@
 
 #include <driver/i2c_master.h>
 #include <stdint.h>
+#include <string>
 
 // PCA9685 16 路 PWM 驱动。本项目只用前两路驱动 SG90 舵机。
 //
@@ -31,8 +32,15 @@ public:
 
     uint8_t ReadPrescale();
 
+    // 只读诊断快照，用于在没有串口和万用表时确认 PCA9685 是否真正保存了
+    // PWM 寄存器。不会改变输出状态。
+    std::string Diagnostics();
+
 private:
     bool WriteReg(uint8_t reg, uint8_t value);
+    bool ReadRegisters(uint8_t reg, uint8_t* data, size_t size);
 
     i2c_master_dev_handle_t dev_ = nullptr;
+    bool outputs_disabled_ = false;
+    esp_err_t last_write_error_ = ESP_OK;
 };
