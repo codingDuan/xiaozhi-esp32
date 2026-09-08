@@ -1,0 +1,100 @@
+#ifndef _BOARD_CONFIG_H_
+#define _BOARD_CONFIG_H_
+
+#include <driver/gpio.h>
+#include <driver/i2c_types.h>
+
+#define AUDIO_INPUT_SAMPLE_RATE  16000
+#define AUDIO_OUTPUT_SAMPLE_RATE 24000
+
+// 如果使用 Duplex I2S 模式，请注释下面一行
+#define AUDIO_I2S_METHOD_SIMPLEX
+
+#define AUDIO_I2S_MIC_GPIO_WS   GPIO_NUM_1
+#define AUDIO_I2S_MIC_GPIO_SCK  GPIO_NUM_2
+#define AUDIO_I2S_MIC_GPIO_DIN  GPIO_NUM_42
+#define AUDIO_I2S_SPK_GPIO_DOUT GPIO_NUM_39
+#define AUDIO_I2S_SPK_GPIO_BCLK GPIO_NUM_40
+#define AUDIO_I2S_SPK_GPIO_LRCK GPIO_NUM_41
+
+#define BUILTIN_LED_GPIO        GPIO_NUM_48
+#define BOOT_BUTTON_GPIO        GPIO_NUM_0
+#define TOUCH_BUTTON_GPIO       GPIO_NUM_NC
+#define VOLUME_UP_BUTTON_GPIO   GPIO_NUM_NC
+#define VOLUME_DOWN_BUTTON_GPIO GPIO_NUM_NC
+
+// ── 摄像头：沿用 bread-compact-wifi-s3cam，引脚不变 ──
+#define CAMERA_PIN_D0    GPIO_NUM_11
+#define CAMERA_PIN_D1    GPIO_NUM_9
+#define CAMERA_PIN_D2    GPIO_NUM_8
+#define CAMERA_PIN_D3    GPIO_NUM_10
+#define CAMERA_PIN_D4    GPIO_NUM_12
+#define CAMERA_PIN_D5    GPIO_NUM_18
+#define CAMERA_PIN_D6    GPIO_NUM_17
+#define CAMERA_PIN_D7    GPIO_NUM_16
+#define CAMERA_PIN_XCLK  GPIO_NUM_15
+#define CAMERA_PIN_PCLK  GPIO_NUM_13
+#define CAMERA_PIN_VSYNC GPIO_NUM_6
+#define CAMERA_PIN_HREF  GPIO_NUM_7
+#define CAMERA_PIN_SIOC  GPIO_NUM_5
+#define CAMERA_PIN_SIOD  GPIO_NUM_4
+#define CAMERA_PIN_PWDN  GPIO_NUM_NC
+#define CAMERA_PIN_RESET GPIO_NUM_NC
+#define XCLK_FREQ_HZ     20000000
+
+// ── 双眼屏（GC9A01 1.28" 240x240 ×2）──
+// MOSI/CLK 已从 GPIO20/19 迁走，把原生 USB 还给烧录与日志。
+// 实物模块 7 针 RST/CS/DC/SDA/SCL/GND/VCC，无 BL 引脚（背光内部常亮）。
+// 模块丝印的 SDA/SCL 即 SPI 的 MOSI/CLK，不是 I2C。
+#define DISPLAY_BACKLIGHT_PIN GPIO_NUM_NC   // 模块无 BL 引脚
+#define DISPLAY_MOSI_PIN      GPIO_NUM_14   // 屏丝印 SDA
+#define DISPLAY_CLK_PIN       GPIO_NUM_38   // 屏丝印 SCL
+#define DISPLAY_DC_PIN        GPIO_NUM_47
+#define DISPLAY_RST_PIN       GPIO_NUM_21
+#define DISPLAY_CS_LEFT_PIN   GPIO_NUM_45
+#define DISPLAY_CS_RIGHT_PIN  GPIO_NUM_43   // 排针丝印 TX
+
+#define DISPLAY_SPI_HOST      SPI3_HOST
+// 面包板飞线 + 双屏并联，先跑通再提速；上限 20MHz
+#define DISPLAY_PCLK_HZ       (10 * 1000 * 1000)
+
+// GC9A01 240x240 圆屏，硬编码不走 Kconfig 的 DISPLAY_LCD_TYPE choice
+// （那个 choice 绑死在特定板型上，改它的依赖列表会污染其他板）
+#define DISPLAY_WIDTH        240
+#define DISPLAY_HEIGHT       240
+#define DISPLAY_MIRROR_X     true
+#define DISPLAY_MIRROR_Y     false
+#define DISPLAY_SWAP_XY      false
+#define DISPLAY_INVERT_COLOR true
+#define DISPLAY_RGB_ORDER    LCD_RGB_ELEMENT_ORDER_BGR
+#define DISPLAY_OFFSET_X     0
+#define DISPLAY_OFFSET_Y     0
+#define DISPLAY_SPI_MODE     0
+
+// ── 舵机：经 PCA9685 驱动，ESP32 不直接产生 PWM ──
+// 以下数值均为 2026-09-07 实机验证所得，非推算。
+// I2C_NUM_0 已被摄像头 SCCB 占用（见 InitializeCamera 的 sccb_i2c_port），故用 1。
+#define SERVO_I2C_SDA_PIN    GPIO_NUM_44   // 排针丝印 RX
+#define SERVO_I2C_SCL_PIN    GPIO_NUM_3
+#define SERVO_I2C_PORT       I2C_NUM_1
+#define SERVO_I2C_HZ         100000
+#define PCA9685_ADDR         0x40          // 实测；0x70 是同一芯片的 ALLCALL 广播地址
+
+// 装配时哪只舵机接 CH0，哪只就是左手；发现装反了对调这两行即可
+#define SERVO_LEFT_CHANNEL   0
+#define SERVO_RIGHT_CHANNEL  1
+
+// SG90：500us→-90°，2500us→+90°
+#define SERVO_MIN_PULSE_US   500
+#define SERVO_MAX_PULSE_US   2500
+#define SERVO_PWM_FREQ_HZ    50
+// 塑料齿保护 + 毛绒布料回弹力，工作行程限制在 ±30°（实测无卡滞）
+#define SERVO_MAX_ANGLE      30
+
+// GPIO46 保留：预留电池检测 / 触摸唤醒
+// GPIO19/20 保持原生 USB，勿占用
+
+// A MCP Test: Control a lamp —— 本板不使用
+// #define LAMP_GPIO GPIO_NUM_NC
+
+#endif // _BOARD_CONFIG_H_

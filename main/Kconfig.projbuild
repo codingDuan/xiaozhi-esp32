@@ -175,6 +175,9 @@ choice BOARD_TYPE
     config BOARD_TYPE_BREAD_COMPACT_WIFI_CAM
         bool "Bread Compact Wi-Fi + LCD + Camera (面包板)"
         depends on IDF_TARGET_ESP32S3
+    config BOARD_TYPE_PLUSH_TOY
+        bool "Plush Toy 毛绒玩具 (双圆屏 + PCA9685 舵机)"
+        depends on IDF_TARGET_ESP32S3
     config BOARD_TYPE_DF_S3_AI_CAM
         bool "DFRobot ESP32-S3 AI Camera Module"
         depends on IDF_TARGET_ESP32S3
