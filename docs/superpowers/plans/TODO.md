@@ -1,19 +1,15 @@
 # 毛绒玩具项目 · 待交付 TODO
 
-**更新**：2026-09-07 · 任务暂停于此
+**更新**：2026-09-08 · A1/A3 已实机确认，C1/C2 软件实现完成，等待其余实机确认
 **当前进度**：见 `STATUS.md`
-**分支**：`feat/plush-toy-design`（已推送至 `codingDuan/xiaozhi-esp32`）
+**分支**：`feat/plush-toy-design`（C1/C2 已本地提交 `5693891`，尚未推送）
 
 ---
 
-## A. 只需你确认，一句话就能结（阻塞中）
+## A. 实机外观确认
 
-### A1. 虹膜颜色 → 定稿 RGB_ORDER
-**现状**：眼睛正在显示，虹膜颜色是 `#35C7F5`（青蓝）。若模块的 RGB/BGR 排列与配置不符，会显示成橙红。
-
-**要做的**：看一眼虹膜颜色，告诉我是青蓝还是橙红。
-- 青蓝 → 无需改动，此项关闭
-- 橙红 → 把 `config.h` 的 `DISPLAY_RGB_ORDER` 默认值改为开启红蓝互换
+### A1. 虹膜颜色 → 定稿 RGB_ORDER —— ✅ 已确认
+**实机结论（2026-09-07）**：用户确认当前眼睛显示正常，保留现有 `DISPLAY_RGB_ORDER`，无需红蓝互换。
 
 **已铺好的退路**：即使不改代码，联网后对玩具说「眼睛颜色反了」，MCP 工具 `self.eyes.swap_colors` 会翻转并存进 NVS，重启不丢。
 
@@ -21,17 +17,21 @@
 **现状**：已从"顺序传输"改为"按条交错"，理论最大偏差从 66ms 降到 6ms。
 **要做的**：再看一次眨眼，确认两只眼是否同时。若仍有可见时间差，把 `DISPLAY_PCLK_HZ` 从 10MHz 提到 20MHz（spec 允许上限），可再砍一半。
 
-### A3. 眼睛造型是否满意
-巩膜比例、瞳孔大小、高光位置这些现在改最便宜。参照 `main/boards/plush-toy/test/` 下 `make test && ./preview && python3 to_png.py` 生成的图。
+### A3. 眼睛造型是否满意 —— ✅ 已确认
+**实机结论（2026-09-07）**：用户查看真屏后确认“眼睛现在好了”，保留当前巩膜比例、瞳孔大小和高光位置。
 
 ---
 
-## B. 需要网络恢复后才能验（当前设备在配网模式）
+## B. 需要网络恢复后才能验（当前设备与服务端不在同一已配置网段）
 
 **前置**：手机热点开启 → Mac 连上该热点 → 确认 Mac 的 IP（热点重开会变）→ 设备配网填 `http://<MacIP>:8003/xiaozhi/ota/` → 服务端重启（`data/.config.yaml` 的 prompt 改动需重启才生效）
 
+**2026-09-08 核对**：服务端已运行并监听 OTA `:8003`、WebSocket `:8010`；最后一次设备连接使用旧地址 `172.20.10.14`，Mac 当前地址为 `10.35.80.13`，所以尚不能据此验收下面三项。
+
 ### B1. emoji 白名单是否生效
 串口看 `SetEmotion:` 的值是否出现 `happy` 以外的情绪。
+
+**离线核对**：服务端 `EMOJI_MAP`、`data/.config.yaml` prompt 和固件 `kPresets` 均为 21 项，双向无缺失；服务端日志也确认进程在 prompt 修改后重启。剩余验收仅是观察模型运行时是否始终遵守白名单。
 
 **已知隐患**：模型曾自发使用 😊（U+1F60A），它**不在** `EMOJI_MAP` 中，会静默回落成 `happy`；而 🙂（U+1F642）才在表内。两者肉眼几乎无差别。prompt 里已明写「形近的其他 emoji 一律无效（例如 😊 就不行，必须用 🙂）」，需实测是否管住了模型。
 
@@ -43,24 +43,17 @@
 
 ---
 
-## C. 未实现的功能（我可以直接做，不需要硬件）
+## C. 软件实现已完成（待实机验收）
 
-### C1. 配网二维码 `overlay_qr`（计划一 Task 6/7）
-**为什么值得做**：现在设备进配网模式时屏上毫无提示，只能看串口——这正是你刚遇到的情况。做完后左眼显示可扫二维码（内容 `WIFI:S:Xiaozhi-XXXX;T:nopass;;`），手机扫一下直接加入热点，不用手动翻 WiFi 列表。
+### C1. 配网二维码 `overlay_qr`（计划一 Task 6/7）—— ✅ 已实现
+设备进入配网模式后，左眼显示可扫二维码（内容 `WIFI:S:Xiaozhi-XXXX;T:nopass;;`），右眼显示青色等待环。
 
-**做法**（不要手写编码器，纠错码写错的表现是"扫不出来"，没硬件时发现不了）：
-```bash
-cd main/boards/plush-toy
-curl -sL -o qrcodegen.c https://raw.githubusercontent.com/nayuki/QR-Code-generator/master/c/qrcodegen.c
-curl -sL -o qrcodegen.h https://raw.githubusercontent.com/nayuki/QR-Code-generator/master/c/qrcodegen.h
-```
-（已验证可下载、MIT 许可、纯 C99 无依赖；本次未接线故已清除，需要时重下）
+实现：vendored Nayuki qrcodegen（MIT、纯 C99）+ `OverlayQr` 编码层 + `OverlayRenderer` 白底黑码布局。二维码含四模块静默区；典型 25×25 模块在圆屏内使用 5px/module。
 
-然后实现 `overlay_qr.h/.cc` + `EyeDisplay::ShowQrCode()`，并挂到 `kDeviceStateWifiConfiguring`。
-**注意**：二维码必须深色模块画在**浅色底**上才扫得出，不能在黑底上画亮模块。
+验证：主机测试通过；将固件编码器与渲染器输出交给 macOS Vision，可精确回读原始 Wi-Fi 载荷。初版已用 ESP-IDF 6.1 构建、烧录并在实机触发，日志确认 `Xiaozhi-7AC9` AP 启动及 `配网二维码已显示，side=25`。本轮又补了 overlay 并发保护，最新镜像构建通过但尚未重烧；仍需用户用手机确认真屏反光和对焦条件下可扫。
 
-### C2. OTA 升级进度显示
-Overlay 模式的第二个用途，进度环。优先级低于 C1。
+### C2. OTA 升级进度显示 —— ✅ 已实现
+`Display::SetDownloadProgress()` 保留普通屏的文本进度语义，`EyeDisplay` 重写为双眼同步进度环；固件 OTA 与 assets 下载共用同一入口。失败分支会离开 `upgrading`，迟到的下载回调也会按状态丢弃，避免恢复眼睛后又被旧进度覆盖。主机渲染/升级恢复测试和最新固件构建通过，但尚未烧录本轮镜像；仍需一次真实 OTA/资源下载确认真屏进度推进及失败恢复。
 
 ---
 

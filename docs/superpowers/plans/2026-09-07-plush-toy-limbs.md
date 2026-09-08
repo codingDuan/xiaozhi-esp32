@@ -10,6 +10,10 @@
 
 **Spec:** `docs/superpowers/specs/2026-09-05-plush-toy-design.md`
 
+**执行状态（2026-09-08）：** PCA9685、动作队列、3 个 MCP 工具、状态反射、emotion 映射和服务端 prompt 均已实现并提交；PCA9685 自检、状态反射和 hug 已有实机证据。`wave_hand`、`cheer`、多情绪联动及模型白名单行为仍需设备恢复联网后端到端验收。下面复选框已按现有证据同步。
+
+**实际偏差：** 舵机从计划早期的 ESP32 LEDC/GPIO 直驱改为 PCA9685 100kHz I2C，避免与摄像头 XCLK 抢 LEDC；设备实际 WebSocket 端口为 8010。prompt、服务端 `EMOJI_MAP` 与固件预设已离线核对为完全一致的 21 项，但这不能替代模型运行时验证。
+
 **前置：** 计划一 Task 1（板型骨架）已完成并提交（`737bdf7`、`83501ef`）。眼睛显示部分（计划一 Task 2–7）与本计划无依赖，可并行或后做。
 
 ## 构建环境（每次必须）
@@ -56,7 +60,7 @@ idf.py -p /dev/cu.usbmodem5C834268091 flash
 - Consumes: `driver/i2c_master.h`（**不继承 `I2cDevice`**，理由见 Step 5）
 - Produces: `class Pca9685`，构造 `Pca9685(bus, addr, scl_hz)`，方法 `bool Init(int freq_hz)`、`void SetPulseUs(int ch, int us)`、`void AllOff()`、`uint8_t ReadPrescale()`
 
-- [ ] **Step 1: 写 `pca9685.h`**
+- [x] **Step 1: 写 `pca9685.h`**
 
 ```cpp
 #pragma once
@@ -85,7 +89,7 @@ public:
 };
 ```
 
-- [ ] **Step 2: 写 `pca9685.cc`**
+- [x] **Step 2: 写 `pca9685.cc`**
 
 `I2cDevice::WriteReg` 一次只写一字节。设置一路需要连写 4 个寄存器（ON_L/ON_H/OFF_L/OFF_H），用基类 protected 的 `i2c_device_` 句柄做一次突发写更高效，也避免中途被打断。
 
@@ -159,7 +163,7 @@ void Pca9685::AllOff() {
 }
 ```
 
-- [ ] **Step 3: 在板级代码建 I2C 总线并实例化**
+- [x] **Step 3: 在板级代码建 I2C 总线并实例化**
 
 `plush_toy_board.cc` 加 `#include "pca9685.h"` 与 `#include <driver/i2c_master.h>`，新增成员 `Pca9685* pca_ = nullptr;` 和：
 
@@ -197,7 +201,7 @@ void Pca9685::AllOff() {
 
 **设计要点**：舵机不可用时**不得 `ESP_ERROR_CHECK` 崩溃**——玩具没有手臂仍应能正常对话。所有失败路径都只记日志并把 `pca_` 留为 `nullptr`。
 
-- [ ] **Step 4: 编译**
+- [x] **Step 4: 编译**
 
 ```bash
 source ~/.espressif/tools/activate_idf_v6.1.sh && export PATH="$IDF_PATH/tools:$PATH"
@@ -206,7 +210,7 @@ idf.py build
 
 Expected: `Project build complete`
 
-- [ ] **Step 5: 烧录并确认自检日志**
+- [x] **Step 5: 烧录并确认自检日志**
 
 ```bash
 idf.py -p /dev/cu.usbmodem5C834268091 flash
@@ -220,7 +224,7 @@ Expected 串口出现：`Pca9685: 初始化完成，50 Hz，PRE_SCALE=121`
 
 降到 100kHz 后回读恢复 121。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```bash
 git add main/boards/plush-toy/
@@ -240,7 +244,7 @@ git commit -m "feat(plush-toy): PCA9685 驱动与启动自检"
 - Consumes: `Pca9685`
 - Produces: `class LimbController`，方法 `void Start()`、`bool Enqueue(Gesture g, int times)`、`void Home()`、`bool available() const`
 
-- [ ] **Step 1: 写 `limb_controller.h`**
+- [x] **Step 1: 写 `limb_controller.h`**
 
 ```cpp
 #pragma once
@@ -284,7 +288,7 @@ private:
 };
 ```
 
-- [ ] **Step 2: 实现 `limb_controller.cc` 的核心约束**
+- [x] **Step 2: 实现 `limb_controller.cc` 的核心约束**
 
 三条硬性规则，全部来自实测与 spec §4.4：
 
@@ -367,7 +371,7 @@ void LimbController::Relax() {
 }
 ```
 
-- [ ] **Step 3: 实现 `Perform` 的手势**
+- [x] **Step 3: 实现 `Perform` 的手势**
 
 参数取自 spec §4.4。注意 `kCheer` 每个来回之间**必须有停顿**——这正是实测中区分「通过」与「BROWNOUT」的关键。
 
@@ -426,7 +430,7 @@ void LimbController::Perform(Gesture g, int times) {
 }
 ```
 
-- [ ] **Step 4: 板级接入并加临时验证工具**
+- [x] **Step 4: 板级接入并加临时验证工具**
 
 `plush_toy_board.cc` 新增成员 `LimbController* limbs_ = nullptr;`，在 `InitializeServoBus()` 之后：
 
@@ -435,11 +439,11 @@ void LimbController::Perform(Gesture g, int times) {
         limbs_->Start();
 ```
 
-- [ ] **Step 5: 编译、烧录、观察**
+- [x] **Step 5: 编译、烧录、观察**
 
 烧录后若 PCA9685 在线，日志应有 `Pca9685: 初始化完成`；无舵机动作（还没人调用）。若 PCA9685 离线，应看到 `LimbController: PCA9685 不可用，肢体动作已禁用` 且**设备其余功能正常**。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```bash
 git add main/boards/plush-toy/
@@ -457,7 +461,7 @@ git commit -m "feat(plush-toy): LimbController 手势编排、串行队列与泄
 - Consumes: `LimbController::Enqueue`、`McpServer::AddTool`
 - Produces: MCP 工具 `self.limbs.wave_hand`、`self.limbs.hug`、`self.limbs.cheer`
 
-- [ ] **Step 1: 注册工具**
+- [x] **Step 1: 注册工具**
 
 只暴露 3 个。otto-robot 暴露 28 个，工具过多会显著降低 LLM 的选择准确率。
 
@@ -508,7 +512,7 @@ git commit -m "feat(plush-toy): LimbController 手势编排、串行队列与泄
 
 **工具描述必须写英文**：`main/mcp_server.cc` 中现有工具描述全是英文，且描述是直接喂给 LLM 的提示词，与服务端 LLM 的主要训练语言一致效果更好。
 
-- [ ] **Step 2: 编译烧录，确认工具注册**
+- [x] **Step 2: 编译烧录，确认工具注册**
 
 Expected 串口出现三行：
 
@@ -520,11 +524,13 @@ MCP: Add tool: self.limbs.cheer
 
 - [ ] **Step 3: 实机验证**
 
+> 部分完成：`self.limbs.hug` 已端到端通过；`wave_hand` 与 `cheer` 尚未实测。
+
 设备联网后，对它说「跟我挥挥手」。预期：服务端 LLM 调用 `self.limbs.wave_hand`，舵机执行挥手。
 
 **若 LLM 不调用工具**：先在服务端确认工具已被发现。`core/providers/tools/device_mcp/` 负责拉取设备工具列表，检查服务端日志是否列出这三个工具名。若列出但不调用，是 prompt 问题，见 Task 6。
 
-- [ ] **Step 4: 提交**
+- [x] **Step 4: 提交**
 
 ```bash
 git add main/boards/plush-toy/
@@ -544,7 +550,7 @@ git commit -m "feat(plush-toy): 暴露 3 个手势 MCP 工具"
 - Consumes: `LimbController`、`Application::GetDeviceState()`（`main/application.h:68`，public）
 - Produces: `class PlushBehavior`，方法 `void Start()`
 
-- [ ] **Step 1: 写 `plush_behavior.h`**
+- [x] **Step 1: 写 `plush_behavior.h`**
 
 ```cpp
 #pragma once
@@ -567,7 +573,7 @@ private:
 };
 ```
 
-- [ ] **Step 2: 实现轮询与状态映射**
+- [x] **Step 2: 实现轮询与状态映射**
 
 **挂钩点选择**：`main/application.cc:247` 与 `:916` 有现成的 `led->OnStateChanged()` 回调，但把玩具行为伪装成 `Led` 语义别扭。改用 public 的 `GetDeviceState()` 轮询——本任务本就需要一个周期任务，顺手读一次状态即可，**零核心代码改动**。
 
@@ -624,20 +630,20 @@ void PlushBehavior::OnStateChanged(DeviceState from, DeviceState to) {
 
 **刻意不做的事**（YAGNI，spec §2.6）：不做音频波形驱动的节奏同步——需要从音频输出管线取实时幅度，耦合深、收益小；不做待机随机小动作——舵机频繁动作对塑料齿和供电都不友好，待机应当安静。
 
-- [ ] **Step 3: 板级接入**
+- [x] **Step 3: 板级接入**
 
 ```cpp
         behavior_ = new PlushBehavior(limbs_);
         behavior_->Start();
 ```
 
-- [ ] **Step 4: 编译烧录，实机观察**
+- [x] **Step 4: 编译烧录，实机观察**
 
 按 BOOT 键触发对话，观察状态切换时手臂是否有对应动作，串口应打印 `PlushBehavior: 状态 x -> y`。
 
 **重点观察是否出现 BROWNOUT**：`speaking` 触发 `kCheer` 时是双臂动作，若此时掉电，说明 `Perform` 里的间歇还不够，需要加大 `kCheer` 中的 `vTaskDelay`。
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add main/boards/plush-toy/
@@ -657,13 +663,13 @@ git commit -m "feat(plush-toy): PlushBehavior 状态反射动作"
 - Consumes: `Display::SetEmotion` 调用链（`main/application.cc:602-606`）
 - Produces: `void PlushBehavior::OnEmotion(const char* emotion)`
 
-- [ ] **Step 1: 理解现有通道**
+- [x] **Step 1: 理解现有通道**
 
 `main/application.cc:602-606` 已把服务端下发的 `{"type":"llm","emotion":"happy"}` 直通到 `display->SetEmotion()`。**服务端零改动**。
 
 当前板型的 `GetDisplay()` 返回基类 `NoDisplay`，其 `SetEmotion` 只打日志。计划一 Task 4 会换成 `EyeDisplay`。为让两个计划互不阻塞，本任务**不改 Display**，而是在板级包一层轻量子类。
 
-- [ ] **Step 2: 在板级定义联动显示类**
+- [x] **Step 2: 在板级定义联动显示类**
 
 `plush_toy_board.cc` 中：
 
@@ -686,7 +692,7 @@ private:
 
 把成员 `NoDisplay display_;` 改为 `LimbEmotionDisplay display_;`，并在创建 `behavior_` 后调用 `display_.SetBehavior(behavior_);`。
 
-- [ ] **Step 3: 实现情绪映射**
+- [x] **Step 3: 实现情绪映射**
 
 服务端 `EMOJI_MAP`（`core/utils/textUtils.py:8-30`）共 21 种。只映射有明确肢体表达的，其余不动作——**动作稀疏比动作滥用更自然**。
 
@@ -711,11 +717,13 @@ void PlushBehavior::OnEmotion(const char* emotion) {
 
 - [ ] **Step 4: 编译烧录，实机验证**
 
+> 编译烧录已完成；仍缺不同 emotion 同时驱动眼型与对应手势的联网实测。
+
 对设备说一句能引发开心回应的话。预期串口打印 `SetEmotion: happy` 并触发 `kCheer`。
 
 **若 `SetEmotion` 始终收到 `happy`**：这不是设备端问题，是服务端 prompt 没让 LLM 带 emoji，见 Task 6。
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add main/boards/plush-toy/
@@ -733,7 +741,7 @@ git commit -m "feat(plush-toy): emotion 通道联动手势"
 - Consumes: 无代码依赖
 - Produces: 一份角色 prompt
 
-- [ ] **Step 1: 理解为什么必须配**
+- [x] **Step 1: 理解为什么必须配**
 
 `core/utils/textUtils.py:84-95` 的 `get_emotion()` 通过**扫描 LLM 回复文本中的 emoji 字符**判定情绪，默认值为 `"happy"`：
 
@@ -747,7 +755,7 @@ for char in text:
 
 **LLM 回复不含 emoji 时，`emotion` 恒为 `"happy"`。** 玩具会永远做同一个动作。该失败模式极难排查——设备端代码与链路均正常。
 
-- [ ] **Step 2: 写角色 prompt**
+- [x] **Step 2: 写角色 prompt**
 
 限定在 `EMOJI_MAP`（`textUtils.py:8-30`）支持的 21 种之内：
 
@@ -767,7 +775,7 @@ for char in text:
 【说话风格】每次回复控制在两句话以内，像小孩子说话，不要用书面语。
 ```
 
-- [ ] **Step 3: 验证 emoji 不会被 TTS 朗读**
+- [x] **Step 3: 验证 emoji 不会被 TTS 朗读**
 
 spec §7 遗留项。`get_string_no_punctuation_or_emoji()`（`textUtils.py:41`）负责剥离，需实测确认：
 
@@ -783,6 +791,8 @@ print(repr(f('🙂 你好呀')))
 Expected: 输出不含 emoji。若含，说明剥离发生在别处或未生效，需追查 TTS 调用链。
 
 - [ ] **Step 4: 端到端验证**
+
+> `hug` 与“emoji 不被 TTS 朗读”已有证据；仍缺模型稳定使用白名单内不同 emoji，以及 `wave_hand` / `cheer` 的端到端证据。
 
 对设备说「你好」，确认：① 服务端日志显示 LLM 回复带 emoji；② 设备串口打印对应的 `SetEmotion`；③ 舵机动作；④ 语音播报不含"笑脸"之类的字。
 

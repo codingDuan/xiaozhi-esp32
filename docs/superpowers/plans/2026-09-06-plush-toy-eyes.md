@@ -10,6 +10,10 @@
 
 **Spec:** `docs/superpowers/specs/2026-09-05-plush-toy-design.md`
 
+**执行状态（2026-09-08）：** Tasks 1–5 已实现、提交并经过主机/实机构建验证；Tasks 6–7 的二维码与 overlay 已实现并提交（`5693891`），主机测试及 ESP-IDF 6.1 构建通过，但最新并发加固镜像尚未重新烧录。二维码像素输出已由 macOS Vision 成功回读，真屏手机扫码仍待验收。下面复选框已按现有证据同步，未勾选项不得视为完成。
+
+**实际偏差：** Task 7 没有保留计划中的临时 MCP 二维码工具，而是直接由 `PlushBehavior` 在 `wifi_configuring` 状态展示真实 AP SSID；二维码/等待环/进度环像素计算集中到可主机测试的 `OverlayRenderer`。为兼容普通显示，下载进度入口提升为 `Display::SetDownloadProgress()`，普通屏继续显示文本，双圆屏显示进度环。当前本机仅有 ESP-IDF 6.1，未复验首选的 6.0.2。
+
 **范围：** 本计划**全部任务不需要实物元件**，可在元件到货前完成并通过编译与主机端测试。舵机动作层、反射协调器、MCP 工具与服务端 prompt 见计划二。
 
 ## Global Constraints
@@ -40,7 +44,7 @@
 - Consumes: 无
 - Produces: 板型 `plush-toy`；宏 `DISPLAY_CS_LEFT_PIN`、`DISPLAY_CS_RIGHT_PIN`、`SERVO_LEFT_PIN`、`SERVO_RIGHT_PIN`、`DISPLAY_SPI_HOST`、`DISPLAY_PCLK_HZ`；类 `PlushToyBoard`
 
-- [ ] **Step 1: 写 `config.h`**
+- [x] **Step 1: 写 `config.h`**
 
 引脚依据 spec §3.1。GC9A01 常量直接硬编码，不走 `Kconfig` 的 `DISPLAY_LCD_TYPE` choice（那个 choice 绑死在特定板型上，改它的依赖列表会污染其他板）。
 
@@ -119,7 +123,7 @@
 #endif // _BOARD_CONFIG_H_
 ```
 
-- [ ] **Step 2: 写 `config.json`**
+- [x] **Step 2: 写 `config.json`**
 
 不设 `DEFAULT_EMOJI_COLLECTION`，因此不打包 emoji 图片资源。
 
@@ -139,7 +143,7 @@
 }
 ```
 
-- [ ] **Step 3: 在 `main/Kconfig.projbuild` 注册板型**
+- [x] **Step 3: 在 `main/Kconfig.projbuild` 注册板型**
 
 在第 177 行 `config BOARD_TYPE_BREAD_COMPACT_WIFI_CAM` 那一项的 `depends on IDF_TARGET_ESP32S3` 之后插入：
 
@@ -149,7 +153,7 @@
         depends on IDF_TARGET_ESP32S3
 ```
 
-- [ ] **Step 4: 在 `main/CMakeLists.txt` 注册板目录**
+- [x] **Step 4: 在 `main/CMakeLists.txt` 注册板目录**
 
 在第 110 行 `elseif(CONFIG_BOARD_TYPE_BREAD_COMPACT_ESP32_LCD)` 分支块之后插入。**不设** `BUILTIN_TEXT_FONT` / `BUILTIN_ICON_FONT` / `DEFAULT_EMOJI_COLLECTION`——本板无文字显示。
 
@@ -158,7 +162,7 @@ elseif(CONFIG_BOARD_TYPE_PLUSH_TOY)
     set(BOARD_DIR "plush-toy")
 ```
 
-- [ ] **Step 5: 写 `plush_toy_board.cc`**
+- [x] **Step 5: 写 `plush_toy_board.cc`**
 
 以 `main/boards/bread-compact-wifi-s3cam/compact_wifi_board_s3cam.cc` 为蓝本。本步只搭骨架：音频、摄像头、按键、LED 齐全，`GetDisplay()` 先返回基类 `NoDisplay`（`main/display/display.h:81`），双屏在 Task 4 接入。
 
@@ -268,7 +272,7 @@ public:
 DECLARE_BOARD(PlushToyBoard);
 ```
 
-- [ ] **Step 6: 选中板型并编译**
+- [x] **Step 6: 选中板型并编译**
 
 ```bash
 idf.py set-target esp32s3
@@ -285,11 +289,11 @@ Expected: 编译成功，末尾输出 `Project build complete`。
 
 若报 `The selected board does not define BOARD_DIR`，说明 Step 4 的 CMake 分支没生效——检查 `CONFIG_BOARD_TYPE_PLUSH_TOY` 拼写是否与 Kconfig 中一致。
 
-- [ ] **Step 7: 确认 `NoAudioCodecSimplex` 构造参数顺序**
+- [x] **Step 7: 确认 `NoAudioCodecSimplex` 构造参数顺序**
 
 不同 IDF 版本下该类签名可能不同。如果 Step 6 报参数不匹配，以 `main/boards/bread-compact-wifi-s3cam/compact_wifi_board_s3cam.cc:185-195` 的实际调用为准照抄，不要自行猜测。
 
-- [ ] **Step 8: 提交**
+- [x] **Step 8: 提交**
 
 ```bash
 git add main/boards/plush-toy/ main/Kconfig.projbuild main/CMakeLists.txt
@@ -312,7 +316,7 @@ git commit -m "feat(plush-toy): 新增板型骨架，显式声明摄像头 LEDC 
 - Consumes: 无
 - Produces: `struct EyeState`、`struct DirtyRect`、`EyeRenderer::Render(uint16_t* out, const EyeState& s, int side, DirtyRect r)`、`EyeRenderer::kSize`、`EyeRenderer::FullRect()`
 
-- [ ] **Step 1: 写 `eye_renderer.h`**
+- [x] **Step 1: 写 `eye_renderer.h`**
 
 `side` 参数是镜像规则的唯一落点：`+1` 左眼、`-1` 右眼，内部对 `lid_tilt` 取符号。双眼不对称偏移**不在**此处，放在 `EyeDisplay`，以保证渲染器可被精确镜像测试。
 
@@ -347,7 +351,7 @@ public:
 };
 ```
 
-- [ ] **Step 2: 写 `test/Makefile`**
+- [x] **Step 2: 写 `test/Makefile`**
 
 ```make
 CXX ?= g++
@@ -365,7 +369,7 @@ clean:
 	rm -f test_eye_renderer *.ppm
 ```
 
-- [ ] **Step 3: 写失败的测试**
+- [x] **Step 3: 写失败的测试**
 
 `test/test_eye_renderer.cc`：
 
@@ -425,7 +429,7 @@ int main() {
 }
 ```
 
-- [ ] **Step 4: 运行测试确认失败**
+- [x] **Step 4: 运行测试确认失败**
 
 ```bash
 cd main/boards/plush-toy/test && make test
@@ -433,7 +437,7 @@ cd main/boards/plush-toy/test && make test
 
 Expected: 编译失败，报 `undefined reference to EyeRenderer::Render`（`eye_renderer.cc` 尚不存在，需先建空文件才能到链接错误；若报找不到源文件，先 `touch ../eye_renderer.cc`）。
 
-- [ ] **Step 5: 写最小实现**
+- [x] **Step 5: 写最小实现**
 
 `eye_renderer.cc`。几何参数取自已归档的原型（spec §8）：屏心 `(120,120)`，巩膜半径 100，虹膜半径 44，瞳孔半径 21×`pupil_scale`，瞳孔偏移 `pupil_x*36` / `pupil_y*30`。
 
@@ -509,7 +513,7 @@ void EyeRenderer::Render(uint16_t* out, const EyeState& s, int side, DirtyRect r
 }
 ```
 
-- [ ] **Step 6: 运行测试确认通过**
+- [x] **Step 6: 运行测试确认通过**
 
 ```bash
 cd main/boards/plush-toy/test && make test
@@ -517,7 +521,7 @@ cd main/boards/plush-toy/test && make test
 
 Expected: `所有测试通过`
 
-- [ ] **Step 7: 提交**
+- [x] **Step 7: 提交**
 
 ```bash
 git add main/boards/plush-toy/eye_renderer.h main/boards/plush-toy/eye_renderer.cc main/boards/plush-toy/test/
@@ -538,7 +542,7 @@ git commit -m "feat(plush-toy): EyeRenderer 巩膜/虹膜/瞳孔渲染与主机�
 - Consumes: Task 2 的 `EyeRenderer::Render`、`EyeState`
 - Produces: 同一签名，行为扩展为受 `openness` / `lid_tilt` / `curve` / `side` 控制
 
-- [ ] **Step 1: 写失败的测试**
+- [x] **Step 1: 写失败的测试**
 
 追加到 `test_eye_renderer.cc`，并在 `main()` 中调用。
 
@@ -596,7 +600,7 @@ static void TestPositiveCurveRaisesLowerLid() {
     TestPositiveCurveRaisesLowerLid();
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 ```bash
 cd main/boards/plush-toy/test && make test
@@ -604,7 +608,7 @@ cd main/boards/plush-toy/test && make test
 
 Expected: 三项新测试全部 FAIL——`openness=0 时应全黑`、`curve>0 应让下半部分点亮像素减少` 必失败（当前实现忽略这两个参数）。
 
-- [ ] **Step 3: 实现眼睑裁切**
+- [x] **Step 3: 实现眼睑裁切**
 
 在 `eye_renderer.cc` 的匿名 namespace 中加入眼睑判定，并在像素循环里先做眼睑测试再画眼球。
 
@@ -646,7 +650,7 @@ inline bool InsideLids(float x, float y, const EyeState& s, int side) {
 
 同时删掉 `(void)side;` 那一行。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 ```bash
 cd main/boards/plush-toy/test && make test
@@ -656,7 +660,7 @@ Expected: `所有测试通过`
 
 若 `TestLidTiltMirrorsBetweenEyes` 仍失败，检查 `InsideLids` 里 `tilt` 是否确实乘了 `side`，以及 `Render` 是否把 `side` 透传了进去。
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add main/boards/plush-toy/eye_renderer.cc main/boards/plush-toy/test/test_eye_renderer.cc
@@ -678,7 +682,7 @@ git commit -m "feat(plush-toy): 眼睑裁切、curve 曲率与左右眼镜像"
 - Consumes: `EyeRenderer::Render`、`EyeState`、`DirtyRect`
 - Produces: `class EyeDisplay : public Display`，构造签名 `EyeDisplay(esp_lcd_panel_handle_t left, esp_lcd_panel_handle_t right)`；方法 `void SetEyeState(const EyeState& s)`、`const EyeState& GetEyeState() const`
 
-- [ ] **Step 1: 写 `eye_display.h`**
+- [x] **Step 1: 写 `eye_display.h`**
 
 只重写 `SetEmotion`。`SetChatMessage` / `SetStatus` / `ShowNotification` **刻意不重写**，让它们落到 `main/display/display.cc:25-37` 的基类实现打到串口——这是移除主屏后的调试通道（spec §2.3）。
 
@@ -714,7 +718,7 @@ private:
 };
 ```
 
-- [ ] **Step 2: 写 `eye_display.cc`**
+- [x] **Step 2: 写 `eye_display.cc`**
 
 双眼不对称在此处施加（`pupil_x` ±0.045），使 `EyeRenderer` 保持可镜像测试。
 
@@ -773,7 +777,7 @@ void EyeDisplay::SetEmotion(const char* emotion) {
 
 > **注意**：`esp_lcd_panel_draw_bitmap` 是异步的，两次调用共用 `buf_` 会导致右眼覆盖左眼尚未传完的数据。**本步先接受这个缺陷**（表现为左眼偶发花屏），Task 5 用 `esp_lcd_panel_io_register_event_callbacks` 的传输完成回调修正。此处记录以免被误当作渲染 bug。
 
-- [ ] **Step 3: 在板型里创建两块 panel**
+- [x] **Step 3: 在板型里创建两块 panel**
 
 修改 `plush_toy_board.cc`：删除 `NoDisplay display_;`，改为 `EyeDisplay* display_ = nullptr;`，加入头文件 `#include "eye_display.h"` 与 `#include <esp_lcd_gc9a01.h>`，并新增：
 
@@ -816,7 +820,7 @@ void EyeDisplay::SetEmotion(const char* emotion) {
 
 在构造函数中 `InitializeCamera();` 之前插入 `InitializeDisplay();`，并把 `GetDisplay()` 改为 `return display_;`。
 
-- [ ] **Step 4: 编译**
+- [x] **Step 4: 编译**
 
 ```bash
 idf.py build
@@ -826,7 +830,7 @@ Expected: `Project build complete`。
 
 若报找不到 `esp_lcd_gc9a01.h`，确认 `main/idf_component.yml:5` 的 `espressif/esp_lcd_gc9a01` 仍在依赖中，并执行 `idf.py reconfigure`。
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add main/boards/plush-toy/eye_display.h main/boards/plush-toy/eye_display.cc main/boards/plush-toy/plush_toy_board.cc
@@ -850,7 +854,7 @@ spec §4.3 把脏矩形定为必需项：20MHz 下双眼全屏重绘只有 11fps
 - Consumes: Task 3 的渲染器
 - Produces: `EyeRenderer::ComputeDirty(const EyeState& a, const EyeState& b)` → `DirtyRect`
 
-- [ ] **Step 1: 写失败的测试**
+- [x] **Step 1: 写失败的测试**
 
 追加到 `test_eye_renderer.cc` 并在 `main()` 调用：
 
@@ -881,7 +885,7 @@ static void TestOpennessChangeYieldsTallRect() {
 }
 ```
 
-- [ ] **Step 2: 运行测试确认失败**
+- [x] **Step 2: 运行测试确认失败**
 
 ```bash
 cd main/boards/plush-toy/test && make test
@@ -889,7 +893,7 @@ cd main/boards/plush-toy/test && make test
 
 Expected: 编译失败，`ComputeDirty` 未声明。
 
-- [ ] **Step 3: 声明并实现 `ComputeDirty`**
+- [x] **Step 3: 声明并实现 `ComputeDirty`**
 
 在 `eye_renderer.h` 的 public 区加入：
 
@@ -940,7 +944,7 @@ DirtyRect EyeRenderer::ComputeDirty(const EyeState& a, const EyeState& b) {
 
 `kC` / `kScleraR` / `kIrisR` / `kLidHalfH` 位于匿名 namespace，`ComputeDirty` 定义在同一文件内可直接访问。
 
-- [ ] **Step 4: 运行测试确认通过**
+- [x] **Step 4: 运行测试确认通过**
 
 ```bash
 cd main/boards/plush-toy/test && make test
@@ -948,7 +952,7 @@ cd main/boards/plush-toy/test && make test
 
 Expected: `所有测试通过`
 
-- [ ] **Step 5: 修掉双眼共用缓冲区的竞争**
+- [x] **Step 5: 修掉双眼共用缓冲区的竞争**
 
 `esp_lcd_panel_draw_bitmap` 异步返回，两眼共用 `buf_` 会让右眼的渲染覆盖左眼未传完的数据。改为**两块缓冲区**——单块 240×240 仅 115KB，PSRAM 有 8MB，为正确性花这份内存是划算的。
 
@@ -969,7 +973,7 @@ void EyeDisplay::SetEyeState(const EyeState& s) {
 }
 ```
 
-- [ ] **Step 6: 编译**
+- [x] **Step 6: 编译**
 
 ```bash
 idf.py build
@@ -977,7 +981,7 @@ idf.py build
 
 Expected: `Project build complete`
 
-- [ ] **Step 7: 提交**
+- [x] **Step 7: 提交**
 
 ```bash
 git add main/boards/plush-toy/
@@ -1001,7 +1005,7 @@ git commit -m "feat(plush-toy): 脏矩形刷新，双眼独立缓冲区消除传
 - Consumes: 无
 - Produces: `bool OverlayQr::Encode(const char* text, std::vector<uint8_t>& modules, int& side)`——`modules` 为 `side*side` 的 0/1 数组，行优先
 
-- [ ] **Step 1: 确认二维码组件可用性**
+- [x] **Step 1: 确认二维码组件可用性**
 
 spec §7 第 1 项。先查乐鑫组件库：
 
@@ -1016,7 +1020,7 @@ compote component list --name qrcode 2>/dev/null || \
 
 **无论走哪条路，`OverlayQr::Encode` 的签名保持不变**，Task 7 只依赖签名。
 
-- [ ] **Step 2: 写 `overlay_qr.h`**
+- [x] **Step 2: 写 `overlay_qr.h`**
 
 ```cpp
 #pragma once
@@ -1033,7 +1037,7 @@ public:
 };
 ```
 
-- [ ] **Step 3: 写失败的测试**
+- [x] **Step 3: 写失败的测试**
 
 `test/test_overlay_qr.cc`：
 
@@ -1092,7 +1096,7 @@ int main() {
 }
 ```
 
-- [ ] **Step 4: 扩展 Makefile**
+- [x] **Step 4: 扩展 Makefile**
 
 ```make
 test: test_eye_renderer test_overlay_qr
@@ -1105,7 +1109,7 @@ test_overlay_qr: test_overlay_qr.cc ../overlay_qr.cc ../overlay_qr.h
 
 并把 `clean` 的 `rm -f` 加上 `test_overlay_qr`。
 
-- [ ] **Step 5: 运行测试确认失败**
+- [x] **Step 5: 运行测试确认失败**
 
 ```bash
 cd main/boards/plush-toy/test && make test
@@ -1113,7 +1117,7 @@ cd main/boards/plush-toy/test && make test
 
 Expected: 链接失败，`OverlayQr::Encode` 未定义。
 
-- [ ] **Step 6: 引入 qrcodegen 并实现 `overlay_qr.cc`**
+- [x] **Step 6: 引入 qrcodegen 并实现 `overlay_qr.cc`**
 
 **不要手写二维码编码器。** 纠错码的 Reed-Solomon 计算、掩码评分、版本容量表极易写错，而错误表现是"手机扫不出来"——在没有硬件时根本无法察觉。
 
@@ -1175,7 +1179,7 @@ test_overlay_qr: test_overlay_qr.cc ../overlay_qr.cc ../qrcodegen.c ../overlay_q
 
 （`-x c++` 让 g++ 按 C++ 编译 `qrcodegen.c`；qrcodegen 是 C99 但兼容 C++ 编译。若报错，改为分两步编译：先 `gcc -c ../qrcodegen.c` 再链接 `.o`。）
 
-- [ ] **Step 7: 运行测试确认通过**
+- [x] **Step 7: 运行测试确认通过**
 
 ```bash
 cd main/boards/plush-toy/test && make test
@@ -1183,7 +1187,9 @@ cd main/boards/plush-toy/test && make test
 
 Expected: 两个测试程序都输出 `所有测试通过`
 
-- [ ] **Step 8: 提交**
+- [x] **Step 8: 提交**
+
+> 实际提交：`5693891 feat(plush-toy): add provisioning and OTA overlays`。
 
 ```bash
 git add main/boards/plush-toy/overlay_qr.h main/boards/plush-toy/overlay_qr.cc main/boards/plush-toy/test/
@@ -1205,7 +1211,7 @@ git commit -m "feat(plush-toy): 二维码编码模块与主机端测试"
 - Consumes: `OverlayQr::Encode`、`EyeDisplay`
 - Produces: `void EyeDisplay::ShowQrCode(const char* text)`、`void EyeDisplay::ShowEyes()`
 
-- [ ] **Step 1: 扩展 `eye_display.h`**
+- [x] **Step 1: 扩展 `eye_display.h`**
 
 ```cpp
     enum Mode { kModeEyes, kModeOverlay };
@@ -1221,7 +1227,7 @@ private:
     Mode mode_ = kModeEyes;
 ```
 
-- [ ] **Step 2: 实现 `ShowQrCode`**
+- [x] **Step 2: 实现 `ShowQrCode`**
 
 先在 `eye_display.cc` 顶部加入 `#include "overlay_qr.h"`。
 
@@ -1270,7 +1276,7 @@ void EyeDisplay::DrawQrToBuffer(const std::vector<uint8_t>& modules, int side, u
 
 `DrawWaitIconToBuffer` 画一个简单图形即可——黑底 + 居中的青色空心圆环（与眼睛虹膜同色 `0x363E`），直径 120px、线宽 10px，表示"等待中"。用与 `EyeRenderer` 相同的圆形距离判定：`ds` 落在 `[55, 65]` 之间的像素涂色，其余为黑。
 
-- [ ] **Step 3: 实现 `ShowEyes`**
+- [x] **Step 3: 实现 `ShowEyes`**
 
 ```cpp
 void EyeDisplay::ShowEyes() {
@@ -1285,7 +1291,7 @@ void EyeDisplay::ShowEyes() {
     if (mode_ != kModeEyes) { state_ = s; return; }
 ```
 
-- [ ] **Step 4: 挂到配网状态**
+- [x] **Step 4: 挂到配网状态**
 
 `plush_toy_board.cc` 中重写 `StartNetwork`前后的时机不易把握，改为在板类里重写 `EnterWifiConfigMode`（`main/boards/common/wifi_board.cc:195` 为基类实现）之外的更简单做法：在板构造完成后由 `PlushBehavior` 轮询设备状态切换（计划二）。
 
@@ -1313,7 +1319,7 @@ void EyeDisplay::ShowEyes() {
 
 > `PropertyList` / `Property` / `ReturnValue` 的确切用法以 `main/mcp_server.cc:45-100` 中现有工具的写法为准，照抄其形式，不要自行推测构造参数。
 
-- [ ] **Step 5: 编译**
+- [x] **Step 5: 编译**
 
 ```bash
 idf.py build
@@ -1321,7 +1327,9 @@ idf.py build
 
 Expected: `Project build complete`
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
+
+> 实际提交：`5693891`；真屏扫码仍是独立的实机验收项。
 
 ```bash
 git add main/boards/plush-toy/
