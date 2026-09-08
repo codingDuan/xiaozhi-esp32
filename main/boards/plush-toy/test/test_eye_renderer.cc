@@ -2,6 +2,7 @@
 //   cd main/boards/plush-toy/test && make test
 
 #include "eye_renderer.h"
+#include "eye_theme.h"
 
 #include <cstdio>
 #include <vector>
@@ -18,7 +19,13 @@ static int g_failures = 0;
 
 static std::vector<uint16_t> RenderFull(const EyeState& s, int side) {
     std::vector<uint16_t> buf(EyeRenderer::kSize * EyeRenderer::kSize, 0xFFFF);
-    EyeRenderer::Render(buf.data(), s, side, EyeRenderer::FullRect());
+    EyeRenderer::Render(buf.data(), s, EyeThemeCatalog::Get(0), side, EyeRenderer::FullRect());
+    return buf;
+}
+
+static std::vector<uint16_t> RenderFull(const EyeState& s, const EyeTheme& theme, int side) {
+    std::vector<uint16_t> buf(EyeRenderer::kSize * EyeRenderer::kSize, 0xFFFF);
+    EyeRenderer::Render(buf.data(), s, theme, side, EyeRenderer::FullRect());
     return buf;
 }
 
@@ -59,6 +66,23 @@ static void TestOpenEyeHasBrightScleraAndDarkPupil() {
     auto b = RenderFull(s, +1);
     CHECK(At(b, 120, 120) < 0x2104, "全睁时中心应为瞳孔，接近黑");
     CHECK(At(b, 120, 52) > 0x8410, "全睁时中心上方应为巩膜，接近白");
+}
+
+// 主题必须改变可见帧：无巩膜、竖瞳、横瞳都不能只换一个名字。
+static void TestThemesChangeScleraAndPupilShape() {
+    EyeState s;
+    s.openness = 1.0f;
+    auto ocean = RenderFull(s, EyeThemeCatalog::Get(0), +1);
+    auto void_blue = RenderFull(s, EyeThemeCatalog::Get(10), +1);
+    auto dragon = RenderFull(s, EyeThemeCatalog::Get(13), +1);
+    auto cat = RenderFull(s, EyeThemeCatalog::Get(16), +1);
+
+    CHECK(At(ocean, 120, 52) != At(void_blue, 120, 52),
+          "无巩膜主题应改变虹膜外的眼白区域");
+    CHECK(At(dragon, 120, 94) != At(ocean, 120, 94),
+          "竖瞳主题应改变圆瞳上方的像素");
+    CHECK(At(cat, 94, 120) != At(ocean, 94, 120),
+          "横瞳主题应改变圆瞳左侧的像素");
 }
 
 // 全闭时整块屏必须是黑的
@@ -104,9 +128,10 @@ static void TestPupilFollowsOffset() {
     EyeState s;
     s.openness = 1.0f;
     s.pupil_x = 0.8f;
+    EyeRenderer::SetSwapRB(false);
     auto b = RenderFull(s, +1);
-    CHECK(At(b, 120, 120) > 0x2104, "瞳孔右移后，屏心不应再是瞳孔");
-    CHECK(At(b, 149, 120) < 0x2104, "瞳孔应出现在偏右位置");
+    CHECK(At(b, 120, 120) != 0x0041, "瞳孔右移后，屏心不应再是瞳孔");
+    CHECK(At(b, 149, 120) == 0x0041, "瞳孔应出现在偏右位置");
 }
 
 // 只渲染局部矩形时，输出必须与整屏渲染的对应区域一致（脏矩形刷新的正确性前提）
@@ -116,7 +141,7 @@ static void TestPartialRectMatchesFull() {
     auto full = RenderFull(s, +1);
     DirtyRect r{80, 80, 60, 60};
     std::vector<uint16_t> part(r.w * r.h, 0xFFFF);
-    EyeRenderer::Render(part.data(), s, +1, r);
+    EyeRenderer::Render(part.data(), s, EyeThemeCatalog::Get(0), +1, r);
     bool same = true;
     for (int y = 0; y < r.h && same; ++y) {
         for (int x = 0; x < r.w; ++x) {
@@ -211,6 +236,7 @@ int main() {
     TestDirtyRectCoversAllChangedPixels();
     TestOutsideCircleIsBlack();
     TestOpenEyeHasBrightScleraAndDarkPupil();
+    TestThemesChangeScleraAndPupilShape();
     TestClosedEyeIsBlank();
     TestLidTiltMirrorsBetweenEyes();
     TestPositiveCurveRaisesLowerLid();

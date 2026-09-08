@@ -1,5 +1,6 @@
 // 把几种情绪渲染成裸 RGB 文件，供 to_png.py 转成图片肉眼检查。
 #include "eye_renderer.h"
+#include "eye_theme.h"
 #include <cstdio>
 #include <vector>
 struct Preset { const char* name; EyeState s; };
@@ -17,8 +18,8 @@ int main() {
     // 每种情绪出一张「左眼|右眼」并排图，便于检查镜像是否对称
     for (auto& p : ps) {
         std::vector<uint16_t> l(N*N), r(N*N);
-        EyeRenderer::Render(l.data(), p.s, +1, EyeRenderer::FullRect());
-        EyeRenderer::Render(r.data(), p.s, -1, EyeRenderer::FullRect());
+        EyeRenderer::Render(l.data(), p.s, EyeThemeCatalog::Get(0), +1, EyeRenderer::FullRect());
+        EyeRenderer::Render(r.data(), p.s, EyeThemeCatalog::Get(0), -1, EyeRenderer::FullRect());
         char fn[128]; std::snprintf(fn, sizeof(fn), "eye_%s.rgb", p.name);
         FILE* f = std::fopen(fn, "wb");
         for (int y = 0; y < N; y++) {

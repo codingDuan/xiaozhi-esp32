@@ -1,4 +1,5 @@
 #include "eye_display.h"
+#include "eye_theme.h"
 #include "overlay_qr.h"
 #include "overlay_renderer.h"
 #include "plush_behavior.h"
@@ -123,11 +124,11 @@ void EyeDisplay::Flush(DirtyRect r) {
     // 完全对称的眼睛看起来像机器。
     EyeState l = state_;
     l.pupil_x += 0.045f;
-    EyeRenderer::Render(buf_left_, l, +1, r);
+    EyeRenderer::Render(buf_left_, l, EyeThemeCatalog::Get(0), +1, r);
 
     EyeState rr = state_;
     rr.pupil_x -= 0.045f;
-    EyeRenderer::Render(buf_right_, rr, -1, r);
+    EyeRenderer::Render(buf_right_, rr, EyeThemeCatalog::Get(0), -1, r);
 
     BlitInterleaved(r);
 

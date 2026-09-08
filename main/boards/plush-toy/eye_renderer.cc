@@ -1,4 +1,5 @@
 #include "eye_renderer.h"
+#include "eye_theme.h"
 
 #include <math.h>
 
@@ -22,13 +23,16 @@ inline uint16_t Rgb565(int r, int g, int b) {
     return (uint16_t)(((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3));
 }
 
-// 按比例调暗/调亮 RGB565，用于虹膜的径向渐变
-inline uint16_t Shade(uint16_t c, float f) {
-    int r = ((c >> 11) & 0x1F) * 255 / 31;
-    int g = ((c >> 5) & 0x3F) * 255 / 63;
-    int b = (c & 0x1F) * 255 / 31;
-    auto cl = [](float v) { return (int)(v < 0 ? 0 : (v > 255 ? 255 : v)); };
-    return Rgb565(cl(r * f), cl(g * f), cl(b * f));
+inline uint16_t Blend(uint16_t a, uint16_t b, float t) {
+    t = t < 0.0f ? 0.0f : (t > 1.0f ? 1.0f : t);
+    const int ar = ((a >> 11) & 0x1F) * 255 / 31;
+    const int ag = ((a >> 5) & 0x3F) * 255 / 63;
+    const int ab = (a & 0x1F) * 255 / 31;
+    const int br = ((b >> 11) & 0x1F) * 255 / 31;
+    const int bg = ((b >> 5) & 0x3F) * 255 / 63;
+    const int bb = (b & 0x1F) * 255 / 31;
+    return Rgb565((int)(ar + (br - ar) * t), (int)(ag + (bg - ag) * t),
+                  (int)(ab + (bb - ab) * t));
 }
 
 inline float Clamp01(float v) { return v < 0.0f ? 0.0f : (v > 1.0f ? 1.0f : v); }
@@ -57,9 +61,26 @@ inline bool InsideLids(float x, float y, const EyeState& s, int side) {
     return true;
 }
 
+inline bool InsidePupil(float dx, float dy, float radius, PupilShape shape) {
+    switch (shape) {
+        case PupilShape::kVerticalSlit:
+            return (dx * dx) / (radius * 0.24f * radius * 0.24f) +
+                       (dy * dy) / (radius * 1.22f * radius * 1.22f) <=
+                   1.0f;
+        case PupilShape::kHorizontalSlit:
+            return (dx * dx) / (radius * 1.22f * radius * 1.22f) +
+                       (dy * dy) / (radius * 0.24f * radius * 0.24f) <=
+                   1.0f;
+        case PupilShape::kRound:
+            return dx * dx + dy * dy <= radius * radius;
+    }
+    return false;
+}
+
 }  // namespace
 
-void EyeRenderer::Render(uint16_t* out, const EyeState& s, int side, DirtyRect r) {
+void EyeRenderer::Render(uint16_t* out, const EyeState& s, const EyeTheme& theme, int side,
+                         DirtyRect r) {
     const float px = (float)kC + s.pupil_x * kPupilDx;
     const float py = (float)kC + s.pupil_y * kPupilDy;
     const float pupil_r = kPupilR * s.pupil_scale;
@@ -78,10 +99,17 @@ void EyeRenderer::Render(uint16_t* out, const EyeState& s, int side, DirtyRect r
             if (ds <= (float)kC && ds <= kScleraR &&
                 InsideLids((float)x, (float)y, s, side)) {
 
-                // 巩膜：中心略亮的径向渐变
+                // 巩膜：中心略亮的径向渐变。无巩膜主题则以主题虹膜色铺满眼白区域。
                 const float t = ds / kScleraR;
-                const int v = (int)(255.0f - 44.0f * t);
-                c = Rgb565(v, v, (int)(v * 0.98f));
+                if (theme.sclera == ScleraStyle::kLight) {
+                    const int v = (int)(255.0f - 44.0f * t);
+                    c = Rgb565(v, v, (int)(v * 0.98f));
+                } else if (theme.sclera == ScleraStyle::kDark) {
+                    const int v = (int)(39.0f - 20.0f * t);
+                    c = Rgb565(v / 2, v, v + 14);
+                } else {
+                    c = Blend(theme.iris_inner, theme.iris_outer, t);
+                }
 
                 const float dxp = (float)x - px, dyp = (float)y - py;
                 const float dp = sqrtf(dxp * dxp + dyp * dyp);
@@ -89,10 +117,10 @@ void EyeRenderer::Render(uint16_t* out, const EyeState& s, int side, DirtyRect r
                 // 虹膜
                 if (dp <= iris_r) {
                     const float k = dp / iris_r;
-                    c = Shade(s.iris_color, 1.35f - 0.93f * k);
+                    c = Blend(theme.iris_inner, theme.iris_outer, k);
                 }
                 // 瞳孔
-                if (dp <= pupil_r) {
+                if (InsidePupil(dxp, dyp, pupil_r, theme.pupil)) {
                     c = Rgb565(7, 9, 12);
                 }
                 // 主高光：偏左上，是眼睛显得"活"的关键

@@ -15,8 +15,8 @@ test: test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer tes
 	./test_overlay_renderer
 	./test_pca9685
 
-test_eye_renderer: test_eye_renderer.cc ../eye_renderer.cc ../eye_renderer.h
-	$(CXX) $(CXXFLAGS) -o $@ test_eye_renderer.cc ../eye_renderer.cc -lm
+test_eye_renderer: test_eye_renderer.cc ../eye_renderer.cc ../eye_renderer.h ../eye_theme.cc ../eye_theme.h
+	$(CXX) $(CXXFLAGS) -o $@ test_eye_renderer.cc ../eye_renderer.cc ../eye_theme.cc -lm
 
 test_eye_theme: test_eye_theme.cc ../eye_theme.cc ../eye_theme.h
 	$(CXX) $(CXXFLAGS) -o $@ test_eye_theme.cc ../eye_theme.cc

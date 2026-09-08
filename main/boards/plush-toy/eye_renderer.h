@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+struct EyeTheme;
+
 // 参数化眼球状态。全部表情由这 7 个字段描述，情绪之间用线性插值过渡。
 //
 // 造型与取值范围经交互式原型确定（2026-09-06，见 spec §2.2.1）。
@@ -32,7 +34,8 @@ public:
 
     // out 指向 r.w * r.h 个 RGB565 像素，行连续（stride == r.w）
     // side: +1 左眼，-1 右眼（仅影响 lid_tilt 的符号）
-    static void Render(uint16_t* out, const EyeState& s, int side, DirtyRect r);
+    static void Render(uint16_t* out, const EyeState& s, const EyeTheme& theme, int side,
+                       DirtyRect r);
 
     static DirtyRect FullRect() { return DirtyRect{0, 0, kSize, kSize}; }
 
