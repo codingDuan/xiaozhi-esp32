@@ -126,7 +126,63 @@ static void TestPartialRectMatchesFull() {
     CHECK(same, "局部渲染结果应与整屏渲染的对应区域一致");
 }
 
+// 状态未变时不该重绘
+static void TestNoChangeYieldsEmptyRect() {
+    EyeState a;
+    DirtyRect r = EyeRenderer::ComputeDirty(a, a);
+    CHECK(r.w == 0 && r.h == 0, "状态未变时脏矩形应为空");
+}
+
+// 只有瞳孔平移时，脏矩形必须显著小于全屏，否则脏矩形就白做了
+static void TestPupilMoveYieldsSmallRect() {
+    EyeState a;
+    EyeState b = a;
+    b.pupil_x = 0.3f;
+    DirtyRect r = EyeRenderer::ComputeDirty(a, b);
+    CHECK(r.w > 0 && r.h > 0, "瞳孔移动应产生非空脏矩形");
+    CHECK(r.w * r.h < EyeRenderer::kSize * EyeRenderer::kSize / 2,
+          "瞳孔移动的脏矩形应小于半屏");
+}
+
+// openness 变化牵动眼睑，脏矩形必须覆盖整个眼睛纵向范围
+static void TestOpennessChangeYieldsTallRect() {
+    EyeState a;
+    a.openness = 1.0f;
+    EyeState b = a;
+    b.openness = 0.2f;
+    DirtyRect r = EyeRenderer::ComputeDirty(a, b);
+    CHECK(r.h >= 200, "眼睑变化应产生纵向接近全屏的脏矩形");
+}
+
+// 脏矩形必须真的覆盖住所有变化的像素，否则屏上会留下残影
+static void TestDirtyRectCoversAllChangedPixels() {
+    EyeState a;
+    EyeState b = a;
+    b.pupil_x = 0.35f;
+    b.pupil_y = -0.2f;
+    auto fa = RenderFull(a, +1);
+    auto fb = RenderFull(b, +1);
+    DirtyRect r = EyeRenderer::ComputeDirty(a, b);
+    bool covered = true;
+    for (int y = 0; y < EyeRenderer::kSize && covered; ++y) {
+        for (int x = 0; x < EyeRenderer::kSize; ++x) {
+            if (At(fa, x, y) == At(fb, x, y)) continue;
+            if (x < r.x || x >= r.x + r.w || y < r.y || y >= r.y + r.h) {
+                std::printf("  未覆盖的变化像素: (%d,%d)，脏矩形=(%d,%d,%d,%d)\n",
+                            x, y, r.x, r.y, r.w, r.h);
+                covered = false;
+                break;
+            }
+        }
+    }
+    CHECK(covered, "脏矩形必须覆盖全部变化像素，否则屏上留残影");
+}
+
 int main() {
+    TestNoChangeYieldsEmptyRect();
+    TestPupilMoveYieldsSmallRect();
+    TestOpennessChangeYieldsTallRect();
+    TestDirtyRectCoversAllChangedPixels();
     TestOutsideCircleIsBlack();
     TestOpenEyeHasBrightScleraAndDarkPupil();
     TestClosedEyeIsBlank();

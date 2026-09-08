@@ -104,3 +104,42 @@ void EyeRenderer::Render(uint16_t* out, const EyeState& s, int side, DirtyRect r
         }
     }
 }
+
+DirtyRect EyeRenderer::ComputeDirty(const EyeState& a, const EyeState& b) {
+    auto ne = [](float x, float y) { return fabsf(x - y) > 1e-4f; };
+
+    const bool lids_changed =
+        ne(a.openness, b.openness) || ne(a.lid_tilt, b.lid_tilt) || ne(a.curve, b.curve);
+    const bool pupil_changed =
+        ne(a.pupil_x, b.pupil_x) || ne(a.pupil_y, b.pupil_y) ||
+        ne(a.pupil_scale, b.pupil_scale) || a.iris_color != b.iris_color;
+
+    if (!lids_changed && !pupil_changed) return DirtyRect{0, 0, 0, 0};
+
+    if (lids_changed) {
+        // 眼睑扫过整个眼球，退化为外接矩形
+        int x0 = kC - (int)kScleraR - 2;
+        int y0 = kC - (int)kLidHalfH - 2;
+        int x1 = kC + (int)kScleraR + 2;
+        int y1 = kC + (int)kLidHalfH + 2;
+        if (x0 < 0) x0 = 0;
+        if (y0 < 0) y0 = 0;
+        if (x1 > kSize) x1 = kSize;
+        if (y1 > kSize) y1 = kSize;
+        return DirtyRect{x0, y0, x1 - x0, y1 - y0};
+    }
+
+    // 仅瞳孔/虹膜变化：取两帧虹膜圆的并集，加高光偏移与余量
+    const float rad = kIrisR * 1.1f + 26.0f;
+    const float ax = kC + a.pupil_x * kPupilDx, ay = kC + a.pupil_y * kPupilDy;
+    const float bx = kC + b.pupil_x * kPupilDx, by = kC + b.pupil_y * kPupilDy;
+    int x0 = (int)floorf(fminf(ax, bx) - rad);
+    int y0 = (int)floorf(fminf(ay, by) - rad);
+    int x1 = (int)ceilf(fmaxf(ax, bx) + rad);
+    int y1 = (int)ceilf(fmaxf(ay, by) + rad);
+    if (x0 < 0) x0 = 0;
+    if (y0 < 0) y0 = 0;
+    if (x1 > kSize) x1 = kSize;
+    if (y1 > kSize) y1 = kSize;
+    return DirtyRect{x0, y0, x1 - x0, y1 - y0};
+}

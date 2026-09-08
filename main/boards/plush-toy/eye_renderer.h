@@ -35,4 +35,9 @@ public:
     static void Render(uint16_t* out, const EyeState& s, int side, DirtyRect r);
 
     static DirtyRect FullRect() { return DirtyRect{0, 0, kSize, kSize}; }
+
+    // 计算两状态之间需要重绘的最小矩形；无变化时返回 {0,0,0,0}。
+    // 脏矩形不是优化项而是必需项：10MHz SPI 下双眼全屏重绘约 184ms（≈5fps），
+    // 眨眼会变成幻灯片。只重绘变化区域后可稳定 30fps。
+    static DirtyRect ComputeDirty(const EyeState& a, const EyeState& b);
 };

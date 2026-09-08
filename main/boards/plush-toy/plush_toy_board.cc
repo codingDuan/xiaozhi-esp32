@@ -4,7 +4,7 @@
 //   1. 屏的 SPI 从 GPIO19/20 迁到 GPIO14/38，把原生 USB 还给烧录与日志
 //   2. 舵机经 PCA9685 走 I2C 驱动，ESP32 不产生 PWM
 //
-// 本阶段显示用 NoDisplay 占位，双眼屏接好后再接入 EyeDisplay。
+//   3. 双 GC9A01 圆屏做眼睛，参数化直绘（不走 LVGL）
 
 #include "wifi_board.h"
 #include "codecs/no_audio_codec.h"
@@ -18,6 +18,11 @@
 #include "pca9685.h"
 #include "limb_controller.h"
 #include "plush_behavior.h"
+#include "eye_display.h"
+
+#include <esp_lcd_panel_vendor.h>
+#include <esp_lcd_panel_io.h>
+#include <esp_lcd_gc9a01.h>
 
 #include <esp_log.h>
 #include <driver/spi_common.h>
@@ -42,22 +47,7 @@ class PlushToyBoard : public WifiBoard {
 private:
     Button boot_button_;
     Esp32Camera* camera_ = nullptr;
-    // 眼睛屏接上前的过渡实现：只把 emotion 转成手势。
-    // 计划一 Task 4 接入 EyeDisplay 后，这段逻辑移进 EyeDisplay::SetEmotion。
-    class LimbEmotionDisplay : public NoDisplay {
-    public:
-        void SetBehavior(PlushBehavior* b) { behavior_ = b; }
-        virtual void SetEmotion(const char* emotion) override {
-            ESP_LOGI(TAG, "SetEmotion: %s", emotion ? emotion : "(null)");
-            if (behavior_ != nullptr) {
-                behavior_->OnEmotion(emotion);
-            }
-        }
-    private:
-        PlushBehavior* behavior_ = nullptr;
-    };
-
-    LimbEmotionDisplay display_;
+    EyeDisplay* display_ = nullptr;
     Pca9685* pca_ = nullptr;
     LimbController* limbs_ = nullptr;
     PlushBehavior* behavior_ = nullptr;
@@ -186,6 +176,51 @@ private:
             });
     }
 
+    esp_lcd_panel_handle_t NewPanel(gpio_num_t cs, bool owns_reset) {
+        esp_lcd_panel_io_handle_t io = nullptr;
+        esp_lcd_panel_io_spi_config_t io_cfg = {};
+        io_cfg.cs_gpio_num = cs;
+        io_cfg.dc_gpio_num = DISPLAY_DC_PIN;
+        io_cfg.spi_mode = DISPLAY_SPI_MODE;
+        io_cfg.pclk_hz = DISPLAY_PCLK_HZ;
+        io_cfg.trans_queue_depth = 10;
+        io_cfg.lcd_cmd_bits = 8;
+        io_cfg.lcd_param_bits = 8;
+        if (esp_lcd_new_panel_io_spi(DISPLAY_SPI_HOST, &io_cfg, &io) != ESP_OK) {
+            ESP_LOGE(TAG, "CS=GPIO%d 创建 panel_io 失败", cs);
+            return nullptr;
+        }
+
+        esp_lcd_panel_handle_t panel = nullptr;
+        esp_lcd_panel_dev_config_t dev_cfg = {};
+        // 两屏共用一根 RST，只让第一块负责复位，第二块传 NC 避免重复拉低
+        dev_cfg.reset_gpio_num = owns_reset ? DISPLAY_RST_PIN : GPIO_NUM_NC;
+        dev_cfg.rgb_ele_order = DISPLAY_RGB_ORDER;
+        dev_cfg.bits_per_pixel = 16;
+        if (esp_lcd_new_panel_gc9a01(io, &dev_cfg, &panel) != ESP_OK) {
+            ESP_LOGE(TAG, "CS=GPIO%d 创建 gc9a01 面板失败", cs);
+            return nullptr;
+        }
+        esp_lcd_panel_reset(panel);
+        esp_lcd_panel_init(panel);
+        esp_lcd_panel_invert_color(panel, DISPLAY_INVERT_COLOR);
+        esp_lcd_panel_swap_xy(panel, DISPLAY_SWAP_XY);
+        esp_lcd_panel_mirror(panel, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y);
+        esp_lcd_panel_disp_on_off(panel, true);
+        ESP_LOGI(TAG, "CS=GPIO%d 面板就绪", cs);
+        return panel;
+    }
+
+    void InitializeEyes() {
+        auto left = NewPanel(DISPLAY_CS_LEFT_PIN, true);
+        auto right = NewPanel(DISPLAY_CS_RIGHT_PIN, false);
+        if (left == nullptr || right == nullptr) {
+            ESP_LOGE(TAG, "眼睛不可用，设备其余功能不受影响");
+            return;
+        }
+        display_ = new EyeDisplay(left, right);
+    }
+
     void InitializeButtons() {
         boot_button_.OnClick([this]() {
             auto& app = Application::GetInstance();
@@ -200,6 +235,7 @@ private:
 public:
     PlushToyBoard() : boot_button_(BOOT_BUTTON_GPIO) {
         InitializeSpi();
+        InitializeEyes();
         InitializeButtons();
         InitializeCamera();
         InitializeServoBus();   // 必须在摄像头之后：SCCB 先占掉它那个 I2C 端口
@@ -208,7 +244,10 @@ public:
 
         behavior_ = new PlushBehavior(limbs_);
         behavior_->Start();
-        display_.SetBehavior(behavior_);
+        if (display_ != nullptr) {
+            display_->SetBehavior(behavior_);
+            display_->StartIdleAnimation();
+        }
 
         InitializeTools();
     }
@@ -231,7 +270,10 @@ public:
     }
 
     virtual Display* GetDisplay() override {
-        return &display_;
+        // 眼睛初始化失败时回落到 NoDisplay，状态文本仍走串口，设备照常可用
+        if (display_ != nullptr) return display_;
+        static NoDisplay fallback;
+        return &fallback;
     }
 
     virtual Camera* GetCamera() override {

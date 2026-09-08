@@ -1,0 +1,58 @@
+#pragma once
+
+#include "display.h"
+#include "eye_renderer.h"
+
+#include <esp_lcd_panel_ops.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
+
+class PlushBehavior;
+
+// 双圆屏眼睛显示。
+//
+// 只重写 SetEmotion；SetChatMessage / SetStatus / ShowNotification 刻意不重写，
+// 让它们落到 display.cc:25-37 的基类实现打到串口 —— 移除主屏后这就是调试通道。
+class EyeDisplay : public Display {
+public:
+    EyeDisplay(esp_lcd_panel_handle_t left, esp_lcd_panel_handle_t right);
+    virtual ~EyeDisplay();
+
+    virtual void SetEmotion(const char* emotion) override;
+
+    // 情绪之外的直接控制（眨眼、注视方向等由行为层驱动）
+    void SetEyeState(const EyeState& s);
+    EyeState GetEyeState() const { return state_; }
+
+    // 手势联动：SetEmotion 时同时通知行为层做对应动作
+    void SetBehavior(PlushBehavior* b) { behavior_ = b; }
+
+    // 启动眨眼与待机微动任务
+    void StartIdleAnimation();
+
+    bool available() const { return left_ != nullptr && right_ != nullptr; }
+
+private:
+    // Display 的纯虚接口。眼睛渲染自带互斥量，这里复用它。
+    virtual bool Lock(int timeout_ms = 0) override;
+    virtual void Unlock() override;
+
+    static void IdleTaskEntry(void* arg);
+    void IdleLoop();
+    void Flush(DirtyRect r);
+    static void BlitStrips(esp_lcd_panel_handle_t panel, const uint16_t* buf, DirtyRect r);
+
+    esp_lcd_panel_handle_t left_ = nullptr;
+    esp_lcd_panel_handle_t right_ = nullptr;
+
+    // 两块独立缓冲。esp_lcd_panel_draw_bitmap 是异步的，共用一块会让右眼的
+    // 渲染覆盖左眼尚未传完的数据（表现为左眼偶发花屏）。
+    // 单块 240x240 RGB565 仅 115KB，8MB PSRAM 下为正确性花这份内存很划算。
+    uint16_t* buf_left_ = nullptr;
+    uint16_t* buf_right_ = nullptr;
+
+    EyeState state_;
+    EyeState base_;            // 眨眼/微动的基准，情绪切换时更新
+    PlushBehavior* behavior_ = nullptr;
+    SemaphoreHandle_t mutex_ = nullptr;
+};
