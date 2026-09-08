@@ -14,6 +14,7 @@
 #include <esp_timer.h>
 
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -35,6 +36,7 @@ public:
     virtual ~Display();
 
     virtual void SetStatus(const char* status);
+    virtual void SetDownloadProgress(int progress, size_t speed);
     virtual void ShowNotification(const char* notification, int duration_ms = 3000);
     virtual void ShowNotification(const std::string& notification, int duration_ms = 3000);
     virtual void SetEmotion(const char* emotion);

@@ -8,11 +8,19 @@ CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -I..
 
 .PHONY: test clean
 
-test: test_eye_renderer
+test: test_eye_renderer test_overlay_qr test_overlay_renderer
 	./test_eye_renderer
+	./test_overlay_qr
+	./test_overlay_renderer
 
 test_eye_renderer: test_eye_renderer.cc ../eye_renderer.cc ../eye_renderer.h
 	$(CXX) $(CXXFLAGS) -o $@ test_eye_renderer.cc ../eye_renderer.cc -lm
 
+test_overlay_qr: test_overlay_qr.cc ../overlay_qr.cc ../qrcodegen.c ../overlay_qr.h ../qrcodegen.h
+	$(CXX) $(CXXFLAGS) -x c++ -o $@ test_overlay_qr.cc ../overlay_qr.cc ../qrcodegen.c -lm
+
+test_overlay_renderer: test_overlay_renderer.cc ../overlay_renderer.cc ../overlay_renderer.h
+	$(CXX) $(CXXFLAGS) -o $@ test_overlay_renderer.cc ../overlay_renderer.cc -lm
+
 clean:
-	rm -f test_eye_renderer test_overlay_qr *.ppm
+	rm -f test_eye_renderer test_overlay_qr test_overlay_renderer *.ppm

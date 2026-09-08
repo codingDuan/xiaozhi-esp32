@@ -1,9 +1,11 @@
 #pragma once
 
-#include "limb_controller.h"
 #include "device_state.h"
+#include "limb_controller.h"
 
 #include <string>
+
+class EyeDisplay;
 
 // 反射协调器：把设备状态与服务端下发的情绪翻译成肢体动作。
 //
@@ -13,7 +15,7 @@
 // 轮询任务本就需要存在，顺手读一次状态即可，零核心改动。
 class PlushBehavior {
 public:
-    explicit PlushBehavior(LimbController* limbs);
+    PlushBehavior(LimbController* limbs, EyeDisplay* display);
 
     void Start();
 
@@ -27,5 +29,6 @@ private:
     void OnStateChanged(DeviceState from, DeviceState to);
 
     LimbController* limbs_;
+    EyeDisplay* display_;
     DeviceState last_state_ = kDeviceStateUnknown;
 };

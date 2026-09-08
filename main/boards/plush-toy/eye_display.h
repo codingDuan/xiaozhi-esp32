@@ -7,6 +7,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
+#include <atomic>
+
 class PlushBehavior;
 
 // 双圆屏眼睛显示。
@@ -19,6 +21,15 @@ public:
     virtual ~EyeDisplay();
 
     virtual void SetEmotion(const char* emotion) override;
+    virtual void SetDownloadProgress(int progress, size_t speed) override;
+
+    enum class Mode { kEyes, kOverlay };
+
+    // Show a Wi-Fi provisioning QR code in the left eye and a wait icon in the right.
+    void ShowQrCode(const char* text);
+
+    // Return from a provisioning/upgrade overlay and redraw both eyes.
+    void ShowEyes();
 
     // 情绪之外的直接控制（眨眼、注视方向等由行为层驱动）
     void SetEyeState(const EyeState& s);
@@ -57,7 +68,10 @@ private:
     uint16_t* buf_right_ = nullptr;
 
     EyeState state_;
-    EyeState base_;            // 眨眼/微动的基准，情绪切换时更新
+    EyeState base_;  // 眨眼/微动的基准，情绪切换时更新
+    // Idle animation runs in its own FreeRTOS task while application callbacks may
+    // switch overlays, so mode must not be a plain cross-task variable.
+    std::atomic<Mode> mode_{Mode::kEyes};
     PlushBehavior* behavior_ = nullptr;
     SemaphoreHandle_t mutex_ = nullptr;
 };

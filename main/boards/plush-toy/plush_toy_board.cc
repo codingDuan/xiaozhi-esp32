@@ -6,27 +6,27 @@
 //
 //   3. 双 GC9A01 圆屏做眼睛，参数化直绘（不走 LVGL）
 
-#include "wifi_board.h"
-#include "codecs/no_audio_codec.h"
-#include "display/display.h"
 #include "application.h"
 #include "button.h"
+#include "codecs/no_audio_codec.h"
 #include "config.h"
-#include "led/single_led.h"
+#include "display/display.h"
 #include "esp32_camera.h"
+#include "eye_display.h"
+#include "led/single_led.h"
+#include "limb_controller.h"
 #include "mcp_server.h"
 #include "pca9685.h"
-#include "limb_controller.h"
 #include "plush_behavior.h"
-#include "eye_display.h"
+#include "wifi_board.h"
 
-#include <esp_lcd_panel_vendor.h>
-#include <esp_lcd_panel_io.h>
 #include <esp_lcd_gc9a01.h>
+#include <esp_lcd_panel_io.h>
+#include <esp_lcd_panel_vendor.h>
 
-#include <esp_log.h>
-#include <driver/spi_common.h>
 #include <driver/i2c_master.h>
+#include <driver/spi_common.h>
+#include <esp_log.h>
 
 #define TAG "PlushToyBoard"
 
@@ -71,8 +71,9 @@ private:
         }
 
         if (i2c_master_probe(bus, PCA9685_ADDR, 100) != ESP_OK) {
-            ESP_LOGE(TAG, "PCA9685(0x%02X) 无响应。请检查："
-                          "SDA(GPIO%d) 与 SCL(GPIO%d) 是否接反、VCC 是否接 3V3、是否共地",
+            ESP_LOGE(TAG,
+                     "PCA9685(0x%02X) 无响应。请检查："
+                     "SDA(GPIO%d) 与 SCL(GPIO%d) 是否接反、VCC 是否接 3V3、是否共地",
                      PCA9685_ADDR, SERVO_I2C_SDA_PIN, SERVO_I2C_SCL_PIN);
             return;
         }
@@ -83,7 +84,7 @@ private:
             pca_ = nullptr;
             return;
         }
-        pca_->AllOff();   // 上电即泄力，避免舵机顶着未知角度堵转
+        pca_->AllOff();  // 上电即泄力，避免舵机顶着未知角度堵转
     }
 
     void InitializeSpi() {
@@ -143,14 +144,14 @@ private:
         if (display_ != nullptr) {
             auto* eyes = display_;
             mcp.AddTool("self.eyes.swap_colors",
-                "Swap the red and blue channels of the eyes. Use when the user says the "
-                "eye color looks wrong or inverted (for example the iris looks orange/red "
-                "instead of cyan blue). The setting is persisted.",
-                PropertyList({ Property("enabled", kPropertyTypeBoolean) }),
-                [eyes](const PropertyList& properties) -> ReturnValue {
-                    eyes->SetSwapRB(properties["enabled"].value<bool>());
-                    return true;
-                });
+                        "Swap the red and blue channels of the eyes. Use when the user says the "
+                        "eye color looks wrong or inverted (for example the iris looks orange/red "
+                        "instead of cyan blue). The setting is persisted.",
+                        PropertyList({Property("enabled", kPropertyTypeBoolean)}),
+                        [eyes](const PropertyList& properties) -> ReturnValue {
+                            eyes->SetSwapRB(properties["enabled"].value<bool>());
+                            return true;
+                        });
         }
 
         if (limbs_ == nullptr || !limbs_->available()) {
@@ -160,36 +161,31 @@ private:
         auto* limbs = limbs_;
 
         mcp.AddTool("self.limbs.wave_hand",
-            "Wave the plush toy's hand to greet someone. Use when the user says hello, "
-            "goodbye, or explicitly asks the toy to wave.",
-            PropertyList({
-                Property("side", kPropertyTypeString, std::string("both")),
-                Property("times", kPropertyTypeInteger, 2, 1, 5)
-            }),
-            [limbs](const PropertyList& properties) -> ReturnValue {
-                auto side = properties["side"].value<std::string>();
-                Gesture g = (side == "left")    ? Gesture::kWaveLeft
-                            : (side == "right") ? Gesture::kWaveRight
-                                                : Gesture::kWaveBoth;
-                return limbs->Enqueue(g, properties["times"].value<int>());
-            });
+                    "Wave the plush toy's hand to greet someone. Use when the user says hello, "
+                    "goodbye, or explicitly asks the toy to wave.",
+                    PropertyList({Property("side", kPropertyTypeString, std::string("both")),
+                                  Property("times", kPropertyTypeInteger, 2, 1, 5)}),
+                    [limbs](const PropertyList& properties) -> ReturnValue {
+                        auto side = properties["side"].value<std::string>();
+                        Gesture g = (side == "left")    ? Gesture::kWaveLeft
+                                    : (side == "right") ? Gesture::kWaveRight
+                                                        : Gesture::kWaveBoth;
+                        return limbs->Enqueue(g, properties["times"].value<int>());
+                    });
 
         mcp.AddTool("self.limbs.hug",
-            "Open both arms for a hug. Use when the user asks for a hug or expresses "
-            "affection toward the toy.",
-            PropertyList(),
-            [limbs](const PropertyList&) -> ReturnValue {
-                return limbs->Enqueue(Gesture::kHug, 1);
-            });
+                    "Open both arms for a hug. Use when the user asks for a hug or expresses "
+                    "affection toward the toy.",
+                    PropertyList(), [limbs](const PropertyList&) -> ReturnValue {
+                        return limbs->Enqueue(Gesture::kHug, 1);
+                    });
 
         mcp.AddTool("self.limbs.cheer",
-            "Wiggle both arms happily. Use to express excitement or celebration.",
-            PropertyList({
-                Property("times", kPropertyTypeInteger, 3, 1, 5)
-            }),
-            [limbs](const PropertyList& properties) -> ReturnValue {
-                return limbs->Enqueue(Gesture::kCheer, properties["times"].value<int>());
-            });
+                    "Wiggle both arms happily. Use to express excitement or celebration.",
+                    PropertyList({Property("times", kPropertyTypeInteger, 3, 1, 5)}),
+                    [limbs](const PropertyList& properties) -> ReturnValue {
+                        return limbs->Enqueue(Gesture::kCheer, properties["times"].value<int>());
+                    });
     }
 
     esp_lcd_panel_handle_t NewPanel(gpio_num_t cs, bool owns_reset) {
@@ -254,11 +250,11 @@ public:
         InitializeEyes();
         InitializeButtons();
         InitializeCamera();
-        InitializeServoBus();   // 必须在摄像头之后：SCCB 先占掉它那个 I2C 端口
+        InitializeServoBus();  // 必须在摄像头之后：SCCB 先占掉它那个 I2C 端口
         limbs_ = new LimbController(pca_);
         limbs_->Start();
 
-        behavior_ = new PlushBehavior(limbs_);
+        behavior_ = new PlushBehavior(limbs_, display_);
         behavior_->Start();
         if (display_ != nullptr) {
             display_->SetBehavior(behavior_);
@@ -276,25 +272,26 @@ public:
     virtual AudioCodec* GetAudioCodec() override {
 #ifdef AUDIO_I2S_METHOD_SIMPLEX
         static NoAudioCodecSimplex audio_codec(AUDIO_INPUT_SAMPLE_RATE, AUDIO_OUTPUT_SAMPLE_RATE,
-            AUDIO_I2S_SPK_GPIO_BCLK, AUDIO_I2S_SPK_GPIO_LRCK, AUDIO_I2S_SPK_GPIO_DOUT,
-            AUDIO_I2S_MIC_GPIO_SCK, AUDIO_I2S_MIC_GPIO_WS, AUDIO_I2S_MIC_GPIO_DIN);
+                                               AUDIO_I2S_SPK_GPIO_BCLK, AUDIO_I2S_SPK_GPIO_LRCK,
+                                               AUDIO_I2S_SPK_GPIO_DOUT, AUDIO_I2S_MIC_GPIO_SCK,
+                                               AUDIO_I2S_MIC_GPIO_WS, AUDIO_I2S_MIC_GPIO_DIN);
 #else
         static NoAudioCodecDuplex audio_codec(AUDIO_INPUT_SAMPLE_RATE, AUDIO_OUTPUT_SAMPLE_RATE,
-            AUDIO_I2S_GPIO_BCLK, AUDIO_I2S_GPIO_WS, AUDIO_I2S_GPIO_DOUT, AUDIO_I2S_GPIO_DIN);
+                                              AUDIO_I2S_GPIO_BCLK, AUDIO_I2S_GPIO_WS,
+                                              AUDIO_I2S_GPIO_DOUT, AUDIO_I2S_GPIO_DIN);
 #endif
         return &audio_codec;
     }
 
     virtual Display* GetDisplay() override {
         // 眼睛初始化失败时回落到 NoDisplay，状态文本仍走串口，设备照常可用
-        if (display_ != nullptr) return display_;
+        if (display_ != nullptr)
+            return display_;
         static NoDisplay fallback;
         return &fallback;
     }
 
-    virtual Camera* GetCamera() override {
-        return camera_;
-    }
+    virtual Camera* GetCamera() override { return camera_; }
 };
 
 DECLARE_BOARD(PlushToyBoard);

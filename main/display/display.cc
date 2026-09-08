@@ -1,6 +1,7 @@
 #include "display.h"
 #include <esp_err.h>
 #include <esp_log.h>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -17,6 +18,12 @@ Display::Display() {}
 Display::~Display() {}
 
 void Display::SetStatus(const char* status) { ESP_LOGW(TAG, "SetStatus: %s", status); }
+
+void Display::SetDownloadProgress(int progress, size_t speed) {
+    char buffer[32];
+    snprintf(buffer, sizeof(buffer), "%d%% %uKB/s", progress, static_cast<unsigned>(speed / 1024));
+    SetChatMessage("system", buffer);
+}
 
 void Display::ShowNotification(const std::string& notification, int duration_ms) {
     ShowNotification(notification.c_str(), duration_ms);

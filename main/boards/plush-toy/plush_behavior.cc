@@ -1,24 +1,28 @@
 #include "plush_behavior.h"
 #include "application.h"
+#include "eye_display.h"
 
 #include <esp_log.h>
+#include <wifi_manager.h>
 
 #define TAG "PlushBehavior"
 
-PlushBehavior::PlushBehavior(LimbController* limbs) : limbs_(limbs) {}
+PlushBehavior::PlushBehavior(LimbController* limbs, EyeDisplay* display)
+    : limbs_(limbs), display_(display) {}
 
 void PlushBehavior::Start() {
-    if (limbs_ == nullptr || !limbs_->available()) {
+    if ((limbs_ == nullptr || !limbs_->available()) && display_ == nullptr) {
         ESP_LOGW(TAG, "肢体不可用，反射行为已禁用");
         return;
+    }
+    if (limbs_ == nullptr || !limbs_->available()) {
+        ESP_LOGW(TAG, "肢体不可用，仅启用显示状态反射");
     }
     xTaskCreate(TaskEntry, "plush_behavior", 3072, this, 2, nullptr);
     ESP_LOGI(TAG, "反射任务已启动");
 }
 
-void PlushBehavior::TaskEntry(void* arg) {
-    static_cast<PlushBehavior*>(arg)->Run();
-}
+void PlushBehavior::TaskEntry(void* arg) { static_cast<PlushBehavior*>(arg)->Run(); }
 
 void PlushBehavior::Run() {
     while (true) {
@@ -33,15 +37,30 @@ void PlushBehavior::Run() {
 
 void PlushBehavior::OnStateChanged(DeviceState from, DeviceState to) {
     ESP_LOGI(TAG, "状态 %d -> %d", (int)from, (int)to);
+
+    if (display_ != nullptr) {
+        if (to == kDeviceStateWifiConfiguring) {
+            const std::string payload =
+                "WIFI:S:" + WifiManager::GetInstance().GetApSsid() + ";T:nopass;;";
+            display_->ShowQrCode(payload.c_str());
+        } else if (to == kDeviceStateUpgrading) {
+            display_->SetDownloadProgress(0, 0);
+        } else if (from == kDeviceStateWifiConfiguring || from == kDeviceStateUpgrading) {
+            display_->ShowEyes();
+        }
+    }
+
+    if (limbs_ == nullptr || !limbs_->available())
+        return;
     switch (to) {
         case kDeviceStateListening:
-            limbs_->Enqueue(Gesture::kLean, 1);    // 微微前倾，像在专心听
+            limbs_->Enqueue(Gesture::kLean, 1);  // 微微前倾，像在专心听
             break;
         case kDeviceStateSpeaking:
-            limbs_->Enqueue(Gesture::kCheer, 1);   // 说话时轻摆一次
+            limbs_->Enqueue(Gesture::kCheer, 1);  // 说话时轻摆一次
             break;
         case kDeviceStateIdle:
-            limbs_->Enqueue(Gesture::kHome, 1);    // 归中泄力
+            limbs_->Enqueue(Gesture::kHome, 1);  // 归中泄力
             break;
         default:
             break;
@@ -49,7 +68,8 @@ void PlushBehavior::OnStateChanged(DeviceState from, DeviceState to) {
 }
 
 void PlushBehavior::OnEmotion(const char* emotion) {
-    if (emotion == nullptr || limbs_ == nullptr) return;
+    if (emotion == nullptr || limbs_ == nullptr)
+        return;
     std::string e(emotion);
 
     // 服务端 EMOJI_MAP（textUtils.py:8-30）共 21 种，此处只映射有明确

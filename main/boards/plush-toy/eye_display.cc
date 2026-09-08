@@ -1,4 +1,6 @@
 #include "eye_display.h"
+#include "overlay_qr.h"
+#include "overlay_renderer.h"
 #include "plush_behavior.h"
 #include "settings.h"
 
@@ -24,41 +26,40 @@ struct EmotionPreset {
 };
 
 const EmotionPreset kPresets[] = {
-    {"neutral",   {0.94f, 0.0f,  0.00f, 1.00f,   0.0f,  0.00f, 0x363E}},
-    {"happy",     {0.62f, 0.0f,  0.05f, 1.00f,   0.0f,  0.85f, 0x363E}},
-    {"laughing",  {0.34f, 0.0f,  0.10f, 0.95f,   0.0f,  1.00f, 0x363E}},
-    {"funny",     {0.45f, 0.0f,  0.08f, 1.00f,   0.0f,  0.90f, 0x363E}},
-    {"silly",     {0.55f, 0.3f,  0.10f, 1.05f,  -6.0f,  0.70f, 0x363E}},
-    {"sad",       {0.58f, 0.0f,  0.34f, 1.00f,  19.0f, -0.40f, 0x363E}},
-    {"crying",    {0.30f, 0.0f,  0.50f, 1.10f,  24.0f, -0.70f, 0x363E}},
-    {"angry",     {0.68f, 0.0f, -0.10f, 0.82f, -27.0f, -0.25f, 0x363E}},
-    {"surprised", {1.00f, 0.0f,  0.00f, 1.45f,   0.0f,  0.00f, 0x363E}},
-    {"shocked",   {1.00f, 0.0f, -0.05f, 1.55f,   0.0f,  0.00f, 0x363E}},
-    {"thinking",  {0.78f,-0.62f,-0.40f, 1.00f,  -9.0f,  0.00f, 0x363E}},
-    {"sleepy",    {0.18f, 0.0f,  0.25f, 1.00f,   6.0f, -0.15f, 0x363E}},
-    {"relaxed",   {0.70f, 0.0f,  0.05f, 1.00f,   0.0f,  0.55f, 0x363E}},
-    {"loving",    {0.66f, 0.0f,  0.05f, 1.25f,   0.0f,  0.80f, 0xF97A}},
-    {"kissy",     {0.60f, 0.0f,  0.05f, 1.20f,   0.0f,  0.85f, 0xF97A}},
-    {"confused",  {0.90f, 0.0f, -0.70f, 1.00f,  -5.0f,  0.00f, 0x363E}},
-    {"embarrassed",{0.55f,0.25f, 0.30f, 1.10f,   8.0f,  0.30f, 0xF97A}},
-    {"winking",   {0.85f, 0.0f,  0.00f, 1.00f,   0.0f,  0.40f, 0x363E}},
-    {"cool",      {0.60f, 0.0f, -0.05f, 0.90f, -12.0f,  0.20f, 0x363E}},
-    {"confident", {0.65f, 0.0f, -0.08f, 0.95f, -10.0f,  0.30f, 0x363E}},
-    {"delicious", {0.50f, 0.0f,  0.15f, 1.10f,   0.0f,  0.75f, 0x363E}},
+    {"neutral", {0.94f, 0.0f, 0.00f, 1.00f, 0.0f, 0.00f, 0x363E}},
+    {"happy", {0.62f, 0.0f, 0.05f, 1.00f, 0.0f, 0.85f, 0x363E}},
+    {"laughing", {0.34f, 0.0f, 0.10f, 0.95f, 0.0f, 1.00f, 0x363E}},
+    {"funny", {0.45f, 0.0f, 0.08f, 1.00f, 0.0f, 0.90f, 0x363E}},
+    {"silly", {0.55f, 0.3f, 0.10f, 1.05f, -6.0f, 0.70f, 0x363E}},
+    {"sad", {0.58f, 0.0f, 0.34f, 1.00f, 19.0f, -0.40f, 0x363E}},
+    {"crying", {0.30f, 0.0f, 0.50f, 1.10f, 24.0f, -0.70f, 0x363E}},
+    {"angry", {0.68f, 0.0f, -0.10f, 0.82f, -27.0f, -0.25f, 0x363E}},
+    {"surprised", {1.00f, 0.0f, 0.00f, 1.45f, 0.0f, 0.00f, 0x363E}},
+    {"shocked", {1.00f, 0.0f, -0.05f, 1.55f, 0.0f, 0.00f, 0x363E}},
+    {"thinking", {0.78f, -0.62f, -0.40f, 1.00f, -9.0f, 0.00f, 0x363E}},
+    {"sleepy", {0.18f, 0.0f, 0.25f, 1.00f, 6.0f, -0.15f, 0x363E}},
+    {"relaxed", {0.70f, 0.0f, 0.05f, 1.00f, 0.0f, 0.55f, 0x363E}},
+    {"loving", {0.66f, 0.0f, 0.05f, 1.25f, 0.0f, 0.80f, 0xF97A}},
+    {"kissy", {0.60f, 0.0f, 0.05f, 1.20f, 0.0f, 0.85f, 0xF97A}},
+    {"confused", {0.90f, 0.0f, -0.70f, 1.00f, -5.0f, 0.00f, 0x363E}},
+    {"embarrassed", {0.55f, 0.25f, 0.30f, 1.10f, 8.0f, 0.30f, 0xF97A}},
+    {"winking", {0.85f, 0.0f, 0.00f, 1.00f, 0.0f, 0.40f, 0x363E}},
+    {"cool", {0.60f, 0.0f, -0.05f, 0.90f, -12.0f, 0.20f, 0x363E}},
+    {"confident", {0.65f, 0.0f, -0.08f, 0.95f, -10.0f, 0.30f, 0x363E}},
+    {"delicious", {0.50f, 0.0f, 0.15f, 1.10f, 0.0f, 0.75f, 0x363E}},
 };
 
 const EyeState& LookupEmotion(const char* name) {
     if (name != nullptr) {
         for (const auto& p : kPresets) {
-            if (std::strcmp(p.name, name) == 0) return p.state;
+            if (std::strcmp(p.name, name) == 0)
+                return p.state;
         }
     }
-    return kPresets[0].state;   // neutral 兜底
+    return kPresets[0].state;  // neutral 兜底
 }
 
-inline uint32_t RandRange(uint32_t lo, uint32_t hi) {
-    return lo + (esp_random() % (hi - lo + 1));
-}
+inline uint32_t RandRange(uint32_t lo, uint32_t hi) { return lo + (esp_random() % (hi - lo + 1)); }
 
 }  // namespace
 
@@ -82,30 +83,42 @@ EyeDisplay::EyeDisplay(esp_lcd_panel_handle_t left, esp_lcd_panel_handle_t right
 }
 
 EyeDisplay::~EyeDisplay() {
-    if (buf_left_) heap_caps_free(buf_left_);
-    if (buf_right_) heap_caps_free(buf_right_);
-    if (mutex_) vSemaphoreDelete(mutex_);
+    if (buf_left_)
+        heap_caps_free(buf_left_);
+    if (buf_right_)
+        heap_caps_free(buf_right_);
+    if (mutex_)
+        vSemaphoreDelete(mutex_);
 }
 
 bool EyeDisplay::Lock(int timeout_ms) {
-    if (mutex_ == nullptr) return false;
+    if (mutex_ == nullptr)
+        return false;
     TickType_t wait = (timeout_ms <= 0) ? portMAX_DELAY : pdMS_TO_TICKS(timeout_ms);
     return xSemaphoreTake(mutex_, wait) == pdTRUE;
 }
 
 void EyeDisplay::Unlock() {
-    if (mutex_ != nullptr) xSemaphoreGive(mutex_);
+    if (mutex_ != nullptr)
+        xSemaphoreGive(mutex_);
 }
 
 void EyeDisplay::Flush(DirtyRect r) {
-    if (buf_left_ == nullptr || buf_right_ == nullptr) return;
-    if (r.w <= 0 || r.h <= 0) return;
+    if (buf_left_ == nullptr || buf_right_ == nullptr)
+        return;
+    if (r.w <= 0 || r.h <= 0)
+        return;
 
     xSemaphoreTake(mutex_, portMAX_DELAY);
 
-    // 双眼不对称偏移在此施加，不放进 EyeRenderer ——
-    // 渲染器保持可精确镜像测试。完全对称的眼睛看起来像机器。
-    // 先把两只眼都渲染好，再交错传输。
+    // SetEyeState may have started before an overlay and waited here while the
+    // overlay was being drawn. Re-check after acquiring the display lock so a
+    // queued idle-animation frame cannot immediately cover the overlay.
+    if (mode_.load(std::memory_order_relaxed) != Mode::kEyes) {
+        xSemaphoreGive(mutex_);
+        return;
+    }
+
     // 双眼不对称偏移在此施加，不放进 EyeRenderer —— 渲染器保持可精确镜像测试。
     // 完全对称的眼睛看起来像机器。
     EyeState l = state_;
@@ -137,33 +150,83 @@ void EyeDisplay::BlitInterleaved(DirtyRect r) {
     for (int y = 0; y < r.h; y += kStripRows) {
         const int h = (y + kStripRows <= r.h) ? kStripRows : (r.h - y);
         const size_t off = (size_t)y * r.w;
-        esp_lcd_panel_draw_bitmap(left_,  r.x, r.y + y, r.x + r.w, r.y + y + h,
-                                  buf_left_ + off);
-        esp_lcd_panel_draw_bitmap(right_, r.x, r.y + y, r.x + r.w, r.y + y + h,
-                                  buf_right_ + off);
+        esp_lcd_panel_draw_bitmap(left_, r.x, r.y + y, r.x + r.w, r.y + y + h, buf_left_ + off);
+        esp_lcd_panel_draw_bitmap(right_, r.x, r.y + y, r.x + r.w, r.y + y + h, buf_right_ + off);
     }
 }
 
 void EyeDisplay::SetEyeState(const EyeState& s) {
+    if (mode_.load(std::memory_order_relaxed) != Mode::kEyes) {
+        state_ = s;
+        return;
+    }
     DirtyRect r = EyeRenderer::ComputeDirty(state_, s);
     state_ = s;
-    Flush(r);   // r 为空时 Flush 直接返回，不浪费 SPI 带宽
+    Flush(r);  // r 为空时 Flush 直接返回，不浪费 SPI 带宽
 }
 
 void EyeDisplay::SetEmotion(const char* emotion) {
     ESP_LOGI(TAG, "SetEmotion: %s", emotion ? emotion : "(null)");
     base_ = LookupEmotion(emotion);
-    SetEyeState(base_);
-    if (behavior_ != nullptr) {
-        behavior_->OnEmotion(emotion);   // 同一次调用同时驱动眼睛与手势
+    if (mode_.load(std::memory_order_relaxed) == Mode::kOverlay) {
+        // Overlay lifetime follows the device state. Remember the latest emotion,
+        // but do not let an alert/emotion callback hide provisioning or OTA status.
+        state_ = base_;
+    } else {
+        SetEyeState(base_);
     }
+    if (behavior_ != nullptr) {
+        behavior_->OnEmotion(emotion);  // 同一次调用同时驱动眼睛与手势
+    }
+}
+
+void EyeDisplay::SetDownloadProgress(int progress, size_t speed) {
+    Display::SetDownloadProgress(progress, speed);
+    if (buf_left_ == nullptr || buf_right_ == nullptr)
+        return;
+
+    mode_.store(Mode::kOverlay, std::memory_order_relaxed);
+    xSemaphoreTake(mutex_, portMAX_DELAY);
+    OverlayRenderer::RenderProgress(buf_left_, progress);
+    OverlayRenderer::RenderProgress(buf_right_, progress);
+    BlitInterleaved(EyeRenderer::FullRect());
+    xSemaphoreGive(mutex_);
+}
+
+void EyeDisplay::ShowQrCode(const char* text) {
+    std::vector<uint8_t> modules;
+    int side = 0;
+    if (!OverlayQr::Encode(text, modules, side)) {
+        ESP_LOGE(TAG, "二维码编码失败");
+        return;
+    }
+    if (buf_left_ == nullptr || buf_right_ == nullptr)
+        return;
+
+    const Mode previous_mode = mode_.exchange(Mode::kOverlay, std::memory_order_relaxed);
+    xSemaphoreTake(mutex_, portMAX_DELAY);
+    if (!OverlayRenderer::RenderQr(buf_left_, modules, side)) {
+        mode_.store(previous_mode, std::memory_order_relaxed);
+        xSemaphoreGive(mutex_);
+        ESP_LOGE(TAG, "二维码渲染失败，side=%d", side);
+        return;
+    }
+    OverlayRenderer::RenderWaitIcon(buf_right_);
+    BlitInterleaved(EyeRenderer::FullRect());
+    xSemaphoreGive(mutex_);
+    ESP_LOGI(TAG, "配网二维码已显示，side=%d", side);
+}
+
+void EyeDisplay::ShowEyes() {
+    mode_.store(Mode::kEyes, std::memory_order_relaxed);
+    Flush(EyeRenderer::FullRect());
 }
 
 void EyeDisplay::SetSwapRB(bool on) {
     Settings s("plush_eye", true);
     s.SetInt("swap_rb", on ? 1 : 0);
     EyeRenderer::SetSwapRB(on);
-    Flush(EyeRenderer::FullRect());   // 通道换了，整屏重绘
+    Flush(EyeRenderer::FullRect());  // 通道换了，整屏重绘
     ESP_LOGI(TAG, "红蓝通道互换 = %s（已存 NVS）", on ? "开" : "关");
 }
 
@@ -178,9 +241,7 @@ void EyeDisplay::StartIdleAnimation() {
     ESP_LOGI(TAG, "待机动画已启动（随机眨眼 + 瞳孔游走）");
 }
 
-void EyeDisplay::IdleTaskEntry(void* arg) {
-    static_cast<EyeDisplay*>(arg)->IdleLoop();
-}
+void EyeDisplay::IdleTaskEntry(void* arg) { static_cast<EyeDisplay*>(arg)->IdleLoop(); }
 
 // 眨眼与瞳孔游走。这是"有生命感"的主要来源，且完全本地、零延迟、断网可用。
 void EyeDisplay::IdleLoop() {
@@ -213,8 +274,8 @@ void EyeDisplay::IdleLoop() {
         }
 
         if (elapsed >= next_roam) {
-            target_x = ((int)RandRange(0, 100) - 50) / 200.0f;   // ±0.25
-            target_y = ((int)RandRange(0, 100) - 50) / 300.0f;   // ±0.17
+            target_x = ((int)RandRange(0, 100) - 50) / 200.0f;  // ±0.25
+            target_y = ((int)RandRange(0, 100) - 50) / 300.0f;  // ±0.17
             next_roam = elapsed + RandRange(1500, 4000);
         }
         roam_x += (target_x - roam_x) * 0.06f;

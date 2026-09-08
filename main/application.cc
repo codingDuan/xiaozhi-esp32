@@ -389,10 +389,10 @@ void Application::CheckAssetsVersion() {
 
         bool success =
             assets.Download(download_url, [this, display](int progress, size_t speed) -> void {
-                char buffer[32];
-                snprintf(buffer, sizeof(buffer), "%d%% %uKB/s", progress, speed / 1024);
-                Schedule([display, message = std::string(buffer)]() {
-                    display->SetChatMessage("system", message.c_str());
+                Schedule([this, display, progress, speed]() {
+                    if (GetDeviceState() == kDeviceStateUpgrading) {
+                        display->SetDownloadProgress(progress, speed);
+                    }
                 });
             });
 
@@ -1064,10 +1064,10 @@ bool Application::UpgradeFirmware(const std::string& url, const std::string& ver
     vTaskDelay(pdMS_TO_TICKS(1000));
 
     bool upgrade_success = Ota::Upgrade(upgrade_url, [this, display](int progress, size_t speed) {
-        char buffer[32];
-        snprintf(buffer, sizeof(buffer), "%d%% %uKB/s", progress, speed / 1024);
-        Schedule([display, message = std::string(buffer)]() {
-            display->SetChatMessage("system", message.c_str());
+        Schedule([this, display, progress, speed]() {
+            if (GetDeviceState() == kDeviceStateUpgrading) {
+                display->SetDownloadProgress(progress, speed);
+            }
         });
     });
 
@@ -1080,6 +1080,7 @@ bool Application::UpgradeFirmware(const std::string& url, const std::string& ver
         Alert(Lang::Strings::ERROR, Lang::Strings::UPGRADE_FAILED, "cancel",
               Lang::Sounds::OGG_EXCLAMATION);
         vTaskDelay(pdMS_TO_TICKS(3000));
+        SetDeviceState(kDeviceStateIdle);
         return false;
     } else {
         // Upgrade success, reboot immediately
