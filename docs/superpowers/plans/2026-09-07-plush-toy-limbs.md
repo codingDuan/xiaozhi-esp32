@@ -4,7 +4,7 @@
 
 **Goal:** 让 `plush-toy` 板型通过 PCA9685 驱动两个 SG90 舵机，具备状态反射动作、情绪联动手势与 LLM 可调用的手势工具。
 
-**Architecture:** 三层。`Pca9685` 继承仓库既有的 `I2cDevice`，只管寄存器；`LimbController` 管角度、行程限制、动作队列串行化与泄力；`PlushBehavior` 起一个 50Hz 任务轮询设备状态，把状态与情绪翻译成手势。服务端零代码改动，仅配角色 prompt。
+**Architecture:** 三层。`Pca9685` 自持 I2C device handle（100kHz，不继承 `I2cDevice`，理由见 Task 1 Step 5），只管寄存器；`LimbController` 管角度、行程限制、动作队列串行化与泄力；`PlushBehavior` 起一个 50Hz 任务轮询设备状态，把状态与情绪翻译成手势。服务端零代码改动，仅配角色 prompt。
 
 **Tech Stack:** ESP-IDF v6.1、`i2c_master` 新驱动、PCA9685、C++17
 
@@ -53,8 +53,8 @@ idf.py -p /dev/cu.usbmodem5C834268091 flash
 - Modify: `main/boards/plush-toy/plush_toy_board.cc`
 
 **Interfaces:**
-- Consumes: `I2cDevice`（`main/boards/common/i2c_device.h`）
-- Produces: `class Pca9685 : public I2cDevice`，方法 `bool Init(int freq_hz)`、`void SetPulseUs(int ch, int us)`、`void AllOff()`、`uint8_t ReadPrescale()`
+- Consumes: `driver/i2c_master.h`（**不继承 `I2cDevice`**，理由见 Step 5）
+- Produces: `class Pca9685`，构造 `Pca9685(bus, addr, scl_hz)`，方法 `bool Init(int freq_hz)`、`void SetPulseUs(int ch, int us)`、`void AllOff()`、`uint8_t ReadPrescale()`
 
 - [ ] **Step 1: 写 `pca9685.h`**
 
