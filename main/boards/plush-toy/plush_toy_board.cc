@@ -14,9 +14,11 @@
 #include "config.h"
 #include "led/single_led.h"
 #include "esp32_camera.h"
+#include "pca9685.h"
 
 #include <esp_log.h>
 #include <driver/spi_common.h>
+#include <driver/i2c_master.h>
 
 #define TAG "PlushToyBoard"
 
@@ -38,6 +40,41 @@ private:
     Button boot_button_;
     Esp32Camera* camera_ = nullptr;
     NoDisplay display_;
+    Pca9685* pca_ = nullptr;
+
+    // 舵机链路的任何一步失败都不得让设备崩溃 —— 没有手臂的玩具仍应能正常对话。
+    // 因此全部失败路径只记日志并让 pca_ 保持 nullptr，不用 ESP_ERROR_CHECK。
+    void InitializeServoBus() {
+        i2c_master_bus_config_t cfg = {};
+        cfg.i2c_port = SERVO_I2C_PORT;
+        cfg.sda_io_num = SERVO_I2C_SDA_PIN;
+        cfg.scl_io_num = SERVO_I2C_SCL_PIN;
+        cfg.clk_source = I2C_CLK_SRC_DEFAULT;
+        cfg.glitch_ignore_cnt = 7;
+        cfg.flags.enable_internal_pullup = true;
+
+        i2c_master_bus_handle_t bus = nullptr;
+        esp_err_t err = i2c_new_master_bus(&cfg, &bus);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "舵机 I2C 总线创建失败: %s（肢体动作将不可用）", esp_err_to_name(err));
+            return;
+        }
+
+        if (i2c_master_probe(bus, PCA9685_ADDR, 100) != ESP_OK) {
+            ESP_LOGE(TAG, "PCA9685(0x%02X) 无响应。请检查："
+                          "SDA(GPIO%d) 与 SCL(GPIO%d) 是否接反、VCC 是否接 3V3、是否共地",
+                     PCA9685_ADDR, SERVO_I2C_SDA_PIN, SERVO_I2C_SCL_PIN);
+            return;
+        }
+
+        pca_ = new Pca9685(bus, PCA9685_ADDR, SERVO_I2C_HZ);
+        if (!pca_->Init(SERVO_PWM_FREQ_HZ)) {
+            delete pca_;
+            pca_ = nullptr;
+            return;
+        }
+        pca_->AllOff();   // 上电即泄力，避免舵机顶着未知角度堵转
+    }
 
     void InitializeSpi() {
         spi_bus_config_t buscfg = {};
@@ -101,6 +138,7 @@ public:
         InitializeSpi();
         InitializeButtons();
         InitializeCamera();
+        InitializeServoBus();   // 必须在摄像头之后：SCCB 先占掉它那个 I2C 端口
     }
 
     virtual Led* GetLed() override {

@@ -22,6 +22,8 @@ export PATH="$IDF_PATH/tools:$PATH"        # 缺这行 build.py 必失败
 python3 scripts/build.py plush-toy          # 或 idf.py build
 ```
 
+**新增 `.cc` 文件后必须 reconfigure**：`main/CMakeLists.txt:869` 用 `file(GLOB)` 收集板目录下的源文件，而 glob 只在 configure 时求值一次。新加的文件不会自动纳入编译，表现为链接期 `undefined reference`。执行 `idf.py reconfigure` 后再 build。
+
 烧录与串口监看：
 
 ```bash
@@ -212,7 +214,11 @@ idf.py -p /dev/cu.usbmodem5C834268091 flash
 
 Expected 串口出现：`Pca9685: 初始化完成，50 Hz，PRE_SCALE=121`
 
-**若回读值不是 121**：先确认 I2C 时钟。`I2cDevice` 构造函数把 `scl_speed_hz` 硬编码为 **400kHz**（`main/boards/common/i2c_device.cc:12`），而实机验证是在 100kHz 下做的。面包板飞线上 400kHz 可能不稳。此时不要改 `i2c_device.cc`（那会影响所有板型），而是在 `Pca9685` 中改为自建 `i2c_master_dev_handle_t`、指定 100kHz。
+**已实测发生并已解决**：最初让 `Pca9685` 继承 `I2cDevice`，回读得到 **217** 而非 121。原因是 `I2cDevice` 构造函数把 `scl_speed_hz` 硬编码为 **400kHz**（`main/boards/common/i2c_device.cc:12`），在本项目的面包板飞线上会导致寄存器读写失真。
+
+解决方案：`Pca9685` **不继承 `I2cDevice`**，自持 `i2c_master_dev_handle_t` 并使用 `SERVO_I2C_HZ`（100kHz）。改基类会影响全部 100+ 个板型，不可取。这是对仓库惯例的一处有意偏离，理由写在 `pca9685.h` 的类注释里。
+
+降到 100kHz 后回读恢复 121。
 
 - [ ] **Step 6: 提交**
 
