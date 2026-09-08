@@ -75,6 +75,18 @@ GPIO19/20 保留给 ESP32-S3 原生 USB，GPIO43 保留给控制台 UART TX。�
 
 二维码必须是白底黑码并保留四模块静默区。圆屏内接方形约 169px；当前配网内容生成的 25×25 模块二维码使用 5px/module，若增长到 Version 3 的 29×29 模块则自动降为 4px/module。缩放必须把静默区计入，不能固定写死为 5px/module。
 
+## 本地服务端地址
+
+设备会把配网时填写的 OTA 地址持久化到 NVS；服务器 IP 变化后，即使服务仍监听端口，设备也无法自动找到新地址。当前构建已启用 lwIP 的 mDNS 查询，因此同一局域网内可优先使用稳定的 Bonjour 主机名：
+
+```text
+OTA:       http://MacBook-Pro-107.local:8003/xiaozhi/ota/
+WebSocket: ws://MacBook-Pro-107.local:8010/xiaozhi/v1/
+Vision:    http://MacBook-Pro-107.local:8003/mcp/vision/explain
+```
+
+其中 OTA 地址由设备配网写入；WebSocket 和 Vision 地址写在服务端 `data/.config.yaml`。`.local` 方案避免普通 DHCP 地址变化，但只适用于设备与 Mac 在同一二层网络且网络允许 mDNS；手机热点可能隔离组播，必须实测。若解析失败，应在固定路由器上做 DHCP 地址保留，或使用可达的域名，不要退回每次手工追踪随机 IP。
+
 ## 验证
 
 纯渲染和二维码编码无需 ESP-IDF 或硬件：
