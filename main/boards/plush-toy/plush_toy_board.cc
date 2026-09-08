@@ -15,6 +15,7 @@
 #include "led/single_led.h"
 #include "esp32_camera.h"
 #include "pca9685.h"
+#include "limb_controller.h"
 
 #include <esp_log.h>
 #include <driver/spi_common.h>
@@ -41,6 +42,7 @@ private:
     Esp32Camera* camera_ = nullptr;
     NoDisplay display_;
     Pca9685* pca_ = nullptr;
+    LimbController* limbs_ = nullptr;
 
     // 舵机链路的任何一步失败都不得让设备崩溃 —— 没有手臂的玩具仍应能正常对话。
     // 因此全部失败路径只记日志并让 pca_ 保持 nullptr，不用 ESP_ERROR_CHECK。
@@ -139,6 +141,12 @@ public:
         InitializeButtons();
         InitializeCamera();
         InitializeServoBus();   // 必须在摄像头之后：SCCB 先占掉它那个 I2C 端口
+        limbs_ = new LimbController(pca_);
+        limbs_->Start();
+
+        // TODO(临时): 开机自检动作，用于验证 Pca9685 + LimbController 整条链路
+        // 在真实固件里能跑通。Task 3 的 MCP 工具验证通过后删除。
+        limbs_->Enqueue(Gesture::kWaveBoth, 2);
     }
 
     virtual Led* GetLed() override {
