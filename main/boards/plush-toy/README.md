@@ -33,6 +33,7 @@ idf.py -p /dev/cu.usbmodem5C834268091 flash
 
 - `plush_toy_board.cc`：组装音频、摄像头、双屏、PCA9685、按键和 MCP 工具；只在此导出一个 `DECLARE_BOARD`。
 - `eye_renderer.*`：纯 CPU 的 `EyeState -> RGB565` 渲染，可在主机测试。
+- `eye_theme.*`：20 个原创参数化眼睛主题，以及名称解析和顺序切换状态机。
 - `eye_display.*`：双 GC9A01 驱动、脏矩形、交错 SPI 传输和 overlay 模式。
 - `overlay_qr.*` / `qrcodegen.*`：将配网文本编码为二维码模块；qrcodegen 是 vendored MIT 许可实现。
 - `overlay_renderer.*`：二维码、等待图标和 OTA 进度环的纯像素渲染。
@@ -74,6 +75,14 @@ GPIO19/20 保留给 ESP32-S3 原生 USB，GPIO43 保留给控制台 UART TX。�
 - 离开配网或升级状态：恢复眼睛模式；overlay 期间收到的 emotion 只更新恢复后的表情，不提前遮住二维码或进度。
 
 二维码必须是白底黑码并保留四模块静默区。圆屏内接方形约 169px；当前配网内容生成的 25×25 模块二维码使用 5px/module，若增长到 Version 3 的 29×29 模块则自动降为 4px/module。缩放必须把静默区计入，不能固定写死为 5px/module。
+
+### 切换眼睛主题
+
+说“换眼睛”会按以下顺序切到下一种主题，第二十种后回到第一种：
+
+`ocean`、`emerald`、`violet`、`amber`、`rose`、`ice`、`copper`、`jade`、`midnight`、`pearl`、`void-blue`、`void-purple`、`void-rose`、`dragon-amber`、`dragon-emerald`、`dragon-violet`、`cat-gold`、`cat-jade`、`cat-ice`、`cat-rose`。
+
+也可指名选择，例如“换成 `dragon-amber` 眼睛”或“换成 `cat-gold` 眼睛”。前者是竖瞳龙眼，后者是横瞳猫眼。主题选择会持久化，断电重启后保持；它与 `self.eyes.swap_colors` 的面板 RGB/BGR 校准相互独立。
 
 ## 本地服务端地址
 
