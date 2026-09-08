@@ -135,16 +135,16 @@ ESP32-S3 在本板上的约束：`CONFIG_SPIRAM_MODE_OCT=y`，GPIO33–37 被八
 | 眼屏 RST | GPIO 21 | 沿用 |
 | 左眼 CS | GPIO 45 | 沿用原主屏 CS |
 | 右眼 CS | GPIO 43 | 原 U0TXD |
-| 左手舵机 | GPIO 46 | strapping，内部默认下拉 → 开机即安全低电平；仍建议外接 10kΩ 下拉作冗余 |
-| 右手舵机 | GPIO 44 | 原 U0RXD，非 strapping；**必须**外接 10kΩ 下拉压掉内部上拉 |
-| 备用 | GPIO 3 | 预留电池检测 / 触摸唤醒 |
+| 舵机 I2C SDA | GPIO 44 | 排针丝印 `RX`；接 PCA9685 SDA |
+| 舵机 I2C SCL | GPIO 3 | 接 PCA9685 SCL；总线为 `I2C_NUM_0`（见 4.1） |
+| 备用 | GPIO 46 | 预留电池检测 / 触摸唤醒 |
 | USB | GPIO 19/20 | **恢复原生 USB**，烧录与日志共用一根线 |
 | 背光 | — | 模块无 BL 引脚，内部直连 VCC 常亮 |
 | 摄像头 | GPIO 4–13, 15–18 | 保留不动 |
 
 **将 SPI 从 GPIO19/20 迁走的理由**：本板 README 明确记载摄像头占用了 USB 的 19/20。若维持现状，固件初始化 SPI 时 USB 枚举即断开，`/dev/cu.usbmodem*` 消失，此后每次烧录须手动按住 BOOT 并复位，且查看日志需外接 USB-TTL 模块。迁移仅需修改 `config.h` 中的宏定义，SPI 经 GPIO 矩阵可映射任意引脚，无逻辑代码改动。
 
-**舵机避开 GPIO43 的理由**：GPIO43 是 ROM 启动阶段的串口发送脚，开机瞬间会输出日志脉冲。喂给舵机会导致上电抽搐；喂给 CS 则无害（无时钟即无法锁存）。
+**舵机改由 PCA9685 驱动后的变化**：舵机不再占用 ESP32 的 GPIO 做 PWM，因此原方案中「舵机落在 strapping 脚上、需外接 10kΩ 下拉」的顾虑全部消失，那两个电阻不再需要。GPIO46 因此空出作为备用脚。GPIO43 仍作右眼 CS —— 它是 ROM 启动阶段的串口发送脚，开机瞬间会输出日志脉冲，喂给 CS 无害（无时钟即无法锁存）。
 
 ### 3.2 供电
 
@@ -206,7 +206,9 @@ Mac ──USB──► 开发板（供电 + 烧录 + 日志）
 
 ### 3.4 元件清单
 
-除舵机与屏外：1000µF/10V 电解电容 ×1、0.1µF 瓷片电容 ×1、10kΩ 电阻 ×2、5V/2A 充电头 ×1、杜邦线若干。
+除舵机与屏外：PCA9685 16 路舵机驱动板 ×1、1000µF/10V 电解电容 ×1、0.1µF 瓷片电容 ×1、5V/2A 充电头 ×1、杜邦线若干。
+
+（原清单中的 10kΩ 电阻 ×2 已不需要——那是 GPIO 直驱 PWM 时给舵机信号线做下拉用的，改用 PCA9685 后信号由其驱动。）
 
 **舵机须为 180° 版本**。360° 连续旋转舵机内部无位置反馈，PWM 输入对应转速而非角度，无法用于肢体定位，且无软件补救办法。
 
@@ -216,20 +218,29 @@ SG90 为塑料齿。毛绒布料的持续回弹力是打齿主因，故固件层
 
 ## 4. 固件设计
 
-### 4.1 必须先修复的资源冲突：LEDC 通道
+### 4.1 资源冲突：I2C 端口（LEDC 冲突已因改用 PCA9685 而消失）
 
-- `managed_components/espressif__esp32-camera/target/xclk.c:24,33,49`：摄像头 XCLK 由 LEDC 生成，走 `LEDC_LOW_SPEED_MODE`，定时器与通道取自 `config->ledc_timer` / `config->ledc_channel`。
-- `main/boards/bread-compact-wifi-s3cam/compact_wifi_board_s3cam.cc:128`：`camera_config_t config = {};` 零初始化后未赋值这两个字段，实际使用 `LEDC_TIMER_0` + `LEDC_CHANNEL_0`。
-- `main/boards/otto-robot/oscillator.cc:21`：`static ledc_channel_t next_free_channel = LEDC_CHANNEL_0;`
+#### 已消失的冲突：LEDC 通道
 
-直接移植舵机代码会导致**第一个舵机覆盖摄像头的 XCLK 通道**。表现为摄像头花屏或超时，而错误信息完全指向不到舵机。
+早期设计由 ESP32 的 LEDC 直接产生舵机 PWM，会与摄像头 XCLK 争抢 `LEDC_CHANNEL_0`
+（`managed_components/espressif__esp32-camera/target/xclk.c:24,33,49`）。
+改用 PCA9685 后，PWM 由其自带振荡器产生，**ESP32 一个 LEDC 通道都不占**，该冲突不复存在。
 
-修复（两处均改）：
+#### 实际存在的冲突：I2C 端口（2026-09-07 实机发现）
 
-1. 板级代码显式声明摄像头占用：`config.ledc_timer = LEDC_TIMER_0; config.ledc_channel = LEDC_CHANNEL_0;`（不改变行为，将隐式默认转为显式声明）
-2. 舵机通道分配起点改为 `LEDC_CHANNEL_2`；定时器沿用 `LEDC_TIMER_1`（50Hz，与摄像头的 20MHz 定时器互不干扰）
+**摄像头 SCCB 占用的是 `I2C_NUM_1`，不是 `I2C_NUM_0`。** 因此 PCA9685 必须走 `I2C_NUM_0`。
 
-背光引脚为 `GPIO_NUM_NC`，`PwmBacklight` 不会实例化，少一个 LEDC 竞争者。
+判定依据必须看 Kconfig，**不能看板级代码里的 `camera_config_t.sccb_i2c_port` 赋值**——那是个死字段：
+
+- `managed_components/espressif__esp32-camera/driver/sccb-ng.c:123`：
+  `sccb_i2c_port = SCCB_I2C_PORT_DEFAULT;` 无条件覆盖传入值
+- `sccb-ng.c:40-44`：`SCCB_I2C_PORT_DEFAULT` 由 `CONFIG_SCCB_HARDWARE_I2C_PORT1` 决定
+- 本工程 `sdkconfig` 中该选项为 `y`，启动日志印证：`sccb-ng: sccb_i2c_port=1`
+
+`bread-compact-wifi-s3cam` 里那行 `config.sccb_i2c_port = 0;` 不起任何作用，照抄它会得出错误结论。
+
+**防护**：`main/boards/plush-toy/plush_toy_board.cc` 中以 `static_assert` 钉死该约束，
+两者撞车时编译期即报错。该断言已验证会正确触发。
 
 ### 4.2 模块划分
 

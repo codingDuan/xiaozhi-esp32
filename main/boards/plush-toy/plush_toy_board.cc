@@ -20,6 +20,19 @@
 
 #define TAG "PlushToyBoard"
 
+// 摄像头 SCCB 占用哪个 I2C 端口，由 Kconfig 决定而非 camera_config_t 字段。
+// 舵机的 PCA9685 必须避开它，否则 i2c_new_master_bus 会失败、舵机全哑。
+// 这条约束曾经被写反过（误以为摄像头占 port 0），故用编译期断言钉死。
+#if CONFIG_SCCB_HARDWARE_I2C_PORT1
+#define CAMERA_SCCB_I2C_PORT I2C_NUM_1
+#else
+#define CAMERA_SCCB_I2C_PORT I2C_NUM_0
+#endif
+
+static_assert(SERVO_I2C_PORT != CAMERA_SCCB_I2C_PORT,
+              "舵机与摄像头 SCCB 抢同一个 I2C 端口："
+              "改 config.h 的 SERVO_I2C_PORT，或改 CONFIG_SCCB_HARDWARE_I2C_PORT1");
+
 class PlushToyBoard : public WifiBoard {
 private:
     Button boot_button_;
@@ -53,7 +66,9 @@ private:
         config.pin_href = CAMERA_PIN_HREF;
         config.pin_sccb_sda = CAMERA_PIN_SIOD;
         config.pin_sccb_scl = CAMERA_PIN_SIOC;
-        config.sccb_i2c_port = 0;   // 占用 I2C_NUM_0，舵机因此走 I2C_NUM_1
+        // 刻意不设 config.sccb_i2c_port：该字段是死的，sccb-ng.c:123 会用
+        // Kconfig 的 SCCB_I2C_PORT_DEFAULT 无条件覆盖。真正的端口由
+        // CONFIG_SCCB_HARDWARE_I2C_PORT1 决定，见文件顶部的 static_assert。
         config.pin_pwdn = CAMERA_PIN_PWDN;
         config.pin_reset = CAMERA_PIN_RESET;
         config.xclk_freq_hz = XCLK_FREQ_HZ;

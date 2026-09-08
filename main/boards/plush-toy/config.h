@@ -72,11 +72,16 @@
 #define DISPLAY_SPI_MODE     0
 
 // ── 舵机：经 PCA9685 驱动，ESP32 不直接产生 PWM ──
-// 以下数值均为 2026-09-07 实机验证所得，非推算。
-// I2C_NUM_0 已被摄像头 SCCB 占用（见 InitializeCamera 的 sccb_i2c_port），故用 1。
+// 引脚与地址为 2026-09-07 实机验证所得，非推算。
+//
+// 端口选择必须看 Kconfig，不能看 camera_config_t.sccb_i2c_port —— 后者是死字段：
+// sccb-ng.c:123 无条件用 SCCB_I2C_PORT_DEFAULT 覆盖它，而该常量由
+// CONFIG_SCCB_HARDWARE_I2C_PORT1 决定（sccb-ng.c:40-44）。
+// 本工程该选项为 y，即摄像头占 I2C_NUM_1，故舵机走 I2C_NUM_0。
+// plush_toy_board.cc 中有 static_assert 守住这个约束。
 #define SERVO_I2C_SDA_PIN    GPIO_NUM_44   // 排针丝印 RX
 #define SERVO_I2C_SCL_PIN    GPIO_NUM_3
-#define SERVO_I2C_PORT       I2C_NUM_1
+#define SERVO_I2C_PORT       I2C_NUM_0
 #define SERVO_I2C_HZ         100000
 #define PCA9685_ADDR         0x40          // 实测；0x70 是同一芯片的 ALLCALL 广播地址
 
