@@ -10,9 +10,9 @@
 
 **Spec:** `docs/superpowers/specs/2026-09-05-plush-toy-design.md`
 
-**执行状态（2026-09-08）：** PCA9685、动作队列、3 个 MCP 工具、状态反射、emotion 映射和服务端 prompt 均已实现并提交；PCA9685 自检、状态反射和 hug 已有实机证据。`wave_hand`、`cheer`、多情绪联动及模型白名单行为仍需设备恢复联网后端到端验收。下面复选框已按现有证据同步。
+**执行状态（2026-09-08）：** PCA9685、动作队列、3 个 MCP 工具、状态反射、emotion 映射和服务端 prompt 均已实现并提交；PCA9685 自检、状态反射和 hug 已有实机证据。既有服务端日志还证明新 prompt 重启后模型产出不同的白名单情绪，并完成一次 `cheer` 的 LLM→设备 RPC 调用。`wave_hand`、`cheer` 物理动作及 emotion 眼型/手势同时呈现仍需设备实机验收。下面复选框已按现有证据同步。
 
-**实际偏差：** 舵机从计划早期的 ESP32 LEDC/GPIO 直驱改为 PCA9685 100kHz I2C，避免与摄像头 XCLK 抢 LEDC；设备实际 WebSocket 端口为 8010。prompt、服务端 `EMOJI_MAP` 与固件预设已离线核对为完全一致的 21 项，但这不能替代模型运行时验证。
+**实际偏差：** 舵机从计划早期的 ESP32 LEDC/GPIO 直驱改为 PCA9685 100kHz I2C，避免与摄像头 XCLK 抢 LEDC；设备实际 WebSocket 端口为 8010。prompt、服务端 `EMOJI_MAP` 与固件预设已离线核对为完全一致的 21 项，并由重启后两个不同白名单 emoji 的运行样本补证；这仍不替代眼型和机械动作的现场观察。
 
 **前置：** 计划一 Task 1（板型骨架）已完成并提交（`737bdf7`、`83501ef`）。眼睛显示部分（计划一 Task 2–7）与本计划无依赖，可并行或后做。
 
@@ -524,7 +524,7 @@ MCP: Add tool: self.limbs.cheer
 
 - [ ] **Step 3: 实机验证**
 
-> 部分完成：`self.limbs.hug` 已端到端通过；`wave_hand` 与 `cheer` 尚未实测。
+> 部分完成：`self.limbs.hug` 已端到端实机通过；`cheer` 已有服务端调用、设备返回 `true` 的 RPC 证据，但没有独立记录物理动作；`wave_hand` 尚无调用与实物证据。
 
 设备联网后，对它说「跟我挥挥手」。预期：服务端 LLM 调用 `self.limbs.wave_hand`，舵机执行挥手。
 
@@ -717,9 +717,9 @@ void PlushBehavior::OnEmotion(const char* emotion) {
 
 - [ ] **Step 4: 编译烧录，实机验证**
 
-> 编译烧录已完成；仍缺不同 emotion 同时驱动眼型与对应手势的联网实测。
+> 编译烧录已完成。“开心一下”已有 `😂` 回复和 `cheer` 设备 RPC 成功证据；仍缺真屏 `funny` 眼型与物理手势同时呈现的现场观察。
 
-对设备说一句能引发开心回应的话。预期串口打印 `SetEmotion: happy` 并触发 `kCheer`。
+对设备说一句能引发开心回应的话。以现有 `😂` 回复为例，预期串口打印 `SetEmotion: funny` 并触发 `kCheer`。
 
 **若 `SetEmotion` 始终收到 `happy`**：这不是设备端问题，是服务端 prompt 没让 LLM 带 emoji，见 Task 6。
 
@@ -792,7 +792,7 @@ Expected: 输出不含 emoji。若含，说明剥离发生在别处或未生效�
 
 - [ ] **Step 4: 端到端验证**
 
-> `hug` 与“emoji 不被 TTS 朗读”已有证据；仍缺模型稳定使用白名单内不同 emoji，以及 `wave_hand` / `cheer` 的端到端证据。
+> `hug` 与“emoji 不被 TTS 朗读”已有证据。prompt 重启后的同一会话还连续产出白名单内 `😂`、`😌`，并完成 `cheer` 的 LLM→设备 RPC；仍缺 `wave_hand`、`cheer` 物理动作和 emotion 眼型/手势同时呈现的现场证据。
 
 对设备说「你好」，确认：① 服务端日志显示 LLM 回复带 emoji；② 设备串口打印对应的 `SetEmotion`；③ 舵机动作；④ 语音播报不含"笑脸"之类的字。
 
