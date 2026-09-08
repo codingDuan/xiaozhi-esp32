@@ -77,6 +77,7 @@ EyeDisplay::EyeDisplay(esp_lcd_panel_handle_t left, esp_lcd_panel_handle_t right
     {
         Settings s("plush_eye", false);
         EyeRenderer::SetSwapRB(s.GetInt("swap_rb", 0) != 0);
+        theme_selection_ = EyeThemeSelection(static_cast<uint8_t>(s.GetInt("theme_id", 0)));
     }
     base_ = state_ = LookupEmotion("neutral");
     Flush(EyeRenderer::FullRect());
@@ -124,11 +125,12 @@ void EyeDisplay::Flush(DirtyRect r) {
     // 完全对称的眼睛看起来像机器。
     EyeState l = state_;
     l.pupil_x += 0.045f;
-    EyeRenderer::Render(buf_left_, l, EyeThemeCatalog::Get(0), +1, r);
+    const EyeTheme& theme = theme_selection_.theme();
+    EyeRenderer::Render(buf_left_, l, theme, +1, r);
 
     EyeState rr = state_;
     rr.pupil_x -= 0.045f;
-    EyeRenderer::Render(buf_right_, rr, EyeThemeCatalog::Get(0), -1, r);
+    EyeRenderer::Render(buf_right_, rr, theme, -1, r);
 
     BlitInterleaved(r);
 
@@ -232,6 +234,25 @@ void EyeDisplay::SetSwapRB(bool on) {
 }
 
 bool EyeDisplay::swap_rb() const { return EyeRenderer::swap_rb(); }
+
+bool EyeDisplay::ChangeTheme(const char* requested_name, std::string& selected_name) {
+    const std::string_view requested = requested_name != nullptr ? requested_name : "";
+
+    xSemaphoreTake(mutex_, portMAX_DELAY);
+    if (!theme_selection_.Select(requested)) {
+        xSemaphoreGive(mutex_);
+        return false;
+    }
+    selected_name = std::string(theme_selection_.theme().name);
+    const int selected_id = theme_selection_.id();
+    xSemaphoreGive(mutex_);
+
+    Settings settings("plush_eye", true);
+    settings.SetInt("theme_id", selected_id);
+    Flush(EyeRenderer::FullRect());
+    ESP_LOGI(TAG, "眼睛主题 = %s（已存 NVS）", selected_name.c_str());
+    return true;
+}
 
 void EyeDisplay::StartIdleAnimation() {
     if (!available() || buf_left_ == nullptr) {

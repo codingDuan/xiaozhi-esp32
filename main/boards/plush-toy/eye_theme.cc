@@ -44,3 +44,15 @@ int EyeThemeCatalog::Find(std::string_view name) {
     }
     return -1;
 }
+
+bool EyeThemeSelection::Select(std::string_view requested_name) {
+    if (requested_name.empty()) {
+        id_ = EyeThemeCatalog::Next(id_);
+        return true;
+    }
+    const int found = EyeThemeCatalog::Find(requested_name);
+    if (found < 0)
+        return false;
+    id_ = static_cast<uint8_t>(found);
+    return true;
+}

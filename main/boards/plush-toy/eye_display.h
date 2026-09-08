@@ -2,12 +2,14 @@
 
 #include "display.h"
 #include "eye_renderer.h"
+#include "eye_theme.h"
 
 #include <esp_lcd_panel_ops.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
 #include <atomic>
+#include <string>
 
 class PlushBehavior;
 
@@ -46,6 +48,9 @@ public:
     void SetSwapRB(bool on);
     bool swap_rb() const;
 
+    // 空名称表示顺序切换；非空名称必须是目录中的规范主题名。
+    bool ChangeTheme(const char* requested_name, std::string& selected_name);
+
     bool available() const { return left_ != nullptr && right_ != nullptr; }
 
 private:
@@ -69,6 +74,7 @@ private:
 
     EyeState state_;
     EyeState base_;  // 眨眼/微动的基准，情绪切换时更新
+    EyeThemeSelection theme_selection_;
     // Idle animation runs in its own FreeRTOS task while application callbacks may
     // switch overlays, so mode must not be a plain cross-task variable.
     std::atomic<Mode> mode_{Mode::kEyes};
