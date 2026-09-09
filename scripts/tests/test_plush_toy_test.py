@@ -1,6 +1,7 @@
 import importlib.util
 import unittest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -38,3 +39,19 @@ class PlushToyTextTestCliTests(unittest.TestCase):
                 "self.limbs.get_diagnostics",
             ],
         )
+
+    @patch("urllib.request.build_opener")
+    @patch("urllib.request.ProxyHandler")
+    def test_loopback_requests_bypass_proxy(self, proxy_handler, build_opener):
+        response = MagicMock()
+        response.read.return_value = b'{"devices": []}'
+        opener = MagicMock()
+        opener.open.return_value.__enter__.return_value = response
+        build_opener.return_value = opener
+
+        self.assertEqual(
+            plush_toy_test.request_json("http://127.0.0.1:8003/debug/device-mcp/devices"),
+            {"devices": []},
+        )
+        proxy_handler.assert_called_once_with({})
+        build_opener.assert_called_once()
