@@ -51,26 +51,25 @@ esp_err_t i2c_master_transmit_receive(i2c_master_dev_handle_t, const uint8_t* wr
     return ESP_OK;
 }
 
-static void TestFirstPulseAfterAllOffRestoresOutputs() {
+static void TestAllOffUsesOnlyServoChannels() {
     FakeI2cBus bus;
     Pca9685 pca(&bus, 0x40, 100000);
 
     g_writes.clear();
     pca.AllOff();
-    CHECK(g_writes == std::vector<std::vector<uint8_t>>({{0xFD, 0x10}}),
-          "AllOff should address the write-only ALL_LED_OFF_H register directly");
+    CHECK(g_writes == std::vector<std::vector<uint8_t>>({{0x09, 0x10}, {0x0D, 0x10}}),
+          "AllOff must disable channels 0 and 1 individually, never the global output gate");
     g_writes.clear();
     pca.SetPulseUs(0, 1500);
     pca.SetPulseUs(1, 1500);
 
-    CHECK(g_writes.size() == 3,
-          "first pulse after AllOff should restore outputs once, then write both channels");
-    if (g_writes.size() != 3)
+    CHECK(g_writes.size() == 2, "each pulse must directly restore only its own channel");
+    if (g_writes.size() != 2)
         return;
-    CHECK(g_writes[0] == std::vector<uint8_t>({0xFD, 0x00}),
-          "output restore should address ALL_LED_OFF_H directly");
-    CHECK(g_writes[1][0] == 0x06, "first pulse should target channel 0");
-    CHECK(g_writes[2][0] == 0x0A, "second pulse should target channel 1");
+    CHECK(g_writes[0][0] == 0x06, "first pulse should target channel 0");
+    CHECK(g_writes[1][0] == 0x0A, "second pulse should target channel 1");
+    CHECK((g_writes[0][4] & 0x10) == 0, "channel 0 pulse must clear its full-off bit");
+    CHECK((g_writes[1][4] & 0x10) == 0, "channel 1 pulse must clear its full-off bit");
 }
 
 static void TestConstructorSoftwareResetsPca() {
@@ -104,8 +103,8 @@ static void TestDiagnosticsReportsOutputRegisters() {
     CHECK(diagnostics.find("mode1=0xA1") != std::string::npos, "diagnostics should report MODE1");
     CHECK(diagnostics.find("prescale=121") != std::string::npos,
           "diagnostics should report PRE_SCALE");
-    CHECK(diagnostics.find("all_off_h=write_only") != std::string::npos,
-          "diagnostics should not report a fabricated value for a write-only register");
+    CHECK(diagnostics.find("output_mode=per_channel") != std::string::npos,
+          "diagnostics should report the per-channel output strategy");
     CHECK(diagnostics.find("ch0_off=307") != std::string::npos,
           "diagnostics should decode channel 0 OFF count");
     CHECK(diagnostics.find("ch1_off=308") != std::string::npos,
@@ -127,7 +126,7 @@ static void TestDiagnosticsPreservesLastWriteFailure() {
 
 int main() {
     TestConstructorSoftwareResetsPca();
-    TestFirstPulseAfterAllOffRestoresOutputs();
+    TestAllOffUsesOnlyServoChannels();
     TestDiagnosticsReportsOutputRegisters();
     TestDiagnosticsPreservesLastWriteFailure();
 

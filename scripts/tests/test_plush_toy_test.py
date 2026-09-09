@@ -14,29 +14,23 @@ SPEC.loader.exec_module(plush_toy_test)
 
 
 class PlushToyTextTestCliTests(unittest.TestCase):
-    def test_wave_maps_to_device_tool(self):
+    def test_wave_maps_to_http_action(self):
         self.assertEqual(
             plush_toy_test.command_to_call(["wave", "--side", "left", "--times", "2"]),
-            ("self.limbs.wave_hand", {"side": "left", "times": 2}),
+            ("wave", {"side": "left", "times": 2}),
         )
 
-    def test_eye_theme_maps_to_device_tool(self):
+    def test_eye_theme_maps_to_http_action(self):
         self.assertEqual(
             plush_toy_test.command_to_call(["eyes", "dragon-amber"]),
-            ("self.eyes.change_theme", {"theme": "dragon-amber"}),
+            ("eyes", {"theme": "dragon-amber"}),
         )
 
     def test_regression_order_is_safe_and_deterministic(self):
         self.assertEqual(
             [tool for tool, _ in plush_toy_test.REGRESSION_CASES],
             [
-                "self.eyes.change_theme",
-                "self.limbs.wave_hand",
-                "self.limbs.wave_hand",
-                "self.limbs.wave_hand",
-                "self.limbs.hug",
-                "self.limbs.cheer",
-                "self.limbs.get_diagnostics",
+                "eyes", "wave", "wave", "wave", "hug", "cheer", "diagnostics",
             ],
         )
 
@@ -55,3 +49,16 @@ class PlushToyTextTestCliTests(unittest.TestCase):
         )
         proxy_handler.assert_called_once_with({})
         build_opener.assert_called_once()
+
+    @patch.object(plush_toy_test, "request_json", return_value={"accepted": True})
+    def test_call_posts_action_to_board_local_endpoint(self, request_json):
+        result = plush_toy_test.call_device_tool(
+            "http://172.20.10.2:8181", "wave", {"side": "left", "times": 1}
+        )
+
+        self.assertEqual(result, {"accepted": True})
+        request_json.assert_called_once_with(
+            "http://172.20.10.2:8181/test/v1/actions",
+            "POST",
+            {"action": "wave", "arguments": {"side": "left", "times": 1}},
+        )

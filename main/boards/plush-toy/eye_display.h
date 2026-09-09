@@ -4,6 +4,7 @@
 #include "eye_renderer.h"
 #include "eye_theme.h"
 
+#include <esp_lcd_panel_io.h>
 #include <esp_lcd_panel_ops.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -19,7 +20,9 @@ class PlushBehavior;
 // 让它们落到 display.cc:25-37 的基类实现打到串口 —— 移除主屏后这就是调试通道。
 class EyeDisplay : public Display {
 public:
-    EyeDisplay(esp_lcd_panel_handle_t left, esp_lcd_panel_handle_t right);
+    // io_left / io_right 只用于登记传输完成回调，见 BlitInterleaved。
+    EyeDisplay(esp_lcd_panel_handle_t left, esp_lcd_panel_handle_t right,
+               esp_lcd_panel_io_handle_t io_left, esp_lcd_panel_io_handle_t io_right);
     virtual ~EyeDisplay();
 
     virtual void SetEmotion(const char* emotion) override;
@@ -71,6 +74,11 @@ private:
     // 单块 240x240 RGB565 仅 115KB，8MB PSRAM 下为正确性花这份内存很划算。
     uint16_t* buf_left_ = nullptr;
     uint16_t* buf_right_ = nullptr;
+
+    // 传输完成计数信号量。每条 draw_bitmap 的色彩传输完成时由 ISR give 一次。
+    SemaphoreHandle_t blit_done_ = nullptr;
+    static bool OnColorTransDone(esp_lcd_panel_io_handle_t io,
+                                 esp_lcd_panel_io_event_data_t* event, void* ctx);
 
     EyeState state_;
     EyeState base_;  // 眨眼/微动的基准，情绪切换时更新

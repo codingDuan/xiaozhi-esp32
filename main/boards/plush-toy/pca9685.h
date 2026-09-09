@@ -41,6 +41,5 @@ private:
     bool ReadRegisters(uint8_t reg, uint8_t* data, size_t size);
 
     i2c_master_dev_handle_t dev_ = nullptr;
-    bool outputs_disabled_ = false;
     esp_err_t last_write_error_ = ESP_OK;
 };

@@ -18,6 +18,8 @@
 #include "mcp_server.h"
 #include "pca9685.h"
 #include "plush_behavior.h"
+#include "plush_toy_test_server.h"
+#include "settings.h"
 #include "wifi_board.h"
 
 #include <esp_lcd_gc9a01.h>
@@ -27,6 +29,9 @@
 #include <driver/i2c_master.h>
 #include <driver/spi_common.h>
 #include <esp_log.h>
+#include <cJSON.h>
+
+#include <algorithm>
 
 #define TAG "PlushToyBoard"
 
@@ -51,6 +56,58 @@ private:
     Pca9685* pca_ = nullptr;
     LimbController* limbs_ = nullptr;
     PlushBehavior* behavior_ = nullptr;
+    PlushToyTestServer* test_server_ = nullptr;
+
+    static std::string ExtractWebsocketHost(const std::string& url) {
+        const auto scheme_end = url.find("://");
+        const auto host_begin = scheme_end == std::string::npos ? 0 : scheme_end + 3;
+        const auto host_end = url.find(':', host_begin);
+        return url.substr(
+            host_begin, host_end == std::string::npos ? std::string::npos : host_end - host_begin);
+    }
+
+    void ScheduleTestAction(const std::string& action, const std::string& arguments_json) {
+        Application::GetInstance().Schedule([this, action, arguments_json]() {
+            cJSON* arguments = cJSON_Parse(arguments_json.c_str());
+            if (action == "wave" && limbs_ != nullptr) {
+                const auto* side = cJSON_GetObjectItem(arguments, "side");
+                const auto* times = cJSON_GetObjectItem(arguments, "times");
+                const int count = std::clamp(cJSON_IsNumber(times) ? times->valueint : 1, 1, 5);
+                const std::string value = cJSON_IsString(side) ? side->valuestring : "both";
+                limbs_->Enqueue(value == "left"    ? Gesture::kWaveLeft
+                                : value == "right" ? Gesture::kWaveRight
+                                                   : Gesture::kWaveBoth,
+                                count);
+            } else if (action == "hug" && limbs_ != nullptr) {
+                limbs_->Enqueue(Gesture::kHug, 1);
+            } else if (action == "cheer" && limbs_ != nullptr) {
+                const auto* times = cJSON_GetObjectItem(arguments, "times");
+                limbs_->Enqueue(Gesture::kCheer,
+                                std::clamp(cJSON_IsNumber(times) ? times->valueint : 1, 1, 5));
+            } else if (action == "eyes" && display_ != nullptr) {
+                const auto* theme = cJSON_GetObjectItem(arguments, "theme");
+                std::string selected;
+                display_->ChangeTheme(cJSON_IsString(theme) ? theme->valuestring : "", selected);
+            } else if (action == "diagnostics" && pca_ != nullptr) {
+                ESP_LOGI(TAG, "test diagnostics: %s", pca_->Diagnostics().c_str());
+            }
+            if (arguments != nullptr)
+                cJSON_Delete(arguments);
+        });
+    }
+
+    void InitializeTestServer() {
+        if (test_server_ != nullptr)
+            return;
+        Settings settings("websocket", false);
+        const auto host = ExtractWebsocketHost(settings.GetString("url"));
+        test_server_ = new PlushToyTestServer(
+            host, [this](const std::string& action, const std::string& arguments) {
+                ScheduleTestAction(action, arguments);
+            });
+        if (!test_server_->Start())
+            ESP_LOGW(TAG, "独立 HTTP 测试通道未启动");
+    }
 
     // 舵机链路的任何一步失败都不得让设备崩溃 —— 没有手臂的玩具仍应能正常对话。
     // 因此全部失败路径只记日志并让 pca_ 保持 nullptr，不用 ESP_ERROR_CHECK。
@@ -211,7 +268,8 @@ private:
                     [pca](const PropertyList&) -> ReturnValue { return pca->Diagnostics(); });
     }
 
-    esp_lcd_panel_handle_t NewPanel(gpio_num_t cs, bool owns_reset) {
+    esp_lcd_panel_handle_t NewPanel(gpio_num_t cs, bool owns_reset,
+                                    esp_lcd_panel_io_handle_t* out_io) {
         esp_lcd_panel_io_handle_t io = nullptr;
         esp_lcd_panel_io_spi_config_t io_cfg = {};
         io_cfg.cs_gpio_num = cs;
@@ -243,17 +301,19 @@ private:
         esp_lcd_panel_mirror(panel, DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y);
         esp_lcd_panel_disp_on_off(panel, true);
         ESP_LOGI(TAG, "CS=GPIO%d 面板就绪", cs);
+        *out_io = io;
         return panel;
     }
 
     void InitializeEyes() {
-        auto left = NewPanel(DISPLAY_CS_LEFT_PIN, true);
-        auto right = NewPanel(DISPLAY_CS_RIGHT_PIN, false);
+        esp_lcd_panel_io_handle_t io_left = nullptr, io_right = nullptr;
+        auto left = NewPanel(DISPLAY_CS_LEFT_PIN, true, &io_left);
+        auto right = NewPanel(DISPLAY_CS_RIGHT_PIN, false, &io_right);
         if (left == nullptr || right == nullptr) {
             ESP_LOGE(TAG, "眼睛不可用，设备其余功能不受影响");
             return;
         }
-        display_ = new EyeDisplay(left, right);
+        display_ = new EyeDisplay(left, right, io_left, io_right);
     }
 
     void InitializeButtons() {
@@ -285,6 +345,16 @@ public:
         }
 
         InitializeTools();
+    }
+
+    void SetNetworkEventCallback(NetworkEventCallback callback) override {
+        WifiBoard::SetNetworkEventCallback(
+            [this, callback = std::move(callback)](NetworkEvent event, const std::string& data) {
+                if (event == NetworkEvent::Connected) {
+                    Application::GetInstance().Schedule([this]() { InitializeTestServer(); });
+                }
+                callback(event, data);
+            });
     }
 
     virtual Led* GetLed() override {

@@ -5,12 +5,12 @@
 
 namespace {
 int failures = 0;
-#define CHECK(condition, message) \
-    do {                          \
-        if (!(condition)) {       \
+#define CHECK(condition, message)                        \
+    do {                                                 \
+        if (!(condition)) {                              \
             std::fprintf(stderr, "FAIL: %s\n", message); \
-            ++failures;           \
-        }                         \
+            ++failures;                                  \
+        }                                                \
     } while (0)
 }  // namespace
 
@@ -20,18 +20,23 @@ int main() {
         scheduled_action = action;
     });
 
+    CHECK(channel.enabled(), "numeric IPv4 host must enable the channel");
     CHECK(channel.AuthorizePeer("172.20.10.14"), "configured host must be authorized");
     CHECK(!channel.AuthorizePeer("172.20.10.15"), "other LAN peer must be rejected");
     CHECK(channel.Dispatch("wave", R"({"side":"left","times":1})"),
           "whitelisted wave must dispatch");
     CHECK(scheduled_action == "wave", "wave must reach the scheduler");
     CHECK(!channel.Dispatch("self.reboot", "{}"), "non-test action must be rejected");
-    CHECK(channel.StatusJson().find("\"wave\"") != std::string::npos,
-          "status must list wave");
+    CHECK(channel.StatusJson().find("\"wave\"") != std::string::npos, "status must list wave");
     CHECK(channel.StatusJson().find("self.reboot") == std::string::npos,
           "status must not expose reboot");
 
-    if (failures) return 1;
+    TestHttpChannel disabled("example.com", [](const std::string&, const std::string&) {});
+    CHECK(!disabled.enabled(), "hostname must disable the channel");
+    CHECK(!disabled.AuthorizePeer("172.20.10.14"), "disabled channel must reject every peer");
+
+    if (failures)
+        return 1;
     std::puts("all TestHttpChannel tests passed");
     return 0;
 }

@@ -98,29 +98,31 @@ Vision:    http://MacBook-Pro-107.local:8003/mcp/vision/explain
 
 ## 文本动作测试
 
-本地服务启动后，文本工具会通过仅接受 `127.0.0.1` 的调试桥直接调用在线板子的 MCP 工具，不经过唤醒词、语音识别或大模型。先确认板子在线：
+固件在 TCP `8181` 提供一个仅用于验收的独立 HTTP 通道；它不经过唤醒词、语音识别、大模型、WebSocket 或本地服务。因此板子只要已连上 Wi-Fi，即使没有语音会话也可以测试。通道只接受其持久化 `websocket.url` 中的 IPv4 主机发起的请求；当前开发机地址变更后，应让设备重新获取该配置再测试。
+
+先检查通道状态（将地址替换为板子的局域网 IP）：
 
 ```sh
-python3 tools/plush_toy_test.py devices
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 status
 ```
 
 单项测试示例：
 
 ```sh
-python3 tools/plush_toy_test.py wave --side left
-python3 tools/plush_toy_test.py hug
-python3 tools/plush_toy_test.py cheer --times 3
-python3 tools/plush_toy_test.py eyes dragon-amber
-python3 tools/plush_toy_test.py diagnostics
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 wave --side left
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 hug
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 cheer --times 3
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 eyes dragon-amber
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 diagnostics
 ```
 
-执行完整的实机 MCP 回归：
+执行完整的实机动作回归：
 
 ```sh
-python3 tools/plush_toy_test.py run-regression
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 run-regression
 ```
 
-只有一块板子在线时会自动选中；多块板子时，每个命令均需增加 `--device-id <ID>`。命令成功表示服务端、MCP 协议和固件动作处理成功；舵机是否真正转动仍需目视验收。
+`--device-url` 默认是当前开发板地址 `http://172.20.10.2:8181`，但建议每次明确传入。`{"accepted":true}` 表示请求已由板子的应用任务接收和排队；舵机是否真正转动、眼睛是否切换仍需目视验收。
 
 ## 验证
 

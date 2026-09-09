@@ -64,9 +64,24 @@ inline uint32_t RandRange(uint32_t lo, uint32_t hi) { return lo + (esp_random() 
 
 }  // namespace
 
-EyeDisplay::EyeDisplay(esp_lcd_panel_handle_t left, esp_lcd_panel_handle_t right)
+// ISR 上下文。只 give 一次信号量，不做别的。
+bool EyeDisplay::OnColorTransDone(esp_lcd_panel_io_handle_t, esp_lcd_panel_io_event_data_t*,
+                                  void* ctx) {
+    auto* self = static_cast<EyeDisplay*>(ctx);
+    BaseType_t woken = pdFALSE;
+    xSemaphoreGiveFromISR(self->blit_done_, &woken);
+    return woken == pdTRUE;
+}
+
+EyeDisplay::EyeDisplay(esp_lcd_panel_handle_t left, esp_lcd_panel_handle_t right,
+                       esp_lcd_panel_io_handle_t io_left, esp_lcd_panel_io_handle_t io_right)
     : left_(left), right_(right) {
     mutex_ = xSemaphoreCreateMutex();
+    // 上限取整屏交错传输的条数：ceil(240/16) * 2 只眼 = 30，留一倍余量
+    blit_done_ = xSemaphoreCreateCounting(64, 0);
+    const esp_lcd_panel_io_callbacks_t cbs = {.on_color_trans_done = OnColorTransDone};
+    esp_lcd_panel_io_register_event_callbacks(io_left, &cbs, this);
+    esp_lcd_panel_io_register_event_callbacks(io_right, &cbs, this);
     const size_t n = (size_t)EyeRenderer::kSize * EyeRenderer::kSize;
     buf_left_ = (uint16_t*)heap_caps_malloc(n * 2, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     buf_right_ = (uint16_t*)heap_caps_malloc(n * 2, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
@@ -91,6 +106,8 @@ EyeDisplay::~EyeDisplay() {
         heap_caps_free(buf_right_);
     if (mutex_)
         vSemaphoreDelete(mutex_);
+    if (blit_done_)
+        vSemaphoreDelete(blit_done_);
 }
 
 bool EyeDisplay::Lock(int timeout_ms) {
@@ -148,13 +165,27 @@ void EyeDisplay::Flush(DirtyRect r) {
 // 眨眼的脏矩形约 204x204 = 83KB，10MHz 下单眼传输约 66ms。若顺序传输，
 // 右眼会整整落后左眼 66ms，而一次眨眼总共才 150ms —— 肉眼可见的错位（实测）。
 // 按条交错后最大偏差降到一条（约 6ms），看起来就是同时眨。
+//
+// 【必须等传完再返回】
+// draw_bitmap 是异步的，只把传输排进队列就返回。若不等待，下一帧的 Render 会在
+// DMA 仍在读 PSRAM 帧缓冲时把它改写。左眼总是先渲染，于是它更早被改掉，两只眼睛
+// 显示出不同帧的眼睑位置 —— 表现为眨眼时左右有先后（实测）。
 void EyeDisplay::BlitInterleaved(DirtyRect r) {
     constexpr int kStripRows = 16;
+    int pending = 0;
     for (int y = 0; y < r.h; y += kStripRows) {
         const int h = (y + kStripRows <= r.h) ? kStripRows : (r.h - y);
         const size_t off = (size_t)y * r.w;
         esp_lcd_panel_draw_bitmap(left_, r.x, r.y + y, r.x + r.w, r.y + y + h, buf_left_ + off);
         esp_lcd_panel_draw_bitmap(right_, r.x, r.y + y, r.x + r.w, r.y + y + h, buf_right_ + off);
+        pending += 2;
+    }
+    // 超时兜底：宁可漏掉一次等待，也不能让显示任务永久卡死
+    while (pending-- > 0) {
+        if (xSemaphoreTake(blit_done_, pdMS_TO_TICKS(500)) != pdTRUE) {
+            ESP_LOGW(TAG, "等待屏幕传输完成超时，剩余 %d 条", pending + 1);
+            break;
+        }
     }
 }
 
@@ -280,15 +311,18 @@ void EyeDisplay::IdleLoop() {
         elapsed += kTick;
 
         if (elapsed >= next_blink) {
-            // 三角波：睁 → 闭 → 睁，全程约 150ms
-            for (int i = 0; i < 6; i++) {
-                float k = (i < 3) ? (i / 2.0f) : ((5 - i) / 2.0f);
+            // 闭得快、睁得慢，真实眨眼就是这个节奏。
+            // 每一帧都是 166KB 的双眼同步传输，帧数直接等于时长：三帧太跳，
+            // 五帧顺，再多就拖了。原来是 6 帧三角波外加每帧 25ms 固定延时，
+            // BlitInterleaved 改成等传输完成后那 25ms 纯属叠加，已去掉。
+            static const float kBlinkPhase[] = {0.70f, 1.0f, 0.80f, 0.45f, 0.0f};
+            for (float k : kBlinkPhase) {
                 EyeState s = base_;
                 s.pupil_x += roam_x;
                 s.pupil_y += roam_y;
                 s.openness = base_.openness * (1.0f - k) + 0.04f * k;
                 SetEyeState(s);
-                vTaskDelay(pdMS_TO_TICKS(25));
+                taskYIELD();
             }
             elapsed = 0;
             next_blink = RandRange(2500, 6000);

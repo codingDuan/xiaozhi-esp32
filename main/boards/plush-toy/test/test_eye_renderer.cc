@@ -33,6 +33,14 @@ static uint16_t At(const std::vector<uint16_t>& b, int x, int y) {
     return b[y * EyeRenderer::kSize + x];
 }
 
+// 近似亮度，0~255。RGB565 的整数大小不是亮度序，直接比大小会把暗虹膜判成比瞳孔还暗。
+static int Lum(uint16_t c) {
+    const int r = ((c >> 11) & 0x1F) * 255 / 31;
+    const int g = ((c >> 5) & 0x3F) * 255 / 63;
+    const int b = (c & 0x1F) * 255 / 31;
+    return (r * 30 + g * 59 + b * 11) / 100;
+}
+
 static int CountLit(const std::vector<uint16_t>& b) {
     int n = 0;
     for (uint16_t v : b) {
@@ -130,8 +138,10 @@ static void TestPupilFollowsOffset() {
     s.pupil_x = 0.8f;
     EyeRenderer::SetSwapRB(false);
     auto b = RenderFull(s, +1);
-    CHECK(At(b, 120, 120) != 0x0041, "瞳孔右移后，屏心不应再是瞳孔");
-    CHECK(At(b, 149, 120) == 0x0041, "瞳孔应出现在偏右位置");
+    // 抖动会让瞳孔在最低位上抖 1 个台阶，因此判亮度关系而不是判某个确定值
+    CHECK(Lum(At(b, 149, 120)) < 16, "瞳孔应出现在偏右位置，那里应当接近黑");
+    CHECK(Lum(At(b, 120, 120)) > Lum(At(b, 149, 120)) + 32,
+          "瞳孔右移后，屏心应是明显更亮的虹膜");
 }
 
 // 只渲染局部矩形时，输出必须与整屏渲染的对应区域一致（脏矩形刷新的正确性前提）

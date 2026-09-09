@@ -58,7 +58,12 @@
 
 #define DISPLAY_SPI_HOST      SPI3_HOST
 // 面包板飞线 + 双屏并联，先跑通再提速；上限 20MHz
-#define DISPLAY_PCLK_HZ       (10 * 1000 * 1000)
+//
+// 眨眼的脏矩形 204x204、双眼合计 166KB，帧时长就是传输时长，10MHz 下一帧 133ms，
+// 肉眼是慢动作。20MHz 实测干净无花点，再提到 40MHz —— SPI3 在 S3 上没有 IOMUX，
+// 走 GPIO matrix 的硬上限就是 40MHz，到顶了。一帧降到 33ms，五帧眨眼约 200ms。
+// 若屏上出现花点、撕裂或颜色错位，退回 20MHz（已实测稳定）。
+#define DISPLAY_PCLK_HZ       (40 * 1000 * 1000)
 
 // GC9A01 240x240 圆屏，硬编码不走 Kconfig 的 DISPLAY_LCD_TYPE choice
 // （那个 choice 绑死在特定板型上，改它的依赖列表会污染其他板）

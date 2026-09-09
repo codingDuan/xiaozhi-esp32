@@ -12,7 +12,6 @@ namespace {
 constexpr uint8_t kRegMode1 = 0x00;
 constexpr uint8_t kRegMode2 = 0x01;
 constexpr uint8_t kRegLed0OnL = 0x06;
-constexpr uint8_t kRegAllLedOffH = 0xFD;
 constexpr uint8_t kRegPrescale = 0xFE;
 
 constexpr uint8_t kMode1Restart = 0x80;
@@ -24,6 +23,7 @@ constexpr uint8_t kMode2OutDrv = 0x04;
 constexpr int kPwmPeriodUs = 20000;  // 50Hz
 constexpr int kPwmSteps = 4096;      // 12 位分辨率
 constexpr int kTimeoutMs = 1000;
+constexpr int kServoChannelCount = 2;
 
 bool SoftwareReset(i2c_master_bus_handle_t bus, uint32_t scl_hz) {
     i2c_device_config_t cfg = {};
@@ -117,10 +117,9 @@ std::string Pca9685::Diagnostics() {
     uint16_t ch1_off = channels[6] | ((channels[7] & 0x0F) << 8);
     char result[160];
     std::snprintf(result, sizeof(result),
-                  "mode1=0x%02X mode2=0x%02X prescale=%u all_off_h=write_only "
-                  "ch0_off=%u ch1_off=%u tracked_disabled=%s last_write_error=%s",
-                  mode1, mode2, prescale, ch0_off, ch1_off, outputs_disabled_ ? "true" : "false",
-                  esp_err_to_name(last_write_error_));
+                  "mode1=0x%02X mode2=0x%02X prescale=%u output_mode=per_channel "
+                  "ch0_off=%u ch1_off=%u last_write_error=%s",
+                  mode1, mode2, prescale, ch0_off, ch1_off, esp_err_to_name(last_write_error_));
     return result;
 }
 
@@ -158,13 +157,6 @@ bool Pca9685::Init(int freq_hz) {
 void Pca9685::SetPulseUs(int ch, int us) {
     if (dev_ == nullptr)
         return;
-    if (outputs_disabled_) {
-        if (!WriteReg(kRegAllLedOffH, 0x00)) {
-            ESP_LOGE(TAG, "恢复输出失败");
-            return;
-        }
-        outputs_disabled_ = false;
-    }
     uint16_t off = (uint16_t)((us * kPwmSteps) / kPwmPeriodUs);
     // 一路占 4 个连续寄存器，用突发写一次发完，避免中途被打断产生半个脉宽
     uint8_t buf[5] = {
@@ -184,11 +176,14 @@ void Pca9685::SetPulseUs(int ch, int us) {
 void Pca9685::AllOff() {
     if (dev_ == nullptr)
         return;
-    // ALL_LED_OFF_H 的 bit4 置 1 表示全部通道完全关闭
-    if (WriteReg(kRegAllLedOffH, 0x10)) {
-        outputs_disabled_ = true;
-    } else {
-        outputs_disabled_ = false;
-        ESP_LOGE(TAG, "关闭输出失败");
+
+    // 不使用 ALL_LED_OFF_H 的全局关闭闸门。该寄存器是写入即生效且不可回读，
+    // 一旦恢复写入丢失会静默所有通道。逐通道置 FULL_OFF 后，下一次 SetPulseUs 的
+    // 连续四字节写会天然清除该通道的 bit4 并恢复 PWM。
+    for (int ch = 0; ch < kServoChannelCount; ++ch) {
+        const uint8_t off_h = kRegLed0OnL + 4 * ch + 3;
+        if (!WriteReg(off_h, 0x10)) {
+            ESP_LOGE(TAG, "关闭通道 %d 输出失败", ch);
+        }
     }
 }
