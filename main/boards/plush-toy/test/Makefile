@@ -8,12 +8,13 @@ CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -I.. -Istubs
 
 .PHONY: test clean
 
-test: test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685
+test: test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel
 	./test_eye_renderer
 	./test_eye_theme
 	./test_overlay_qr
 	./test_overlay_renderer
 	./test_pca9685
+	./test_http_channel
 
 test_eye_renderer: test_eye_renderer.cc ../eye_renderer.cc ../eye_renderer.h ../eye_theme.cc ../eye_theme.h
 	$(CXX) $(CXXFLAGS) -o $@ test_eye_renderer.cc ../eye_renderer.cc ../eye_theme.cc -lm
@@ -30,5 +31,8 @@ test_overlay_renderer: test_overlay_renderer.cc ../overlay_renderer.cc ../overla
 test_pca9685: test_pca9685.cc ../pca9685.cc ../pca9685.h
 	$(CXX) $(CXXFLAGS) -o $@ test_pca9685.cc ../pca9685.cc
 
+test_http_channel: test_http_channel.cc ../test_http_channel.cc ../test_http_channel.h
+	$(CXX) $(CXXFLAGS) -o $@ test_http_channel.cc ../test_http_channel.cc
+
 clean:
-	rm -f test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 *.ppm
+	rm -f test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel *.ppm
