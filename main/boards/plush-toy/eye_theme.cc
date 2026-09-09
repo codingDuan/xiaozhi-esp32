@@ -1,5 +1,7 @@
 #include "eye_theme.h"
 
+#include "eye_iris_tex.h"
+
 namespace {
 
 constexpr EyeTheme kThemes[] = {
@@ -23,6 +25,11 @@ constexpr EyeTheme kThemes[] = {
     {17, "cat-jade", 0xA7F3, 0x05A0, ScleraStyle::kLight, PupilShape::kHorizontalSlit},
     {18, "cat-ice", 0xE7FF, 0x3DFF, ScleraStyle::kLight, PupilShape::kHorizontalSlit},
     {19, "cat-rose", 0xFCB8, 0x980F, ScleraStyle::kLight, PupilShape::kHorizontalSlit},
+    // 照片纹理虹膜，来自 Adafruit Uncanny_Eyes。iris_inner/outer 仅在
+    // 无巩膜主题下才会用到，这里留着与前面保持同一初始化形状。
+    {20, "uncanny-human", 0x8B4A, 0x4208, ScleraStyle::kLight, PupilShape::kRound, &kIrisHuman},
+    {21, "uncanny-dragon", 0xFF08, 0xA000, ScleraStyle::kDark, PupilShape::kVerticalSlit,
+     &kIrisDragon},
 };
 
 static_assert(sizeof(kThemes) / sizeof(kThemes[0]) == EyeThemeCatalog::Count());

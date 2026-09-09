@@ -1,4 +1,5 @@
 #include "eye_renderer.h"
+#include "eye_iris_tex.h"
 #include "eye_theme.h"
 
 #include <math.h>
@@ -219,6 +220,7 @@ void EyeRenderer::Render(uint16_t* out, const EyeState& s, const EyeTheme& theme
 
     const LidGeom lids = MakeLidGeom(s, side);
     const LidProfile& prof = Profile();
+    const IrisTexture* tex = theme.iris_tex;
     const Rgb iris_in = Unpack(theme.iris_inner);
     const Rgb iris_out = Unpack(theme.iris_outer);
     const Rgb limbal = Scale(iris_out, kLimbalDark);
@@ -269,9 +271,22 @@ void EyeRenderer::Render(uint16_t* out, const EyeState& s, const EyeTheme& theme
                 const float dp = sqrtf(dp2);
                 const float ia = Cov(iris_r - dp);
                 const float k = Clamp01(dp / iris_r);
-                Rgb ic = Mix(iris_in, iris_out, k);
-                const float lr = Clamp01((k - kLimbalStart) / (1.0f - kLimbalStart));
-                ic = Mix(ic, limbal, lr * lr * (3.0f - 2.0f * lr));   // smoothstep
+                Rgb ic;
+                if (tex != nullptr) {
+                    // 极坐标采样。atan2f 只在虹膜盘内算，那约占脏矩形的一成半。
+                    // 纹理外缘自带角膜缘环，不再叠程序化的那一圈。
+                    float a = atan2f(dyp, dxp) * (0.5f / (float)M_PI);
+                    if (a < 0.0f) a += 1.0f;
+                    int ai = (int)(a * (float)tex->angles);
+                    if (ai >= tex->angles) ai = tex->angles - 1;
+                    int ri = (int)(k * (float)(tex->radii - 1) + 0.5f);
+                    if (ri >= tex->radii) ri = tex->radii - 1;
+                    ic = Unpack(tex->data[(size_t)ri * tex->angles + ai]);
+                } else {
+                    ic = Mix(iris_in, iris_out, k);
+                    const float lr = Clamp01((k - kLimbalStart) / (1.0f - kLimbalStart));
+                    ic = Mix(ic, limbal, lr * lr * (3.0f - 2.0f * lr));   // smoothstep
+                }
                 c = Mix(c, ic, ia);
             }
 

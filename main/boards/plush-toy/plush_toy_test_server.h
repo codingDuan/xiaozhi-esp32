@@ -3,6 +3,7 @@
 #include "test_http_channel.h"
 
 #include <esp_http_server.h>
+#include <cstddef>
 
 #include <string>
 

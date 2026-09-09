@@ -10,6 +10,7 @@
 #include <esp_random.h>
 #include <freertos/task.h>
 
+#include <algorithm>
 #include <cstring>
 #include <string>
 
@@ -296,50 +297,79 @@ void EyeDisplay::StartIdleAnimation() {
 
 void EyeDisplay::IdleTaskEntry(void* arg) { static_cast<EyeDisplay*>(arg)->IdleLoop(); }
 
-// 眨眼与瞳孔游走。这是"有生命感"的主要来源，且完全本地、零延迟、断网可用。
+// 眨眼与注视。这是"有生命感"的主要来源，且完全本地、零延迟、断网可用。
+//
+// 【眼睛不会漂，只会跳】
+// 原来是每 50ms 朝目标做一次指数平滑（系数 0.06，时间常数约 800ms），瞳孔
+// 一直在缓慢滑动，看着发飘、发呆。真实眼球运动是扫视：七十到一百四十毫秒内
+// 快速跳到新目标，然后完全静止注视，其间只有极小幅度的微扫视。
+// 这个节奏顺带把待机 SPI 流量降到接近零 —— 注视期一帧都不重绘，
+// 而原来每 50ms 就要传一次瞳孔区域。
 void EyeDisplay::IdleLoop() {
-    uint32_t next_blink = RandRange(2500, 6000);
-    uint32_t next_roam = RandRange(1500, 4000);
-    uint32_t elapsed = 0;
-    const uint32_t kTick = 50;
+    const int32_t kTick = 50;
 
-    float roam_x = 0.0f, roam_y = 0.0f;
-    float target_x = 0.0f, target_y = 0.0f;
+    float gaze_x = 0.0f, gaze_y = 0.0f;
+    int32_t to_blink = RandRange(2500, 6000);
+    int32_t to_saccade = RandRange(700, 2500);
+    int32_t to_micro = RandRange(300, 900);
+
+    // 把当前注视点连同基准情绪推给显示层
+    auto push = [this](float gx, float gy, float openness_k) {
+        EyeState s = base_;
+        s.pupil_x += gx;
+        s.pupil_y += gy;
+        if (openness_k > 0.0f)
+            s.openness = base_.openness * (1.0f - openness_k) + 0.04f * openness_k;
+        SetEyeState(s);
+        taskYIELD();
+    };
 
     while (true) {
         vTaskDelay(pdMS_TO_TICKS(kTick));
-        elapsed += kTick;
+        to_blink -= kTick;
+        to_saccade -= kTick;
+        to_micro -= kTick;
 
-        if (elapsed >= next_blink) {
+        if (to_blink <= 0) {
             // 闭得快、睁得慢，真实眨眼就是这个节奏。
             // 每一帧都是 166KB 的双眼同步传输，帧数直接等于时长：三帧太跳，
             // 五帧顺，再多就拖了。原来是 6 帧三角波外加每帧 25ms 固定延时，
             // BlitInterleaved 改成等传输完成后那 25ms 纯属叠加，已去掉。
             static const float kBlinkPhase[] = {0.70f, 1.0f, 0.80f, 0.45f, 0.0f};
-            for (float k : kBlinkPhase) {
-                EyeState s = base_;
-                s.pupil_x += roam_x;
-                s.pupil_y += roam_y;
-                s.openness = base_.openness * (1.0f - k) + 0.04f * k;
-                SetEyeState(s);
-                taskYIELD();
-            }
-            elapsed = 0;
-            next_blink = RandRange(2500, 6000);
+            for (float k : kBlinkPhase)
+                push(gaze_x, gaze_y, k);
+            to_blink = RandRange(2500, 6000);
+            to_saccade = RandRange(700, 2500);
+            to_micro = RandRange(300, 900);
             continue;
         }
 
-        if (elapsed >= next_roam) {
-            target_x = ((int)RandRange(0, 100) - 50) / 200.0f;  // ±0.25
-            target_y = ((int)RandRange(0, 100) - 50) / 300.0f;  // ±0.17
-            next_roam = elapsed + RandRange(1500, 4000);
+        if (to_saccade <= 0) {
+            // 三帧跳到位。瞳孔区的脏矩形远小于眨眼，单帧约 20ms，
+            // 三帧合计接近真实扫视的时长。缓动前快后慢，落点不回弹。
+            const float from_x = gaze_x, from_y = gaze_y;
+            const float to_x = ((int)RandRange(0, 100) - 50) / 125.0f;   // ±0.40
+            const float to_y = ((int)RandRange(0, 100) - 50) / 227.0f;   // ±0.22
+            static const float kSaccadeEase[] = {0.58f, 0.88f, 1.0f};
+            for (float t : kSaccadeEase) {
+                gaze_x = from_x + (to_x - from_x) * t;
+                gaze_y = from_y + (to_y - from_y) * t;
+                push(gaze_x, gaze_y, 0.0f);
+            }
+            to_saccade = RandRange(700, 2500);
+            to_micro = RandRange(300, 900);
+            continue;
         }
-        roam_x += (target_x - roam_x) * 0.06f;
-        roam_y += (target_y - roam_y) * 0.06f;
 
-        EyeState s = base_;
-        s.pupil_x += roam_x;
-        s.pupil_y += roam_y;
-        SetEyeState(s);
+        if (to_micro <= 0) {
+            // 微扫视：注视期内极小幅度的一次位移。没有它，注视期是彻底冻住的，
+            // 反而不像活物。幅度控制在一两个像素，只花一帧。
+            // 微扫视是累加的，夹一下防止连续几次同向漂出注视范围
+            gaze_x = std::clamp(gaze_x + ((int)RandRange(0, 100) - 50) / 2000.0f, -0.5f, 0.5f);
+            gaze_y = std::clamp(gaze_y + ((int)RandRange(0, 100) - 50) / 3000.0f, -0.3f, 0.3f);
+            push(gaze_x, gaze_y, 0.0f);
+            to_micro = RandRange(300, 900);
+        }
+        // 注视期不重绘
     }
 }

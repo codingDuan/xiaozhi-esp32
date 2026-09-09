@@ -21,11 +21,21 @@ bool TestHttpChannel::enabled() const {
     return inet_pton(AF_INET, allowed_host_.c_str(), &allowed) == 1;
 }
 
+void TestHttpChannel::SetAllowedSubnetMask(uint32_t netmask) { allowed_subnet_mask_ = netmask; }
+
 bool TestHttpChannel::AuthorizePeer(const std::string& peer) const {
-    in_addr allowed = {};
     in_addr candidate = {};
-    return inet_pton(AF_INET, allowed_host_.c_str(), &allowed) == 1 &&
-           inet_pton(AF_INET, peer.c_str(), &candidate) == 1 && allowed.s_addr == candidate.s_addr;
+    return inet_pton(AF_INET, peer.c_str(), &candidate) == 1 &&
+           AuthorizePeerAddress(candidate.s_addr);
+}
+
+bool TestHttpChannel::AuthorizePeerAddress(uint32_t peer_address) const {
+    in_addr allowed = {};
+    if (inet_pton(AF_INET, allowed_host_.c_str(), &allowed) != 1)
+        return false;
+    return allowed.s_addr == peer_address ||
+           (allowed_subnet_mask_ != 0 &&
+            (allowed.s_addr & allowed_subnet_mask_) == (peer_address & allowed_subnet_mask_));
 }
 
 bool TestHttpChannel::Dispatch(const std::string& action, const std::string& arguments_json) const {

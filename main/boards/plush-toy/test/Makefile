@@ -16,11 +16,11 @@ test: test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer tes
 	./test_pca9685
 	./test_http_channel
 
-test_eye_renderer: test_eye_renderer.cc ../eye_renderer.cc ../eye_renderer.h ../eye_theme.cc ../eye_theme.h
-	$(CXX) $(CXXFLAGS) -o $@ test_eye_renderer.cc ../eye_renderer.cc ../eye_theme.cc -lm
+test_eye_renderer: test_eye_renderer.cc ../eye_renderer.cc ../eye_renderer.h ../eye_theme.cc ../eye_theme.h ../eye_iris_tex.cc ../eye_iris_tex.h
+	$(CXX) $(CXXFLAGS) -o $@ test_eye_renderer.cc ../eye_renderer.cc ../eye_theme.cc ../eye_iris_tex.cc -lm
 
-test_eye_theme: test_eye_theme.cc ../eye_theme.cc ../eye_theme.h
-	$(CXX) $(CXXFLAGS) -o $@ test_eye_theme.cc ../eye_theme.cc
+test_eye_theme: test_eye_theme.cc ../eye_theme.cc ../eye_theme.h ../eye_iris_tex.cc
+	$(CXX) $(CXXFLAGS) -o $@ test_eye_theme.cc ../eye_theme.cc ../eye_iris_tex.cc
 
 test_overlay_qr: test_overlay_qr.cc ../overlay_qr.cc ../qrcodegen.c ../overlay_qr.h ../qrcodegen.h
 	$(CXX) $(CXXFLAGS) -x c++ -o $@ test_overlay_qr.cc ../overlay_qr.cc ../qrcodegen.c -lm

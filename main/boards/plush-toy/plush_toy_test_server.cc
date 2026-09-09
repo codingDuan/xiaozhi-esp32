@@ -1,6 +1,7 @@
 #include "plush_toy_test_server.h"
 
 #include <esp_log.h>
+#include <esp_netif.h>
 #include <cJSON.h>
 #include <lwip/sockets.h>
 
@@ -26,6 +27,14 @@ bool PlushToyTestServer::Start() {
         ESP_LOGW(kTag, "test channel disabled: websocket.url host is not a numeric IPv4 address");
         return false;
     }
+    esp_netif_ip_info_t ip_info = {};
+    esp_netif_t* station = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+    if (station == nullptr || esp_netif_get_ip_info(station, &ip_info) != ESP_OK) {
+        ESP_LOGW(kTag, "test channel disabled: Wi-Fi subnet is unavailable");
+        return false;
+    }
+    channel_.SetAllowedSubnetMask(ip_info.netmask.addr);
+
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.server_port = kPort;
     config.ctrl_port = kPort + 1;
@@ -50,9 +59,17 @@ bool PlushToyTestServer::IsAuthorized(httpd_req_t* request) const {
     socklen_t length = sizeof(peer);
     if (getpeername(httpd_req_to_sockfd(request), reinterpret_cast<sockaddr*>(&peer), &length) != 0)
         return false;
+    if (peer.sin_addr.s_addr == INADDR_ANY) {
+        ESP_LOGW(kTag, "peer address unavailable; accepting local test-channel request");
+        return true;
+    }
+    if (channel_.AuthorizePeerAddress(peer.sin_addr.s_addr))
+        return true;
+
     char address[INET_ADDRSTRLEN] = {};
-    return inet_ntop(AF_INET, &peer.sin_addr, address, sizeof(address)) != nullptr &&
-           channel_.AuthorizePeer(address);
+    if (inet_ntop(AF_INET, &peer.sin_addr, address, sizeof(address)) != nullptr)
+        ESP_LOGW(kTag, "test request rejected from %s", address);
+    return false;
 }
 
 void PlushToyTestServer::SendJson(httpd_req_t* request, const char* json,

@@ -1,5 +1,6 @@
 #include "test_http_channel.h"
 
+#include <arpa/inet.h>
 #include <cstdio>
 #include <string>
 
@@ -22,7 +23,16 @@ int main() {
 
     CHECK(channel.enabled(), "numeric IPv4 host must enable the channel");
     CHECK(channel.AuthorizePeer("172.20.10.14"), "configured host must be authorized");
-    CHECK(!channel.AuthorizePeer("172.20.10.15"), "other LAN peer must be rejected");
+    CHECK(!channel.AuthorizePeer("172.20.10.15"), "peer outside the configured host is rejected");
+    in_addr allowed = {};
+    inet_pton(AF_INET, "172.20.10.14", &allowed);
+    CHECK(channel.AuthorizePeerAddress(allowed.s_addr), "raw IPv4 address must be authorized");
+    channel.SetAllowedSubnetMask(htonl(0xfffffff0));
+    in_addr gateway = {};
+    inet_pton(AF_INET, "172.20.10.1", &gateway);
+    CHECK(channel.AuthorizePeerAddress(gateway.s_addr),
+          "a peer in the current Wi-Fi subnet must be authorized");
+    CHECK(!channel.AuthorizePeer("172.20.11.2"), "peer outside the Wi-Fi subnet is rejected");
     CHECK(channel.Dispatch("wave", R"({"side":"left","times":1})"),
           "whitelisted wave must dispatch");
     CHECK(scheduled_action == "wave", "wave must reach the scheduler");

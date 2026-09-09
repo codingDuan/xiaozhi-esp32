@@ -5,6 +5,8 @@
 
 #include <string_view>
 
+struct IrisTexture;
+
 // 眼睛主题是静态视觉参数；注视、眨眼和表情仍由 EyeState 驱动。
 enum class ScleraStyle : uint8_t { kLight, kDark, kNone };
 enum class PupilShape : uint8_t { kRound, kVerticalSlit, kHorizontalSlit };
@@ -16,11 +18,14 @@ struct EyeTheme {
     uint16_t iris_outer;
     ScleraStyle sclera;
     PupilShape pupil;
+    // 非空时虹膜改用极坐标照片纹理，iris_inner/iris_outer 只在无巩膜主题里
+    // 继续用来铺眼白区域。纹理自带角膜缘环，程序化的那一圈会跳过。
+    const IrisTexture* iris_tex = nullptr;
 };
 
 class EyeThemeCatalog {
 public:
-    static constexpr size_t Count() { return 20; }
+    static constexpr size_t Count() { return 22; }
 
     // 无效 ID 回退到默认主题，避免旧 NVS 数据导致崩溃。
     static const EyeTheme& Get(uint8_t id);
