@@ -96,6 +96,32 @@ Vision:    http://MacBook-Pro-107.local:8003/mcp/vision/explain
 
 其中 OTA 地址由设备配网写入；WebSocket 和 Vision 地址写在服务端 `data/.config.yaml`。`.local` 方案避免普通 DHCP 地址变化，但只适用于设备与 Mac 在同一二层网络且网络允许 mDNS；手机热点可能隔离组播，必须实测。若解析失败，应在固定路由器上做 DHCP 地址保留，或使用可达的域名，不要退回每次手工追踪随机 IP。
 
+## 文本动作测试
+
+本地服务启动后，文本工具会通过仅接受 `127.0.0.1` 的调试桥直接调用在线板子的 MCP 工具，不经过唤醒词、语音识别或大模型。先确认板子在线：
+
+```sh
+python3 tools/plush_toy_test.py devices
+```
+
+单项测试示例：
+
+```sh
+python3 tools/plush_toy_test.py wave --side left
+python3 tools/plush_toy_test.py hug
+python3 tools/plush_toy_test.py cheer --times 3
+python3 tools/plush_toy_test.py eyes dragon-amber
+python3 tools/plush_toy_test.py diagnostics
+```
+
+执行完整的实机 MCP 回归：
+
+```sh
+python3 tools/plush_toy_test.py run-regression
+```
+
+只有一块板子在线时会自动选中；多块板子时，每个命令均需增加 `--device-id <ID>`。命令成功表示服务端、MCP 协议和固件动作处理成功；舵机是否真正转动仍需目视验收。
+
 ## 验证
 
 纯渲染和二维码编码无需 ESP-IDF 或硬件：
