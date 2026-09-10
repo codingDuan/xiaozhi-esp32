@@ -1,8 +1,10 @@
 #pragma once
 
+#include "config.h"
 #include "device_state.h"
 #include "limb_controller.h"
 
+#include <stdint.h>
 #include <string>
 
 class EyeDisplay;
@@ -23,6 +25,13 @@ public:
     // （application.cc:602-606）是现成的，服务端零代码改动。
     void OnEmotion(const char* emotion);
 
+    // 由 TouchController 转发而来。按模式掩码分发，四条路径互不影响。
+    void OnTouch(int electrode, bool pressed);
+
+    uint32_t touch_modes() const { return touch_modes_; }
+    // 立即生效并写回 NVS。
+    void SetTouchModes(uint32_t modes);
+
 private:
     static void TaskEntry(void* arg);
     void Run();
@@ -31,4 +40,5 @@ private:
     LimbController* limbs_;
     EyeDisplay* display_;
     DeviceState last_state_ = kDeviceStateUnknown;
+    uint32_t touch_modes_ = TOUCH_MODES_DEFAULT;
 };

@@ -1,6 +1,7 @@
 #include "plush_behavior.h"
 #include "application.h"
 #include "eye_display.h"
+#include "settings.h"
 
 #include <esp_log.h>
 #include <wifi_manager.h>
@@ -8,7 +9,17 @@
 #define TAG "PlushBehavior"
 
 PlushBehavior::PlushBehavior(LimbController* limbs, EyeDisplay* display)
-    : limbs_(limbs), display_(display) {}
+    : limbs_(limbs), display_(display) {
+    Settings settings("plush", false);
+    touch_modes_ = (uint32_t)settings.GetInt("touch_modes", TOUCH_MODES_DEFAULT);
+}
+
+void PlushBehavior::SetTouchModes(uint32_t modes) {
+    touch_modes_ = modes;
+    Settings settings("plush", true);
+    settings.SetInt("touch_modes", (int32_t)modes);
+    ESP_LOGI(TAG, "触摸模式掩码改为 0x%02X", (unsigned)modes);
+}
 
 void PlushBehavior::Start() {
     if ((limbs_ == nullptr || !limbs_->available()) && display_ == nullptr) {
@@ -83,5 +94,32 @@ void PlushBehavior::OnEmotion(const char* emotion) {
         limbs_->Enqueue(Gesture::kDroop, 1);
     } else if (e == "surprised" || e == "shocked") {
         limbs_->Enqueue(Gesture::kWaveBoth, 1);
+    }
+}
+
+void PlushBehavior::OnTouch(int electrode, bool pressed) {
+    ESP_LOGI(TAG, "触摸 电极%d %s，掩码 0x%02X", electrode, pressed ? "按下" : "松开",
+             (unsigned)touch_modes_);
+
+    if ((touch_modes_ & TOUCH_MODE_REFLEX) != 0) {
+        if (display_ != nullptr)
+            display_->SetEmotion(pressed ? "happy" : "neutral");
+        if (pressed && limbs_ != nullptr && limbs_->available())
+            limbs_->Enqueue(Gesture::kCheer, 1);
+    }
+
+    // 松开不触发任何网络行为：一次触摸只该引起一轮对话，
+    // 否则手指离开时会再来一轮。
+    if (!pressed)
+        return;
+
+    auto& app = Application::GetInstance();
+    if ((touch_modes_ & TOUCH_MODE_REPORT) != 0) {
+        // WakeWordInvoke 会把这句话当作用户说的送给服务端，本身就带唤醒效果，
+        // 因此它与 WAKE 位是包含关系，不能再叠加一次 StartListening。
+        app.WakeWordInvoke("有人摸了摸我的头");
+    } else if ((touch_modes_ & TOUCH_MODE_WAKE) != 0) {
+        if (app.GetDeviceState() == kDeviceStateIdle)
+            app.StartListening();
     }
 }

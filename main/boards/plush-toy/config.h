@@ -117,6 +117,13 @@
 #define TOUCH_PRESS_THRESHOLD    0x0C
 #define TOUCH_RELEASE_THRESHOLD  0x06
 
+// 触摸响应模式，可叠加。存 NVS 命名空间 plush 的 touch_modes 键，运行时可改。
+#define TOUCH_MODE_REFLEX   0x01   // 本地反射：直接改眼睛、动手臂
+#define TOUCH_MODE_WAKE     0x02   // 唤醒对话：进入聆听状态
+#define TOUCH_MODE_REPORT   0x04   // 上报大模型：把触摸作为一句话送给服务端
+#define TOUCH_MODE_DIAG     0x08   // 读值诊断：把原始计数放进 HTTP status 返回
+#define TOUCH_MODES_DEFAULT (TOUCH_MODE_REFLEX | TOUCH_MODE_DIAG)
+
 // GPIO43(丝印TX) 保留给控制台 TX，勿占用 —— 否则日志变乱码（实测）
 // 现已无空闲脚：3=舵机SCL 14/38=屏SPI 44=舵机SDA 45/46=两屏CS
 // GPIO19/20 保持原生 USB，勿占用
