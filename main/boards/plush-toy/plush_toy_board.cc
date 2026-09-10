@@ -16,7 +16,9 @@
 #include "led/single_led.h"
 #include "limb_controller.h"
 #include "mcp_server.h"
+#include "motion_controller.h"
 #include "mpr121.h"
+#include "mpu6050.h"
 #include "pca9685.h"
 #include "plush_behavior.h"
 #include "plush_toy_test_server.h"
@@ -61,6 +63,8 @@ private:
     PlushToyTestServer* test_server_ = nullptr;
     Mpr121* mpr121_ = nullptr;
     TouchController* touch_ = nullptr;
+    Mpu6050* mpu6050_ = nullptr;
+    MotionController* motion_ = nullptr;
     // MPR121 要挂在同一条总线上，因此句柄必须活过 InitializeServoBus()
     i2c_master_bus_handle_t servo_bus_ = nullptr;
 
@@ -219,6 +223,25 @@ private:
         if (!mpr121_->Init()) {
             delete mpr121_;
             mpr121_ = nullptr;
+        }
+    }
+
+    // 运动链路的任何失败都不得影响对话 —— 与舵机、触摸同一原则。
+    void InitializeMotion() {
+        if (servo_bus_ == nullptr)
+            return;
+        if (i2c_master_probe(servo_bus_, MPU6050_ADDR, 100) != ESP_OK) {
+            ESP_LOGE(TAG,
+                     "MPU6050(0x%02X) 无响应。请检查：VCC 是否接 3V3、是否共地、"
+                     "AD0 是否接地。若同时触摸或舵机也开始不稳，先拆掉 GY-521 "
+                     "板载的 4.7k 上拉电阻",
+                     MPU6050_ADDR);
+            return;
+        }
+        mpu6050_ = new Mpu6050(servo_bus_, MPU6050_ADDR, SERVO_I2C_HZ);
+        if (!mpu6050_->Init()) {
+            delete mpu6050_;
+            mpu6050_ = nullptr;
         }
     }
 
@@ -426,6 +449,15 @@ public:
             behavior->OnTouch(electrode, pressed);
         });
         touch_->Start();
+
+        InitializeMotion();
+        motion_ = new MotionController(mpu6050_);
+        auto* limbs = limbs_;
+        motion_->SetSuppressor([limbs]() { return limbs != nullptr && limbs->busy(); });
+        motion_->SetHandler([behavior](MotionEvent event, Orientation orientation) {
+            behavior->OnMotion(event, orientation);
+        });
+        motion_->Start();
         if (display_ != nullptr) {
             display_->SetBehavior(behavior_);
             display_->StartIdleAnimation();
