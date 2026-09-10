@@ -88,6 +88,11 @@ private:
                 const auto* theme = cJSON_GetObjectItem(arguments, "theme");
                 std::string selected;
                 display_->ChangeTheme(cJSON_IsString(theme) ? theme->valuestring : "", selected);
+            } else if (action == "emotion" && display_ != nullptr) {
+                // 走 SetEmotion 而不是分别驱动眼睛和手势 —— 这正是服务端 emotion
+                // 通道的入口，联动行为必须和线上完全同一条路径才有回归价值。
+                const auto* emotion = cJSON_GetObjectItem(arguments, "emotion");
+                display_->SetEmotion(cJSON_IsString(emotion) ? emotion->valuestring : "neutral");
             } else if (action == "diagnostics" && pca_ != nullptr) {
                 ESP_LOGI(TAG, "test diagnostics: %s", pca_->Diagnostics().c_str());
             }

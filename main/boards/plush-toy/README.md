@@ -113,8 +113,11 @@ python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 wave --side
 python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 hug
 python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 cheer --times 3
 python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 eyes dragon-amber
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 emotion happy
 python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 diagnostics
 ```
+
+`emotion` 与 `eyes` 的区别：`eyes` 只换虹膜主题，`emotion` 走的是服务端 emotion 通道的同一入口 `EyeDisplay::SetEmotion`，一次调用同时改变眼睛表情并触发对应手势（happy 摆手、loving 张臂、sad 垂臂、surprised 双手上举）。angry 与 thinking 按设计只改眼睛、不产生动作。
 
 执行完整的实机动作回归：
 
@@ -122,7 +125,9 @@ python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 diagnostics
 python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 run-regression
 ```
 
-`--device-url` 默认是当前开发板地址 `http://172.20.10.2:8181`，但建议每次明确传入。`{"accepted":true}` 表示请求已由板子的应用任务接收和排队；舵机是否真正转动、眼睛是否切换仍需目视验收。
+回归覆盖三组：六个眼睛主题各对应一条虹膜渲染路径（圆瞳浅巩膜、竖瞳暗巩膜、横瞳、无巩膜、照片纹理、日系画法）、三个方向的挥手与拥抱欢呼、六个情绪联动。
+
+`--device-url` 默认是当前开发板地址 `http://172.20.10.2:8181`，但建议每次明确传入。`{"accepted":true}` 表示请求已由板子的应用任务接收和排队；舵机是否真正转动、眼睛是否切换仍需目视验收。情绪联动尤其要看 angry 那条：眼睛应当变化而手臂必须保持不动。
 
 ## 验证
 
@@ -160,5 +165,6 @@ idf.py build
 详细设计、实测记录与剩余硬件项见：
 
 - [设计方案](../../../docs/superpowers/specs/2026-09-05-plush-toy-design.md)
+- [触摸感知设计（MPR121）](../../../docs/superpowers/specs/2026-09-10-plush-toy-mpr121-touch-design.md)
 - [进度汇总](../../../docs/superpowers/plans/STATUS.md)
 - [剩余 TODO](../../../docs/superpowers/plans/TODO.md)

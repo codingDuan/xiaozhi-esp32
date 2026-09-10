@@ -10,9 +10,20 @@ import urllib.request
 
 DEFAULT_DEVICE_URL = "http://172.20.10.2:8181"
 REGRESSION_CASES = [
-    ("eyes", {"theme": "dragon-amber"}), ("wave", {"side": "left", "times": 1}),
+    # 每种虹膜渲染路径取一个主题：圆瞳浅巩膜、竖瞳暗巩膜、横瞳、无巩膜、
+    # 照片纹理、日系画法。少了任何一条，对应的渲染分支就没人跑过。
+    ("eyes", {"theme": "ocean"}), ("eyes", {"theme": "dragon-amber"}),
+    ("eyes", {"theme": "cat-gold"}), ("eyes", {"theme": "void-blue"}),
+    ("eyes", {"theme": "uncanny-dragon"}), ("eyes", {"theme": "anime-sky"}),
+    ("wave", {"side": "left", "times": 1}),
     ("wave", {"side": "right", "times": 1}), ("wave", {"side": "both", "times": 1}),
-    ("hug", {}), ("cheer", {"times": 1}), ("diagnostics", {}),
+    ("hug", {}), ("cheer", {"times": 1}),
+    # 情绪联动：一次 SetEmotion 同时改眼睛并触发手势。前四条各覆盖一种手势映射，
+    # angry 覆盖“刻意不动作”那一支 —— 它必须只改眼睛、手臂保持不动。
+    ("emotion", {"emotion": "happy"}), ("emotion", {"emotion": "loving"}),
+    ("emotion", {"emotion": "sad"}), ("emotion", {"emotion": "surprised"}),
+    ("emotion", {"emotion": "angry"}), ("emotion", {"emotion": "neutral"}),
+    ("diagnostics", {}),
 ]
 
 
@@ -31,6 +42,8 @@ def build_parser() -> argparse.ArgumentParser:
     cheer.add_argument("--times", type=int, choices=range(1, 6), default=3)
     eyes = subparsers.add_parser("eyes", help="set an eye theme")
     eyes.add_argument("theme", help="for example: dragon-amber or cat-gold")
+    emotion = subparsers.add_parser("emotion", help="set an emotion; drives eyes and gesture")
+    emotion.add_argument("emotion", help="for example: happy, loving, sad, surprised or angry")
     subparsers.add_parser("diagnostics", help="read arm driver diagnostics")
     subparsers.add_parser("run-regression", help="run the standard direct-MCP regression")
     return parser
@@ -46,6 +59,8 @@ def command_to_call(argv: list[str]) -> tuple[str, dict]:
         return "cheer", {"times": args.times}
     if args.command == "eyes":
         return "eyes", {"theme": args.theme}
+    if args.command == "emotion":
+        return "emotion", {"emotion": args.emotion}
     if args.command == "diagnostics":
         return "diagnostics", {}
     raise ValueError(f"{args.command} does not map to one MCP tool")

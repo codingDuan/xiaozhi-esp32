@@ -36,8 +36,13 @@ int main() {
     CHECK(channel.Dispatch("wave", R"({"side":"left","times":1})"),
           "whitelisted wave must dispatch");
     CHECK(scheduled_action == "wave", "wave must reach the scheduler");
+    CHECK(channel.Dispatch("emotion", R"({"emotion":"happy"})"),
+          "whitelisted emotion must dispatch");
+    CHECK(scheduled_action == "emotion", "emotion must reach the scheduler");
     CHECK(!channel.Dispatch("self.reboot", "{}"), "non-test action must be rejected");
     CHECK(channel.StatusJson().find("\"wave\"") != std::string::npos, "status must list wave");
+    CHECK(channel.StatusJson().find("\"emotion\"") != std::string::npos,
+          "status must list emotion");
     CHECK(channel.StatusJson().find("self.reboot") == std::string::npos,
           "status must not expose reboot");
 

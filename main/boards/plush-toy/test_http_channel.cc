@@ -9,7 +9,7 @@
 namespace {
 bool IsAllowedAction(const std::string& action) {
     return action == "wave" || action == "hug" || action == "cheer" || action == "eyes" ||
-           action == "diagnostics";
+           action == "emotion" || action == "diagnostics";
 }
 }  // namespace
 
@@ -46,5 +46,5 @@ bool TestHttpChannel::Dispatch(const std::string& action, const std::string& arg
 }
 
 std::string TestHttpChannel::StatusJson() const {
-    return R"({"ready":true,"actions":["wave","hug","cheer","eyes","diagnostics"]})";
+    return R"({"ready":true,"actions":["wave","hug","cheer","eyes","emotion","diagnostics"]})";
 }
