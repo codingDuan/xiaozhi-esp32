@@ -136,6 +136,23 @@
 #define MOTION_ACCEL_FS_SEL      0x08
 #define MOTION_LSB_PER_G         8192
 
+// 姿态门限（重力分量，单位 LSB）。进入与离开用不同门限 —— 没有迟滞的话，
+// 玩具斜靠在沙发上会在两态边界反复横跳，每跳一次就改一次表情。
+#define MOTION_UPRIGHT_ENTER   ((MOTION_LSB_PER_G * 7) / 10)   // +0.7g
+#define MOTION_UPRIGHT_EXIT    ((MOTION_LSB_PER_G * 5) / 10)   // +0.5g
+#define MOTION_INVERTED_ENTER  (-(MOTION_LSB_PER_G * 7) / 10)  // -0.7g
+#define MOTION_INVERTED_EXIT   (-(MOTION_LSB_PER_G * 5) / 10)  // -0.5g
+
+// 摇晃：合矢量对 1g 的偏离超过阈值算一次命中，窗口内命中够数才算摇晃，
+// 之后进入不应期。没有不应期的话，一次持续摇晃会刷出几十个事件。
+#define MOTION_SHAKE_DELTA       ((MOTION_LSB_PER_G * 35) / 100)  // 0.35g
+#define MOTION_SHAKE_WINDOW_MS   1000
+#define MOTION_SHAKE_HITS        3
+#define MOTION_SHAKE_COOLDOWN_MS 1500
+
+// 玩具竖立时哪一轴对着天。装配后若姿态判反，改这里而不是改判定逻辑。
+#define MOTION_UP_AXIS_Z         1
+
 // GPIO43(丝印TX) 保留给控制台 TX，勿占用 —— 否则日志变乱码（实测）
 // 现已无空闲脚：3=舵机SCL 14/38=屏SPI 44=舵机SDA 45/46=两屏CS
 // GPIO19/20 保持原生 USB，勿占用
