@@ -136,6 +136,21 @@ private:
                     std::to_string(mpr121_->ReadFiltered(TOUCH_HEAD_ELECTRODE));
             json += ",\"touch_baseline\":" +
                     std::to_string(mpr121_->ReadBaseline(TOUCH_HEAD_ELECTRODE));
+            // 全部 12 路的读数。标定时要靠它确认线到底接在哪个电极上 ——
+            // 只报一路的话，接错脚和电极失效这两种情况长得一模一样。
+            json += ",\"touch_all_filtered\":[";
+            for (int ch = 0; ch < TOUCH_ELECTRODE_COUNT; ++ch) {
+                if (ch != 0)
+                    json += ",";
+                json += std::to_string(mpr121_->ReadFiltered(ch));
+            }
+            json += "],\"touch_all_baseline\":[";
+            for (int ch = 0; ch < TOUCH_ELECTRODE_COUNT; ++ch) {
+                if (ch != 0)
+                    json += ",";
+                json += std::to_string(mpr121_->ReadBaseline(ch));
+            }
+            json += "]";
         }
         return json;
     }
