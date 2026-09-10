@@ -216,7 +216,8 @@ private:
                 "this with an empty theme to cycle to the next theme. For a named style, use "
                 "one of: ocean, emerald, violet, amber, rose, ice, copper, jade, midnight, "
                 "pearl, void-blue, void-purple, void-rose, dragon-amber, dragon-emerald, "
-                "dragon-violet, cat-gold, cat-jade, cat-ice, cat-rose.",
+                "dragon-violet, cat-gold, cat-jade, cat-ice, cat-rose, uncanny-human, "
+                "uncanny-dragon, anime-sky, anime-rose, anime-gold, anime-violet.",
                 PropertyList({Property("theme", kPropertyTypeString, std::string(""))}),
                 [eyes](const PropertyList& properties) -> ReturnValue {
                     std::string selected;

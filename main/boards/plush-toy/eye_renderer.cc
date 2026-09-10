@@ -20,6 +20,13 @@ constexpr float kIrisR   = 44.0f;
 constexpr float kPupilR  = 21.0f;
 constexpr float kPupilDx = 36.0f;            // pupil_x = 1.0 时的像素偏移
 constexpr float kPupilDy = 30.0f;
+
+// 日系画法的虹膜远大于写实比例，瞳孔反而相对更小 —— 这个占比本身就是
+// 「动漫眼」最直观的特征，只改配色不改几何做不出来。
+// 虹膜 62 + 注视偏移 30 = 92，超过眼裂半高 82，睁大眼向上看时虹膜上缘会被
+// 上睑切掉一截。那是日系画法的常态，不是 bug。
+constexpr float kAnimeIrisR  = 62.0f;
+constexpr float kAnimePupilR = 22.0f;
 // 眼裂满开时的半高。刻意小于巩膜半径：等于巩膜半径时上下睑几乎切不到东西，
 // 轮廓退化成整个巩膜圆，看着像圆角方块而不像眼睛。
 constexpr float kLidHalfH = 82.0f;
@@ -35,6 +42,39 @@ constexpr float kHi1R = 9.5f, kHi1Dx = -15.0f, kHi1Dy = -17.0f;
 constexpr float kHi2R = 5.5f, kHi2Dx = 13.0f, kHi2Dy = 14.0f;
 constexpr float kHi2Alpha = 0.32f;
 constexpr float kHiSoft = 3.0f;              // 高光边缘羽化宽度（像素）
+
+// ---- 日系画法参数 ----
+// 配方来自几份日系眼睛画法教程，五件事缺一不可：上睑投影带、下缘反射月牙、
+// 放射纤维、加粗睫毛线、按虹膜比例放大的高光。全部现算，不占 flash。
+//
+// 高光按虹膜半径的比例给，虹膜一放大高光就跟着放大 —— 写实主题那种固定
+// 9.5px 的小圆点摊到 62px 虹膜上会缩成一颗水珠。
+constexpr float kAnimeHi1K = 0.27f, kAnimeHi1DxK = -0.34f, kAnimeHi1DyK = -0.36f;
+constexpr float kAnimeHi2K = 0.15f, kAnimeHi2DxK = 0.42f, kAnimeHi2DyK = 0.46f;
+constexpr float kAnimeHi2Alpha = 0.70f;
+constexpr float kAnimeHiSoft = 2.0f;         // 日系高光边缘比写实硬
+
+// 上睑投影带。ny 是相对瞳孔中心、按虹膜半径归一化的纵坐标。
+constexpr float kShadowY = -0.05f, kShadowSoft = 0.42f, kShadowDark = 0.44f;
+
+// 下缘反射月牙：正对投影带的一段亮弧，贴着虹膜外圈。
+constexpr float kCrescentR = 0.72f, kCrescentW = 0.26f;
+constexpr float kCrescentY = 0.18f, kCrescentSoft = 0.35f, kCrescentAmp = 0.85f;
+
+// 放射纤维。24 条摊在 62px 半径的虹膜上约每 16px 一条，肉眼刚好分得清。
+// 包络取 4k(1-k)，两端归零，免得纤维戳进瞳孔或穿过角膜缘环。
+constexpr float kFiberN = 24.0f, kFiberAmp = 0.07f;
+
+// 角膜缘环：比写实主题起得更早、压得更深，这是日系虹膜"描边感"的来源。
+constexpr float kAnimeLimbalStart = 0.76f, kAnimeLimbalDark = 0.20f;
+
+// 睫毛线：上睑内侧的一条深色粗边，日系与写实最直观的区别。
+// 线宽还要卡在睑缝高度的 kLashSlitCap 以内，否则眨眼眨到一半时
+// 上下睑各画一半线宽，整条缝会被填成纯黑，看着像眼睛直接消失。
+constexpr float kLashW = 10.0f, kLashSlitCap = 0.22f, kLashSharp = 6.0f;
+
+// 上睑投在眼白上的柔和阴影。虹膜自带更深的投影带，这里只补虹膜之外的部分。
+constexpr float kLidShadowW = 10.0f, kLidShadowDark = 0.10f;
 
 // 工作色：0~255 的线性 RGB，未经红蓝互换。所有混色都在这里做，末尾只 Pack 一次。
 // 不能在 RGB565 上链式混色 —— swap_rb 会被叠加成偶数次而自我抵消。
@@ -77,11 +117,13 @@ inline uint16_t Pack(const Rgb& c, int x, int y) {
 inline float Cov(float signed_dist) { return Clamp01(signed_dist + 0.5f); }
 
 // 羽化圆盘，用于高光。硬边高光看着像贴纸。
-inline float SoftDisc(float dx, float dy, float radius) {
+inline float SoftDisc(float dx, float dy, float radius, float soft) {
     const float d2 = dx * dx + dy * dy;
     if (d2 >= radius * radius) return 0.0f;
-    return Clamp01((radius - sqrtf(d2)) / kHiSoft);
+    return Clamp01((radius - sqrtf(d2)) / soft);
 }
+
+inline float Smoothstep01(float t) { return t * t * (3.0f - 2.0f * t); }
 
 // 眼睑轮廓表。上下睑共用一条归一化曲线 p(x) = (1-u²)^E，u = (x-120)/kApertureW，
 // 眼裂高度按列取 open*kLidHalfH*p(x)。指数小于 1 使顶部平缓、眼角收尖，得到杏仁形。
@@ -158,9 +200,22 @@ LidGeom MakeLidGeom(const EyeState& s, int side) {
     return g;
 }
 
+// 一次采样同时给出三件事：覆盖率、到上睑缘的垂距、该列的睑缝高度。
+// 后两项只有日系画法用（睫毛线和睑影），但它们和覆盖率共用同一套几何，
+// 拆成两个函数会把 powf 查表和剪切计算做两遍。
+struct LidSample {
+    float cov;
+    float d_upper;   // 睑内为正。离上睑较远时给一个哨兵大值，省掉开方
+    float slit;      // 该列上下睑缘之间的高度
+};
+
+// 睫毛线宽 11、睑影宽 26，超过这个距离的像素两者都用不上，不必开方。
+constexpr float kUpperBand = 48.0f;
+
 // 像素落在睁开的眼缝内的覆盖率。上下睑都是轮廓表的缩放，上睑另加 lid_tilt 剪切。
-inline float LidCoverage(int x, float y, const LidGeom& g, const LidProfile& prof) {
-    if (g.closed) return 0.0f;
+inline LidSample SampleLids(int x, float y, const LidGeom& g, const LidProfile& prof) {
+    LidSample out{0.0f, 1e9f, 0.0f};
+    if (g.closed) return out;
     const float p = prof.p[x];
     const float dp = prof.dp[x];
     const float dx = (float)x - (float)kC;
@@ -176,17 +231,28 @@ inline float LidCoverage(int x, float y, const LidGeom& g, const LidProfile& pro
     const float k_lo = g.amp * dp - g.bow * prof.db[x];
     const float raw_lo = y_lo - y;
 
-    // raw 是竖直距离，要除以 sqrt(1+k²) 才是到睑缘的垂距。但抗锯齿只在边缘
-    // 一像素内起作用，用 sqrt(1+k²) ≤ 1+|k| 先做保守夹逼，绝大多数像素在这里
-    // 就判完了，省掉两次开方。
+    out.slit = y_lo - y_up;
+
+    // raw 是竖直距离，要除以 sqrt(1+k²) 才是到睑缘的垂距。抗锯齿只在边缘一像素
+    // 内起作用，用 sqrt(1+k²) ≤ 1+|k| 先做保守夹逼；日系的睫毛线要往里吃几十像素，
+    // 所以上睑那一侧的开方门槛放宽到 kUpperBand，仍能替绝大多数像素省掉开方。
     const float bu = 0.5f * (1.0f + fabsf(k_up));
     const float bl = 0.5f * (1.0f + fabsf(k_lo));
-    if (raw_up > bu && raw_lo > bl) return 1.0f;
-    if (raw_up < -bu || raw_lo < -bl) return 0.0f;
 
-    const float d_upper = raw_up / sqrtf(1.0f + k_up * k_up);
-    const float d_lower = raw_lo / sqrtf(1.0f + k_lo * k_lo);
-    return Cov(d_upper < d_lower ? d_upper : d_lower);
+    float d_upper = 1e9f, d_lower = 1e9f;
+    if (raw_up < kUpperBand) d_upper = raw_up / sqrtf(1.0f + k_up * k_up);
+    if (raw_lo < kUpperBand) d_lower = raw_lo / sqrtf(1.0f + k_lo * k_lo);
+    out.d_upper = d_upper;
+
+    if (raw_up > bu && raw_lo > bl) {
+        out.cov = 1.0f;
+        return out;
+    }
+    if (raw_up < -bu || raw_lo < -bl) return out;   // cov 已是 0
+
+    // 走到这里两侧 raw 都落在 ±b 内，因而都小于 kUpperBand，垂距一定已经算过
+    out.cov = Cov(d_upper < d_lower ? d_upper : d_lower);
+    return out;
 }
 
 // 瞳孔覆盖率。椭圆到边界的距离用 f/|∇f| 近似；圆的情况下该式恰好精确。
@@ -209,14 +275,43 @@ inline float PupilCoverage(float dx, float dy, float radius, PupilShape shape) {
     return Cov(-f / gm);
 }
 
+// 日系虹膜着色。nx/ny 是相对瞳孔中心、按虹膜半径归一化的坐标，k = 到中心的
+// 归一化距离，angle 是极角（弧度）。五道工序按顺序叠：
+// 基础渐变 → 放射纤维 → 上睑投影带 → 角膜缘环 → 下缘反射月牙。
+//
+// 月牙必须排在角膜缘环之后。它本来就画在虹膜外圈上，排在环之前会被环压掉，
+// 而"深色描边的底部透出一道亮光"正是日系虹膜的招牌观感。
+inline Rgb AnimeIris(const Rgb& inner, const Rgb& outer, float ny, float k, float angle) {
+    Rgb c = Mix(inner, outer, powf(k, 1.15f));
+
+    const float env = 4.0f * k * (1.0f - k);
+    c = Scale(c, 1.0f + kFiberAmp * sinf(angle * kFiberN) * env);
+
+    const float sh = Smoothstep01(Clamp01((kShadowY - ny) / kShadowSoft));
+    c = Scale(c, 1.0f - kShadowDark * sh);
+
+    const float lr = Smoothstep01(Clamp01((k - kAnimeLimbalStart) / (1.0f - kAnimeLimbalStart)));
+    c = Mix(c, Scale(outer, kAnimeLimbalDark), lr);
+
+    const float rb = Clamp01(1.0f - fabsf(k - kCrescentR) / kCrescentW);
+    const float ab = Clamp01((ny - kCrescentY) / kCrescentSoft);
+    if (rb > 0.0f && ab > 0.0f) {
+        const Rgb glow = Mix(inner, Rgb{255.0f, 255.0f, 255.0f}, 0.55f);
+        c = Mix(c, glow, kCrescentAmp * Smoothstep01(rb) * Smoothstep01(ab));
+    }
+    return c;
+}
+
 }  // namespace
 
 void EyeRenderer::Render(uint16_t* out, const EyeState& s, const EyeTheme& theme, int side,
                          DirtyRect r) {
+    const bool anime = theme.iris == IrisStyle::kAnime;
+
     const float px = (float)kC + s.pupil_x * kPupilDx;
     const float py = (float)kC + s.pupil_y * kPupilDy;
-    const float pupil_r = kPupilR * s.pupil_scale;
-    const float iris_r = kIrisR * (0.9f + 0.1f * s.pupil_scale);
+    const float pupil_r = (anime ? kAnimePupilR : kPupilR) * s.pupil_scale;
+    const float iris_r = (anime ? kAnimeIrisR : kIrisR) * (0.9f + 0.1f * s.pupil_scale);
 
     const LidGeom lids = MakeLidGeom(s, side);
     const LidProfile& prof = Profile();
@@ -227,9 +322,17 @@ void EyeRenderer::Render(uint16_t* out, const EyeState& s, const EyeTheme& theme
     const Rgb pupil_c = Rgb{7.0f, 9.0f, 12.0f};
     const Rgb white = Rgb{255.0f, 255.0f, 255.0f};
     const Rgb black = Rgb{0.0f, 0.0f, 0.0f};
+    const Rgb lash_c = Rgb{18.0f, 14.0f, 22.0f};
 
-    const float hi1x = px + kHi1Dx, hi1y = py + kHi1Dy;
-    const float hi2x = px + kHi2Dx, hi2y = py + kHi2Dy;
+    // 日系高光按虹膜半径取，写实高光是固定像素尺寸
+    const float hi1r = anime ? iris_r * kAnimeHi1K : kHi1R;
+    const float hi2r = anime ? iris_r * kAnimeHi2K : kHi2R;
+    const float hi2a = anime ? kAnimeHi2Alpha : kHi2Alpha;
+    const float hi_soft = anime ? kAnimeHiSoft : kHiSoft;
+    const float hi1x = px + (anime ? iris_r * kAnimeHi1DxK : kHi1Dx);
+    const float hi1y = py + (anime ? iris_r * kAnimeHi1DyK : kHi1Dy);
+    const float hi2x = px + (anime ? iris_r * kAnimeHi2DxK : kHi2Dx);
+    const float hi2y = py + (anime ? iris_r * kAnimeHi2DyK : kHi2Dy);
 
     for (int yy = 0; yy < r.h; ++yy) {
         const int y = r.y + yy;
@@ -242,23 +345,32 @@ void EyeRenderer::Render(uint16_t* out, const EyeState& s, const EyeTheme& theme
             // 圆屏边缘、巩膜外沿、眼睑三道边界合成一个覆盖率
             const float edge = ((float)kC - ds) < (kScleraR - ds) ? ((float)kC - ds)
                                                                   : (kScleraR - ds);
-            const float alpha = Cov(edge) * LidCoverage(x, (float)y, lids, prof);
+            const LidSample lid = SampleLids(x, (float)y, lids, prof);
+            const float alpha = Cov(edge) * lid.cov;
             if (alpha <= 0.0f) {
                 out[yy * r.w + xx] = 0x0000;
                 continue;
             }
 
             // 巩膜：中心略亮的径向渐变。无巩膜主题则以主题虹膜色铺满眼白区域。
+            // 日系眼白比写实平得多，径向压暗量减到三分之一。
             const float t = Clamp01(ds / kScleraR);
             Rgb c;
             if (theme.sclera == ScleraStyle::kLight) {
-                const float v = 255.0f - 44.0f * t;
+                const float v = 255.0f - (anime ? 15.0f : 44.0f) * t;
                 c = Rgb{v, v, v * 0.98f};
             } else if (theme.sclera == ScleraStyle::kDark) {
                 const float v = 39.0f - 20.0f * t;
                 c = Rgb{v * 0.5f, v, v + 14.0f};
             } else {
                 c = Mix(iris_in, iris_out, t);
+            }
+
+            // 上睑投在眼白上的柔和阴影。必须赶在混入虹膜之前 —— 虹膜自带更深的
+            // 投影带，两层叠上去虹膜上缘会黑成一块。
+            if (anime && lid.d_upper < kLidShadowW) {
+                const float sw = Clamp01(1.0f - lid.d_upper / kLidShadowW);
+                c = Scale(c, 1.0f - kLidShadowDark * sw * sw);
             }
 
             const float dxp = (float)x - px, dyp = (float)y - py;
@@ -282,6 +394,10 @@ void EyeRenderer::Render(uint16_t* out, const EyeState& s, const EyeTheme& theme
                     int ri = (int)(k * (float)(tex->radii - 1) + 0.5f);
                     if (ri >= tex->radii) ri = tex->radii - 1;
                     ic = Unpack(tex->data[(size_t)ri * tex->angles + ai]);
+                } else if (anime) {
+                    // atan2f 只在虹膜盘内算。日系虹膜大，这一块约占脏矩形三成，
+                    // 仍远好过为放射纹理烧掉几十 KB flash。
+                    ic = AnimeIris(iris_in, iris_out, dyp / iris_r, k, atan2f(dyp, dxp));
                 } else {
                     ic = Mix(iris_in, iris_out, k);
                     const float lr = Clamp01((k - kLimbalStart) / (1.0f - kLimbalStart));
@@ -294,11 +410,22 @@ void EyeRenderer::Render(uint16_t* out, const EyeState& s, const EyeTheme& theme
             const float pa = PupilCoverage(dxp, dyp, pupil_r, theme.pupil);
             if (pa > 0.0f) c = Mix(c, pupil_c, pa);
 
+            // 睫毛线。压在虹膜和瞳孔之上、高光之下 —— 日系画法里高光是允许
+            // 骑在睫毛线上的，那正是"眼睛在反光"的读法。
+            if (anime) {
+                const float cap = lid.slit * kLashSlitCap;
+                const float w = cap < kLashW ? cap : kLashW;
+                if (w > 0.0f && lid.d_upper < w) {
+                    const float la = Clamp01((1.0f - lid.d_upper / w) * kLashSharp);
+                    c = Mix(c, lash_c, la);
+                }
+            }
+
             // 高光
-            const float h1 = SoftDisc((float)x - hi1x, (float)y - hi1y, kHi1R);
+            const float h1 = SoftDisc((float)x - hi1x, (float)y - hi1y, hi1r, hi_soft);
             if (h1 > 0.0f) c = Mix(c, white, h1);
-            const float h2 = SoftDisc((float)x - hi2x, (float)y - hi2y, kHi2R);
-            if (h2 > 0.0f) c = Mix(c, white, h2 * kHi2Alpha);
+            const float h2 = SoftDisc((float)x - hi2x, (float)y - hi2y, hi2r, hi_soft);
+            if (h2 > 0.0f) c = Mix(c, white, h2 * hi2a);
 
             if (alpha < 1.0f) c = Mix(black, c, alpha);
             out[yy * r.w + xx] = Pack(c, x, y);
@@ -331,8 +458,13 @@ DirtyRect EyeRenderer::ComputeDirty(const EyeState& a, const EyeState& b) {
         return DirtyRect{x0, y0, x1 - x0, y1 - y0};
     }
 
-    // 仅瞳孔/虹膜变化：取两帧虹膜圆的并集，加高光偏移与余量
-    const float rad = kIrisR * 1.1f + 26.0f;
+    // 仅瞳孔/虹膜变化：取两帧虹膜圆的并集，加高光偏移与余量。
+    // ComputeDirty 拿不到主题，只能按两种画法里够得最远的那个取值：
+    // 写实主题的高光是固定像素尺寸，会溢出 44px 的虹膜，26 的余量是为它留的；
+    // 日系虹膜 62 更大，但高光按虹膜比例给，反而全落在盘内。
+    constexpr float kRealReach = kIrisR * 1.1f + 26.0f;
+    constexpr float kAnimeReach = kAnimeIrisR * 1.1f + 6.0f;
+    const float rad = kRealReach > kAnimeReach ? kRealReach : kAnimeReach;
     const float ax = kC + a.pupil_x * kPupilDx, ay = kC + a.pupil_y * kPupilDy;
     const float bx = kC + b.pupil_x * kPupilDx, by = kC + b.pupil_y * kPupilDy;
     int x0 = (int)floorf(fminf(ax, bx) - rad);

@@ -6,7 +6,7 @@
 CXX ?= g++
 CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -I.. -Istubs
 
-.PHONY: test clean
+.PHONY: test clean preview-png
 
 test: test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel
 	./test_eye_renderer
@@ -34,5 +34,14 @@ test_pca9685: test_pca9685.cc ../pca9685.cc ../pca9685.h
 test_http_channel: test_http_channel.cc ../test_http_channel.cc ../test_http_channel.h
 	$(CXX) $(CXXFLAGS) -o $@ test_http_channel.cc ../test_http_channel.cc
 
+preview: preview.cc ../eye_renderer.cc ../eye_renderer.h ../eye_theme.cc ../eye_theme.h ../eye_iris_tex.cc
+	$(CXX) $(CXXFLAGS) -o $@ preview.cc ../eye_renderer.cc ../eye_theme.cc ../eye_iris_tex.cc -lm
+
+# 肉眼检查用：把 THEMES 里每个主题的七种情绪渲成 PNG
+THEMES ?= ocean anime-sky
+preview-png: preview
+	./preview $(THEMES)
+	python3 to_png.py
+
 clean:
-	rm -f test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel *.ppm
+	rm -f test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel preview *.ppm

@@ -30,6 +30,16 @@ constexpr EyeTheme kThemes[] = {
     {20, "uncanny-human", 0x8B4A, 0x4208, ScleraStyle::kLight, PupilShape::kRound, &kIrisHuman},
     {21, "uncanny-dragon", 0xFF08, 0xA000, ScleraStyle::kDark, PupilShape::kVerticalSlit,
      &kIrisDragon},
+    // 日系画法。内外色差要比写实主题大得多 —— 动漫虹膜是一条从瞳孔边缘的浅色
+    // 到外缘深色的强渐变，内外色太接近会让放射纤维和角膜缘环一起糊掉。
+    {22, "anime-sky", 0x7F5F, 0x0A75, ScleraStyle::kLight, PupilShape::kRound, nullptr,
+     IrisStyle::kAnime},
+    {23, "anime-rose", 0xFD9B, 0xA0CC, ScleraStyle::kLight, PupilShape::kRound, nullptr,
+     IrisStyle::kAnime},
+    {24, "anime-gold", 0xFF11, 0x9AC0, ScleraStyle::kLight, PupilShape::kRound, nullptr,
+     IrisStyle::kAnime},
+    {25, "anime-violet", 0xDDDF, 0x48F2, ScleraStyle::kLight, PupilShape::kRound, nullptr,
+     IrisStyle::kAnime},
 };
 
 static_assert(sizeof(kThemes) / sizeof(kThemes[0]) == EyeThemeCatalog::Count());

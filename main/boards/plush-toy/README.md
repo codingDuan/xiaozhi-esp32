@@ -78,11 +78,11 @@ GPIO19/20 保留给 ESP32-S3 原生 USB，GPIO43 保留给控制台 UART TX。�
 
 ### 切换眼睛主题
 
-说“换眼睛”会按以下顺序切到下一种主题，第二十种后回到第一种：
+说“换眼睛”会按以下顺序切到下一种主题，最后一种后回到第一种：
 
-`ocean`、`emerald`、`violet`、`amber`、`rose`、`ice`、`copper`、`jade`、`midnight`、`pearl`、`void-blue`、`void-purple`、`void-rose`、`dragon-amber`、`dragon-emerald`、`dragon-violet`、`cat-gold`、`cat-jade`、`cat-ice`、`cat-rose`。
+`ocean`、`emerald`、`violet`、`amber`、`rose`、`ice`、`copper`、`jade`、`midnight`、`pearl`、`void-blue`、`void-purple`、`void-rose`、`dragon-amber`、`dragon-emerald`、`dragon-violet`、`cat-gold`、`cat-jade`、`cat-ice`、`cat-rose`、`uncanny-human`、`uncanny-dragon`、`anime-sky`、`anime-rose`、`anime-gold`、`anime-violet`。
 
-也可指名选择，例如“换成 `dragon-amber` 眼睛”或“换成 `cat-gold` 眼睛”。前者是竖瞳龙眼，后者是横瞳猫眼。主题选择会持久化，断电重启后保持；它与 `self.eyes.swap_colors` 的面板 RGB/BGR 校准相互独立。
+也可指名选择，例如“换成 `dragon-amber` 眼睛”或“换成 `cat-gold` 眼睛”。前者是竖瞳龙眼，后者是横瞳猫眼。`anime-*` 四种走日系画法：虹膜放大到写实的一倍半、上缘压一条眼睑投影带、下缘补一道反射光月牙、加放射纤维和加粗的睫毛线，高光按虹膜比例放大。主题选择会持久化，断电重启后保持；它与 `self.eyes.swap_colors` 的面板 RGB/BGR 校准相互独立。
 
 ## 本地服务端地址
 
@@ -131,6 +131,14 @@ python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 run-regress
 ```sh
 cd main/boards/plush-toy/test
 make clean && make test
+```
+
+观感改动还要肉眼过一遍。下面这条把每个主题的七种情绪渲成 PNG，
+默认渲 `ocean` 和 `anime-sky` 两种画法便于对照：
+
+```sh
+make preview-png                              # 默认对照
+make preview-png THEMES="anime-rose midnight" # 指名渲某几种
 ```
 
 代码交付至少还应执行：
