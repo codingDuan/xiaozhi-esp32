@@ -9,3 +9,5 @@ preview
 test_eye_theme
 test_pca9685
 test_http_channel
+test_mpr121
+test_touch_controller
