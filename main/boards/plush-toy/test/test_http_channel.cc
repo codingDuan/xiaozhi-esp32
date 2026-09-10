@@ -39,12 +39,27 @@ int main() {
     CHECK(channel.Dispatch("emotion", R"({"emotion":"happy"})"),
           "whitelisted emotion must dispatch");
     CHECK(scheduled_action == "emotion", "emotion must reach the scheduler");
+    CHECK(channel.Dispatch("touch_modes", R"({"modes":5})"),
+          "whitelisted touch_modes must dispatch");
+    CHECK(scheduled_action == "touch_modes", "touch_modes must reach the scheduler");
+    CHECK(channel.Dispatch("simulate_touch", R"({"electrode":0,"pressed":true})"),
+          "whitelisted simulate_touch must dispatch");
+    CHECK(channel.StatusJson().find("\"simulate_touch\"") != std::string::npos,
+          "status must list simulate_touch");
     CHECK(!channel.Dispatch("self.reboot", "{}"), "non-test action must be rejected");
     CHECK(channel.StatusJson().find("\"wave\"") != std::string::npos, "status must list wave");
     CHECK(channel.StatusJson().find("\"emotion\"") != std::string::npos,
           "status must list emotion");
     CHECK(channel.StatusJson().find("self.reboot") == std::string::npos,
           "status must not expose reboot");
+
+    // 控制台是哑的，原始计数只能从 status 拿。板级片段必须原样嵌入。
+    TestHttpChannel probed("172.20.10.14", [](const std::string&, const std::string&) {},
+                           []() { return std::string(R"("touch_bits":1)"); });
+    CHECK(probed.StatusJson().find(R"("touch_bits":1)") != std::string::npos,
+          "status must embed the board-provided fragment");
+    CHECK(probed.StatusJson().find("\"ready\":true") != std::string::npos,
+          "status must keep the ready flag");
 
     TestHttpChannel disabled("example.com", [](const std::string&, const std::string&) {});
     CHECK(!disabled.enabled(), "hostname must disable the channel");

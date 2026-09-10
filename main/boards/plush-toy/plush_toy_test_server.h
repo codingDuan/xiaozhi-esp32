@@ -10,7 +10,8 @@
 class PlushToyTestServer {
 public:
     PlushToyTestServer(const std::string& allowed_host,
-                       TestHttpChannel::ScheduleAction schedule_action);
+                       TestHttpChannel::ScheduleAction schedule_action,
+                       TestHttpChannel::StatusProvider status_provider = nullptr);
     ~PlushToyTestServer();
     bool Start();
 

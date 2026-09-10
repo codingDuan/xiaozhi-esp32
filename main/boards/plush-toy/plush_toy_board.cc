@@ -99,6 +99,18 @@ private:
                 // 通道的入口，联动行为必须和线上完全同一条路径才有回归价值。
                 const auto* emotion = cJSON_GetObjectItem(arguments, "emotion");
                 display_->SetEmotion(cJSON_IsString(emotion) ? emotion->valuestring : "neutral");
+            } else if (action == "touch_modes" && behavior_ != nullptr) {
+                const auto* modes = cJSON_GetObjectItem(arguments, "modes");
+                if (cJSON_IsNumber(modes))
+                    behavior_->SetTouchModes((uint32_t)modes->valueint);
+            } else if (action == "simulate_touch" && touch_ != nullptr) {
+                // 不碰硬件就能验证四条响应路径。没有它，每跑一次回归都要有人
+                // 真的伸手去摸，且结果依赖手指位置和力度，不可重复。
+                const auto* electrode = cJSON_GetObjectItem(arguments, "electrode");
+                const auto* pressed = cJSON_GetObjectItem(arguments, "pressed");
+                const int ch = cJSON_IsNumber(electrode) ? electrode->valueint : 0;
+                const bool down = cJSON_IsBool(pressed) ? cJSON_IsTrue(pressed) : true;
+                touch_->ApplyTouchBits(down ? (uint16_t)(1u << ch) : 0);
             } else if (action == "diagnostics" && pca_ != nullptr) {
                 ESP_LOGI(TAG, "test diagnostics: %s", pca_->Diagnostics().c_str());
             }
@@ -107,15 +119,38 @@ private:
         });
     }
 
+    // 控制台静默，原始计数只能从 HTTP 拿。DIAG 位关掉时省掉这段读 I2C 的开销。
+    std::string TestStatusFragment() {
+        std::string json =
+            "\"touch_modes\":" + std::to_string(behavior_ != nullptr ? behavior_->touch_modes() : 0);
+        json += ",\"touch_present\":";
+        json += (mpr121_ != nullptr ? "true" : "false");
+        json += ",\"servo_present\":";
+        json += (pca_ != nullptr ? "true" : "false");
+        if (pca_ != nullptr)
+            json += ",\"servo_diagnostics\":\"" + pca_->Diagnostics() + "\"";
+        if (mpr121_ != nullptr && behavior_ != nullptr &&
+            (behavior_->touch_modes() & TOUCH_MODE_DIAG) != 0) {
+            json += ",\"touch_bits\":" + std::to_string(mpr121_->ReadTouchBits());
+            json += ",\"touch_filtered\":" +
+                    std::to_string(mpr121_->ReadFiltered(TOUCH_HEAD_ELECTRODE));
+            json += ",\"touch_baseline\":" +
+                    std::to_string(mpr121_->ReadBaseline(TOUCH_HEAD_ELECTRODE));
+        }
+        return json;
+    }
+
     void InitializeTestServer() {
         if (test_server_ != nullptr)
             return;
         Settings settings("websocket", false);
         const auto host = ExtractWebsocketHost(settings.GetString("url"));
         test_server_ = new PlushToyTestServer(
-            host, [this](const std::string& action, const std::string& arguments) {
+            host,
+            [this](const std::string& action, const std::string& arguments) {
                 ScheduleTestAction(action, arguments);
-            });
+            },
+            [this]() { return TestStatusFragment(); });
         if (!test_server_->Start())
             ESP_LOGW(TAG, "独立 HTTP 测试通道未启动");
     }

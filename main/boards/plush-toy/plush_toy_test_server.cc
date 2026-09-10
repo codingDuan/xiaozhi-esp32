@@ -14,8 +14,9 @@ constexpr char kTag[] = "PlushTestHttp";
 }  // namespace
 
 PlushToyTestServer::PlushToyTestServer(const std::string& allowed_host,
-                                       TestHttpChannel::ScheduleAction schedule_action)
-    : channel_(allowed_host, std::move(schedule_action)) {}
+                                       TestHttpChannel::ScheduleAction schedule_action,
+                                       TestHttpChannel::StatusProvider status_provider)
+    : channel_(allowed_host, std::move(schedule_action), std::move(status_provider)) {}
 
 PlushToyTestServer::~PlushToyTestServer() {
     if (server_ != nullptr)

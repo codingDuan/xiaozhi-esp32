@@ -9,12 +9,16 @@
 namespace {
 bool IsAllowedAction(const std::string& action) {
     return action == "wave" || action == "hug" || action == "cheer" || action == "eyes" ||
-           action == "emotion" || action == "diagnostics";
+           action == "emotion" || action == "touch_modes" || action == "simulate_touch" ||
+           action == "diagnostics";
 }
 }  // namespace
 
-TestHttpChannel::TestHttpChannel(std::string allowed_host, ScheduleAction schedule_action)
-    : allowed_host_(std::move(allowed_host)), schedule_action_(std::move(schedule_action)) {}
+TestHttpChannel::TestHttpChannel(std::string allowed_host, ScheduleAction schedule_action,
+                                 StatusProvider status_provider)
+    : allowed_host_(std::move(allowed_host)),
+      schedule_action_(std::move(schedule_action)),
+      status_provider_(std::move(status_provider)) {}
 
 bool TestHttpChannel::enabled() const {
     in_addr allowed = {};
@@ -46,5 +50,13 @@ bool TestHttpChannel::Dispatch(const std::string& action, const std::string& arg
 }
 
 std::string TestHttpChannel::StatusJson() const {
-    return R"({"ready":true,"actions":["wave","hug","cheer","eyes","emotion","diagnostics"]})";
+    std::string json =
+        R"({"ready":true,"actions":["wave","hug","cheer","eyes","emotion","touch_modes",)"
+        R"("simulate_touch","diagnostics"])";
+    if (status_provider_) {
+        const std::string fragment = status_provider_();
+        if (!fragment.empty())
+            json += "," + fragment;
+    }
+    return json + "}";
 }
