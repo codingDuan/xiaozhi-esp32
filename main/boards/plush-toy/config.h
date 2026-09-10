@@ -103,6 +103,20 @@
 // 塑料齿保护 + 毛绒布料回弹力，工作行程限制在 ±30°（实测无卡滞）
 #define SERVO_MAX_ANGLE      30
 
+// ── 触摸：MPR121 并入舵机那条 I2C，不占新引脚 ──
+// 引脚已用尽（26-32 是 flash，33-37 被八线 PSRAM 占用），IRQ 无处可接，
+// 因此只能轮询。去抖交给芯片的 DEBOUNCE 寄存器(0x5B)，不在软件里做第二重。
+//
+// 模块 VCC 必须接 3V3。它的 I2C 上拉拉到自身 VCC，接 5V 会把 SDA(GPIO44) 与
+// SCL(GPIO3) 拉到 5V，超出耐压；GPIO3 还是 JTAG_SEL 启动脚。
+#define MPR121_ADDR              0x5A          // ADDR 接地时的默认地址
+#define TOUCH_POLL_INTERVAL_MS   50
+#define TOUCH_HEAD_ELECTRODE     0             // 本期只接头部一个电极
+#define TOUCH_ELECTRODE_COUNT    12
+// 出厂猜测值，必须实机标定后回填。标定方法见 README「触摸标定」。
+#define TOUCH_PRESS_THRESHOLD    0x0C
+#define TOUCH_RELEASE_THRESHOLD  0x06
+
 // GPIO43(丝印TX) 保留给控制台 TX，勿占用 —— 否则日志变乱码（实测）
 // 现已无空闲脚：3=舵机SCL 14/38=屏SPI 44=舵机SDA 45/46=两屏CS
 // GPIO19/20 保持原生 USB，勿占用

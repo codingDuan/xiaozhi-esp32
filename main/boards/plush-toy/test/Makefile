@@ -8,13 +8,14 @@ CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -I.. -Istubs
 
 .PHONY: test clean preview-png
 
-test: test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel
+test: test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel test_mpr121
 	./test_eye_renderer
 	./test_eye_theme
 	./test_overlay_qr
 	./test_overlay_renderer
 	./test_pca9685
 	./test_http_channel
+	./test_mpr121
 
 test_eye_renderer: test_eye_renderer.cc ../eye_renderer.cc ../eye_renderer.h ../eye_theme.cc ../eye_theme.h ../eye_iris_tex.cc ../eye_iris_tex.h
 	$(CXX) $(CXXFLAGS) -o $@ test_eye_renderer.cc ../eye_renderer.cc ../eye_theme.cc ../eye_iris_tex.cc -lm
@@ -34,6 +35,9 @@ test_pca9685: test_pca9685.cc ../pca9685.cc ../pca9685.h
 test_http_channel: test_http_channel.cc ../test_http_channel.cc ../test_http_channel.h
 	$(CXX) $(CXXFLAGS) -o $@ test_http_channel.cc ../test_http_channel.cc
 
+test_mpr121: test_mpr121.cc ../mpr121.cc ../mpr121.h ../config.h
+	$(CXX) $(CXXFLAGS) -o $@ test_mpr121.cc ../mpr121.cc
+
 preview: preview.cc ../eye_renderer.cc ../eye_renderer.h ../eye_theme.cc ../eye_theme.h ../eye_iris_tex.cc
 	$(CXX) $(CXXFLAGS) -o $@ preview.cc ../eye_renderer.cc ../eye_theme.cc ../eye_iris_tex.cc -lm
 
@@ -44,4 +48,4 @@ preview-png: preview
 	python3 to_png.py
 
 clean:
-	rm -f test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel preview *.ppm
+	rm -f test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel test_mpr121 preview *.ppm
