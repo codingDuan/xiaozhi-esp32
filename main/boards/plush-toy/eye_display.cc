@@ -95,6 +95,10 @@ EyeDisplay::EyeDisplay(esp_lcd_panel_handle_t left, esp_lcd_panel_handle_t right
         EyeRenderer::SetSwapRB(s.GetInt("swap_rb", 0) != 0);
         theme_selection_ = EyeThemeSelection(static_cast<uint8_t>(s.GetInt("theme_id", 0)));
     }
+    // 【临时】日系虹膜调参期间强制上电即用 anime-sky。板子连的是手机热点、
+    // 开发机连的是另一个 WiFi，HTTP 测试通道够不着，换主题只能靠重烧。
+    // 这里只覆盖内存里的选择、不写 NVS，删掉本行即恢复由 NVS 决定。
+    theme_selection_.Select("anime-sky");
     base_ = state_ = LookupEmotion("neutral");
     Flush(EyeRenderer::FullRect());
     ESP_LOGI(TAG, "双眼初始化完成");
