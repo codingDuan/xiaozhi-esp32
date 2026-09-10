@@ -10,7 +10,7 @@ namespace {
 bool IsAllowedAction(const std::string& action) {
     return action == "wave" || action == "hug" || action == "cheer" || action == "eyes" ||
            action == "emotion" || action == "touch_modes" || action == "simulate_touch" ||
-           action == "diagnostics";
+           action == "motion_modes" || action == "simulate_motion" || action == "diagnostics";
 }
 }  // namespace
 
@@ -52,7 +52,7 @@ bool TestHttpChannel::Dispatch(const std::string& action, const std::string& arg
 std::string TestHttpChannel::StatusJson() const {
     std::string json =
         R"({"ready":true,"actions":["wave","hug","cheer","eyes","emotion","touch_modes",)"
-        R"("simulate_touch","diagnostics"])";
+        R"("simulate_touch","motion_modes","simulate_motion","diagnostics"])";
     if (status_provider_) {
         const std::string fragment = status_provider_();
         if (!fragment.empty())

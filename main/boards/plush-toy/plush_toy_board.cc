@@ -33,6 +33,7 @@
 #include <driver/i2c_master.h>
 #include <driver/spi_common.h>
 #include <esp_log.h>
+#include <esp_timer.h>
 #include <cJSON.h>
 
 #include <algorithm>
@@ -115,6 +116,26 @@ private:
                 const int ch = cJSON_IsNumber(electrode) ? electrode->valueint : 0;
                 const bool down = cJSON_IsBool(pressed) ? cJSON_IsTrue(pressed) : true;
                 touch_->ApplyTouchBits(down ? (uint16_t)(1u << ch) : 0);
+            } else if (action == "motion_modes" && behavior_ != nullptr) {
+                const auto* modes = cJSON_GetObjectItem(arguments, "modes");
+                if (cJSON_IsNumber(modes))
+                    behavior_->SetMotionModes((uint32_t)modes->valueint);
+            } else if (action == "simulate_motion" && motion_ != nullptr) {
+                // 不碰硬件验证四条响应路径。摇晃靠连喂剧烈样本，姿态靠喂重力方向，
+                // 都走 ApplySample，与真实轮询同一条路径。
+                const auto* kind = cJSON_GetObjectItem(arguments, "kind");
+                const std::string value = cJSON_IsString(kind) ? kind->valuestring : "shake";
+                int64_t now = esp_timer_get_time() / 1000;
+                if (value == "shake") {
+                    for (int i = 0; i < MOTION_SHAKE_HITS; ++i, now += MOTION_POLL_INTERVAL_MS)
+                        motion_->ApplySample(0, 0, MOTION_LSB_PER_G * 2, now);
+                } else if (value == "inverted") {
+                    motion_->ApplySample(0, 0, -MOTION_LSB_PER_G, now);
+                } else if (value == "lying") {
+                    motion_->ApplySample(MOTION_LSB_PER_G, 0, 0, now);
+                } else {
+                    motion_->ApplySample(0, 0, MOTION_LSB_PER_G, now);
+                }
             } else if (action == "diagnostics" && pca_ != nullptr) {
                 ESP_LOGI(TAG, "test diagnostics: %s", pca_->Diagnostics().c_str());
             }
@@ -155,6 +176,22 @@ private:
                 json += std::to_string(mpr121_->ReadBaseline(ch));
             }
             json += "]";
+        }
+
+        json += ",\"motion_modes\":" +
+                std::to_string(behavior_ != nullptr ? behavior_->motion_modes() : 0);
+        json += ",\"motion_present\":";
+        json += (mpu6050_ != nullptr ? "true" : "false");
+        if (mpu6050_ != nullptr && motion_ != nullptr && behavior_ != nullptr &&
+            (behavior_->motion_modes() & MOTION_MODE_DIAG) != 0) {
+            int16_t ax = 0, ay = 0, az = 0;
+            // 读失败就不报这三个字段，而不是报 0 —— 0 是合法加速度值。
+            if (mpu6050_->ReadAccel(ax, ay, az)) {
+                json += ",\"accel\":[" + std::to_string(ax) + "," + std::to_string(ay) + "," +
+                        std::to_string(az) + "]";
+            }
+            json += ",\"orientation\":" + std::to_string((int)motion_->orientation());
+            json += ",\"shake_hits\":" + std::to_string(motion_->shake_hits());
         }
         return json;
     }

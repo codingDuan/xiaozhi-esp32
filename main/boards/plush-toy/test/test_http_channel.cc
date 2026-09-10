@@ -46,6 +46,13 @@ int main() {
           "whitelisted simulate_touch must dispatch");
     CHECK(channel.StatusJson().find("\"simulate_touch\"") != std::string::npos,
           "status must list simulate_touch");
+    CHECK(channel.Dispatch("motion_modes", R"({"modes":9})"),
+          "whitelisted motion_modes must dispatch");
+    CHECK(scheduled_action == "motion_modes", "motion_modes must reach the scheduler");
+    CHECK(channel.Dispatch("simulate_motion", R"({"kind":"shake"})"),
+          "whitelisted simulate_motion must dispatch");
+    CHECK(channel.StatusJson().find("\"simulate_motion\"") != std::string::npos,
+          "status must list simulate_motion");
     CHECK(!channel.Dispatch("self.reboot", "{}"), "non-test action must be rejected");
     CHECK(channel.StatusJson().find("\"wave\"") != std::string::npos, "status must list wave");
     CHECK(channel.StatusJson().find("\"emotion\"") != std::string::npos,
