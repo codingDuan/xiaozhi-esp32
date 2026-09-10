@@ -124,6 +124,18 @@
 #define TOUCH_MODE_DIAG     0x08   // 读值诊断：把原始计数放进 HTTP status 返回
 #define TOUCH_MODES_DEFAULT (TOUCH_MODE_REFLEX | TOUCH_MODE_DIAG)
 
+// ── 运动：MPU6050 并入同一条 I2C，不占新引脚 ──
+// INT 引脚同样无处可接，改为 100ms 轮询。姿态与摇晃都不需要毫秒级响应。
+//
+// GY-521 板载 4.7k 上拉，比 PCA9685/MPR121 的 10k 低一倍。三块板并联后
+// 总上拉约 2.4k。若接入后 I2C 读写失败，或触摸、舵机开始不稳，
+// 第一件事是拆掉 GY-521 上那两颗上拉电阻。
+#define MPU6050_ADDR             0x68   // AD0 接地或悬空
+#define MOTION_POLL_INTERVAL_MS  100
+// ±4g 量程。±2g 摇晃时削顶，±8g 以上牺牲静态姿态分辨率。
+#define MOTION_ACCEL_FS_SEL      0x08
+#define MOTION_LSB_PER_G         8192
+
 // GPIO43(丝印TX) 保留给控制台 TX，勿占用 —— 否则日志变乱码（实测）
 // 现已无空闲脚：3=舵机SCL 14/38=屏SPI 44=舵机SDA 45/46=两屏CS
 // GPIO19/20 保持原生 USB，勿占用

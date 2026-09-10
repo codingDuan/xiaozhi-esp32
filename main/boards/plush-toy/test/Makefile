@@ -8,7 +8,7 @@ CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -I.. -Istubs
 
 .PHONY: test clean preview-png
 
-test: test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel test_mpr121 test_touch_controller
+test: test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel test_mpr121 test_touch_controller test_mpu6050
 	./test_eye_renderer
 	./test_eye_theme
 	./test_overlay_qr
@@ -17,6 +17,7 @@ test: test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer tes
 	./test_http_channel
 	./test_mpr121
 	./test_touch_controller
+	./test_mpu6050
 
 test_eye_renderer: test_eye_renderer.cc ../eye_renderer.cc ../eye_renderer.h ../eye_theme.cc ../eye_theme.h ../eye_iris_tex.cc ../eye_iris_tex.h
 	$(CXX) $(CXXFLAGS) -o $@ test_eye_renderer.cc ../eye_renderer.cc ../eye_theme.cc ../eye_iris_tex.cc -lm
@@ -39,6 +40,9 @@ test_http_channel: test_http_channel.cc ../test_http_channel.cc ../test_http_cha
 test_touch_controller: test_touch_controller.cc ../touch_controller.cc ../touch_controller.h ../mpr121.cc ../mpr121.h ../config.h
 	$(CXX) $(CXXFLAGS) -o $@ test_touch_controller.cc ../touch_controller.cc ../mpr121.cc
 
+test_mpu6050: test_mpu6050.cc ../mpu6050.cc ../mpu6050.h ../config.h
+	$(CXX) $(CXXFLAGS) -o $@ test_mpu6050.cc ../mpu6050.cc
+
 test_mpr121: test_mpr121.cc ../mpr121.cc ../mpr121.h ../config.h
 	$(CXX) $(CXXFLAGS) -o $@ test_mpr121.cc ../mpr121.cc
 
@@ -52,4 +56,4 @@ preview-png: preview
 	python3 to_png.py
 
 clean:
-	rm -f test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel test_mpr121 test_touch_controller preview *.ppm
+	rm -f test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel test_mpr121 test_touch_controller test_mpu6050 preview *.ppm

@@ -11,3 +11,5 @@ test_pca9685
 test_http_channel
 test_mpr121
 test_touch_controller
+test_mpu6050
+test_motion_controller
