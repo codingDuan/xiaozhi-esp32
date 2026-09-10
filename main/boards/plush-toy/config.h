@@ -153,6 +153,17 @@
 // 玩具竖立时哪一轴对着天。装配后若姿态判反，改这里而不是改判定逻辑。
 #define MOTION_UP_AXIS_Z         1
 
+// 运动响应模式。形状与触摸一致，但用独立的 NVS 键 motion_modes，
+// 以便调试时单独关掉其中一类传感器。
+#define MOTION_MODE_REFLEX   0x01
+#define MOTION_MODE_WAKE     0x02
+#define MOTION_MODE_REPORT   0x04
+#define MOTION_MODE_DIAG     0x08
+#define MOTION_MODES_DEFAULT (MOTION_MODE_REFLEX | MOTION_MODE_DIAG)
+
+// 动作结束后机械振动还会持续一小段，这段时间内继续抑制摇晃判定。
+#define MOTION_SERVO_SETTLE_MS 400
+
 // GPIO43(丝印TX) 保留给控制台 TX，勿占用 —— 否则日志变乱码（实测）
 // 现已无空闲脚：3=舵机SCL 14/38=屏SPI 44=舵机SDA 45/46=两屏CS
 // GPIO19/20 保持原生 USB，勿占用

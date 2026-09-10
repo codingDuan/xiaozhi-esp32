@@ -3,6 +3,7 @@
 #include "config.h"
 #include "device_state.h"
 #include "limb_controller.h"
+#include "motion_controller.h"
 
 #include <stdint.h>
 #include <string>
@@ -32,6 +33,12 @@ public:
     // 立即生效并写回 NVS。
     void SetTouchModes(uint32_t modes);
 
+    // 由 MotionController 转发而来。按 motion_modes 掩码分发。
+    void OnMotion(MotionEvent event, Orientation orientation);
+
+    uint32_t motion_modes() const { return motion_modes_; }
+    void SetMotionModes(uint32_t modes);
+
 private:
     static void TaskEntry(void* arg);
     void Run();
@@ -41,4 +48,5 @@ private:
     EyeDisplay* display_;
     DeviceState last_state_ = kDeviceStateUnknown;
     uint32_t touch_modes_ = TOUCH_MODES_DEFAULT;
+    uint32_t motion_modes_ = MOTION_MODES_DEFAULT;
 };

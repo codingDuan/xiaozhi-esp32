@@ -2,7 +2,10 @@
 #include "config.h"
 
 #include <esp_log.h>
+#include <esp_timer.h>
+
 #include <algorithm>
+#include <cstdint>
 
 #define TAG "LimbController"
 
@@ -53,13 +56,18 @@ void LimbController::Run() {
     Item it;
     while (true) {
         if (xQueueReceive(queue_, &it, portMAX_DELAY) == pdTRUE) {
+            busy_until_us_ = INT64_MAX;       // 动作期间无条件为忙
             Perform(it.g, it.times);
             vTaskDelay(pdMS_TO_TICKS(200));
             Relax();
             vTaskDelay(pdMS_TO_TICKS(300));   // 强制冷却，让电源轨恢复
+            // 动作结束后机械振动还会持续一小段，沉降窗口内继续算忙
+            busy_until_us_ = esp_timer_get_time() + MOTION_SERVO_SETTLE_MS * 1000;
         }
     }
 }
+
+bool LimbController::busy() const { return esp_timer_get_time() < busy_until_us_; }
 
 void LimbController::MoveTo(int left_deg, int right_deg, int step_ms) {
     // 分步逼近，绝不瞬间大幅跳变 —— 急转是电流尖峰的主要来源

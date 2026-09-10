@@ -12,6 +12,14 @@ PlushBehavior::PlushBehavior(LimbController* limbs, EyeDisplay* display)
     : limbs_(limbs), display_(display) {
     Settings settings("plush", false);
     touch_modes_ = (uint32_t)settings.GetInt("touch_modes", TOUCH_MODES_DEFAULT);
+    motion_modes_ = (uint32_t)settings.GetInt("motion_modes", MOTION_MODES_DEFAULT);
+}
+
+void PlushBehavior::SetMotionModes(uint32_t modes) {
+    motion_modes_ = modes;
+    Settings settings("plush", true);
+    settings.SetInt("motion_modes", (int32_t)modes);
+    ESP_LOGI(TAG, "运动模式掩码改为 0x%02X", (unsigned)modes);
 }
 
 void PlushBehavior::SetTouchModes(uint32_t modes) {
@@ -119,6 +127,40 @@ void PlushBehavior::OnTouch(int electrode, bool pressed) {
         // 因此它与 WAKE 位是包含关系，不能再叠加一次 StartListening。
         app.WakeWordInvoke("有人摸了摸我的头");
     } else if ((touch_modes_ & TOUCH_MODE_WAKE) != 0) {
+        if (app.GetDeviceState() == kDeviceStateIdle)
+            app.StartListening();
+    }
+}
+
+void PlushBehavior::OnMotion(MotionEvent event, Orientation orientation) {
+    ESP_LOGI(TAG, "运动事件 %d 姿态 %d，掩码 0x%02X", (int)event, (int)orientation,
+             (unsigned)motion_modes_);
+
+    if ((motion_modes_ & MOTION_MODE_REFLEX) != 0 && display_ != nullptr) {
+        if (event == MotionEvent::kShake) {
+            display_->SetEmotion("confused");
+            if (limbs_ != nullptr && limbs_->available())
+                limbs_->Enqueue(Gesture::kWaveBoth, 1);
+        } else {
+            // 姿态变化不带手臂动作：搬动玩具时动手臂容易卡住，还白费电流。
+            switch (orientation) {
+                case Orientation::kInverted: display_->SetEmotion("surprised"); break;
+                case Orientation::kLying:    display_->SetEmotion("sleepy"); break;
+                case Orientation::kUpright:  display_->SetEmotion("neutral"); break;
+                default: break;
+            }
+        }
+    }
+
+    // 姿态变化不发起对话：搬动玩具太频繁，会把对话刷爆。只有摇晃才上行。
+    if (event != MotionEvent::kShake)
+        return;
+
+    auto& app = Application::GetInstance();
+    if ((motion_modes_ & MOTION_MODE_REPORT) != 0) {
+        // 与 OnTouch 同理：WakeWordInvoke 自带唤醒，与 WAKE 位是包含关系。
+        app.WakeWordInvoke("有人在摇晃我");
+    } else if ((motion_modes_ & MOTION_MODE_WAKE) != 0) {
         if (app.GetDeviceState() == kDeviceStateIdle)
             app.StartListening();
     }
