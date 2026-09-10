@@ -203,5 +203,6 @@ idf.py build
 
 - [设计方案](../../../docs/superpowers/specs/2026-09-05-plush-toy-design.md)
 - [触摸感知设计（MPR121）](../../../docs/superpowers/specs/2026-09-10-plush-toy-mpr121-touch-design.md)
+- [运动感知设计（MPU6050）](../../../docs/superpowers/specs/2026-09-10-plush-toy-mpu6050-motion-design.md)
 - [进度汇总](../../../docs/superpowers/plans/STATUS.md)
 - [剩余 TODO](../../../docs/superpowers/plans/TODO.md)
