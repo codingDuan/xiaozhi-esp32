@@ -129,6 +129,43 @@ python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 run-regress
 
 `--device-url` 默认是当前开发板地址 `http://172.20.10.2:8181`，但建议每次明确传入。`{"accepted":true}` 表示请求已由板子的应用任务接收和排队；舵机是否真正转动、眼睛是否切换仍需目视验收。情绪联动尤其要看 angry 那条：眼睛应当变化而手臂必须保持不动。
 
+## 触摸标定（MPR121）
+
+**接线前先看这条：模块的 VCC 接 ESP32 的 3V3，不要接 5V。** 模块的 I2C 上拉电阻拉到自身 VCC，接 5V 会把 SDA(GPIO44) 与 SCL(GPIO3) 拉到 5V，超出 ESP32-S3 耐压；GPIO3 还是 JTAG_SEL 启动引脚。
+
+MPR121 并入舵机那条 I2C（`I2C_NUM_0`），地址 0x5A，与 PCA9685 的 0x40 不冲突，不占用任何新引脚。引脚已用尽，IRQ 接不上，因此靠 50ms 轮询，去抖由芯片的 `DEBOUNCE` 寄存器完成。
+
+阈值必须实机标定，`config.h` 里的出厂值只是猜测 —— 布料厚度和电极面积会显著改变触发点。步骤：
+
+```sh
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 touch-modes 0x09
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 status
+```
+
+`status` 会带出 `touch_filtered` 与 `touch_baseline`。手指不碰时两者接近；手指贴上去时 `touch_filtered` 明显下降。记下这个差值，把约六成填进 `config.h` 的 `TOUCH_PRESS_THRESHOLD`，约三成填 `TOUCH_RELEASE_THRESHOLD`，然后重新烧录。
+
+**释放阈值必须低于触摸阈值**，这是迟滞的来源。两者相等或反过来会让电极在临界点反复抖动，日志里表现为一秒内几十次按下松开。
+
+四个响应模式可叠加，掩码存 NVS，改完立即生效且重启保持：
+
+| 位 | 值 | 模式 |
+|---|---|---|
+| 0 | 0x01 | 本地反射：直接改眼睛、动手臂 |
+| 1 | 0x02 | 唤醒对话：进入聆听状态 |
+| 2 | 0x04 | 上报大模型：把触摸作为一句话送给服务端 |
+| 3 | 0x08 | 读值诊断：把原始计数放进 status 返回 |
+
+默认 `0x09`。上报位与唤醒位是包含关系：上报走 `WakeWordInvoke`，本身就带唤醒效果，两位同开不会触发两轮对话。
+
+没接传感器也能验证四条响应路径：
+
+```sh
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 simulate-touch 0
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 simulate-touch 0 --release
+```
+
+它复用 `TouchController::ApplyTouchBits`，与真实触摸走同一条路径，因此结果不依赖手指位置和力度。
+
 ## 验证
 
 纯渲染和二维码编码无需 ESP-IDF 或硬件：

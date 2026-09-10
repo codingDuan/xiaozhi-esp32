@@ -23,6 +23,12 @@ REGRESSION_CASES = [
     ("emotion", {"emotion": "happy"}), ("emotion", {"emotion": "loving"}),
     ("emotion", {"emotion": "sad"}), ("emotion", {"emotion": "surprised"}),
     ("emotion", {"emotion": "angry"}), ("emotion", {"emotion": "neutral"}),
+    # 触摸：先只开本地反射，验证眼睛和手臂；再开诊断位，让 status 带出原始计数。
+    # 唤醒与上报两位不进回归 —— 它们会真的发起一轮对话，干扰后续用例。
+    ("touch_modes", {"modes": 0x01}),
+    ("simulate_touch", {"electrode": 0, "pressed": True}),
+    ("simulate_touch", {"electrode": 0, "pressed": False}),
+    ("touch_modes", {"modes": 0x09}),
     ("diagnostics", {}),
 ]
 
@@ -44,6 +50,12 @@ def build_parser() -> argparse.ArgumentParser:
     eyes.add_argument("theme", help="for example: dragon-amber or cat-gold")
     emotion = subparsers.add_parser("emotion", help="set an emotion; drives eyes and gesture")
     emotion.add_argument("emotion", help="for example: happy, loving, sad, surprised or angry")
+    touch_modes = subparsers.add_parser("touch-modes", help="set the touch response mask")
+    touch_modes.add_argument("modes", type=lambda v: int(v, 0),
+                             help="bitmask: 1 reflex, 2 wake, 4 report, 8 diagnostics")
+    simulate = subparsers.add_parser("simulate-touch", help="fake a touch without the sensor")
+    simulate.add_argument("electrode", type=int, choices=range(0, 12), default=0, nargs="?")
+    simulate.add_argument("--release", action="store_true", help="send release instead of press")
     subparsers.add_parser("diagnostics", help="read arm driver diagnostics")
     subparsers.add_parser("run-regression", help="run the standard direct-MCP regression")
     return parser
@@ -61,6 +73,10 @@ def command_to_call(argv: list[str]) -> tuple[str, dict]:
         return "eyes", {"theme": args.theme}
     if args.command == "emotion":
         return "emotion", {"emotion": args.emotion}
+    if args.command == "touch-modes":
+        return "touch_modes", {"modes": args.modes}
+    if args.command == "simulate-touch":
+        return "simulate_touch", {"electrode": args.electrode, "pressed": not args.release}
     if args.command == "diagnostics":
         return "diagnostics", {}
     raise ValueError(f"{args.command} does not map to one MCP tool")

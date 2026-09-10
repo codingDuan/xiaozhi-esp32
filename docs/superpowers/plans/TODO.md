@@ -74,6 +74,9 @@
 
 迁移时把设备 NVS 中的 OTA 地址配为 `http://MacBook-Pro-107.local:8003/xiaozhi/ota/`，并把服务端 `data/.config.yaml` 的地址改为 `ws://MacBook-Pro-107.local:8010/xiaozhi/v1/` 与对应的 `:8003/mcp/vision/explain`。当前没有直接修改运行配置：设备仍需重新配网，且手机热点是否转发 mDNS 必须在现场验证；若热点隔离 mDNS，则改用路由器 DHCP 地址保留或公网域名。
 
+### D5. MPR121 触摸阈值实机标定
+代码已完成（驱动、轮询、模式掩码、HTTP 观测、模拟触摸），但 `config.h` 中的 `TOUCH_PRESS_THRESHOLD` / `TOUCH_RELEASE_THRESHOLD` 仍是出厂猜测值，尚未接线标定。布料厚度和电极面积会显著改变触发点，未标定前真实触摸的灵敏度不可信。标定方法见 `main/boards/plush-toy/README.md` 的「触摸标定」。
+
 ### D4. MPU6050 六轴姿态传感器接入
 手头已有模块，等 MPR121 触摸接入完成后再设计。**引脚可行性已确认**：MPU6050 走 I2C，地址 0x68，可并入 `I2C_NUM_0`，与 PCA9685(0x40)、MPR121(0x5A) 不冲突，只要不接 INT 引脚就不需要任何新 GPIO。待定的是姿态语义（抱起、摇晃、倒置、拍打）如何映射到眼睛与手臂，以及轮询频率与 I2C 带宽的取舍 —— 该总线还要同时喂 PCA9685 的舵机脉宽。
 
