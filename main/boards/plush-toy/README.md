@@ -166,6 +166,50 @@ python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 simulate-to
 
 它复用 `TouchController::ApplyTouchBits`，与真实触摸走同一条路径，因此结果不依赖手指位置和力度。
 
+## 运动标定（MPU6050）
+
+接线同样并入舵机那条 I2C，地址 0x68，不占新引脚：
+
+```
+MPU6050 (GY-521)      ESP32-S3
+VCC  ──►  3V3      ← 模块虽标 3-5V，仍接 3V3，理由同 MPR121
+GND  ──►  GND
+SCL  ──►  GPIO3    ← 与 PCA9685、MPR121 同一节点
+SDA  ──►  GPIO44   ← 与 PCA9685、MPR121 同一节点
+AD0  ──►  GND 或悬空 ← 决定地址 0x68
+INT / XDA / XCL ──► 不接
+```
+
+**总线上拉是接入它特有的风险。** GY-521 板载 4.7k 上拉，比 PCA9685 和 MPR121 的 10k 低一倍。三块板并联后总上拉约 2.4k。100kHz 下预期仍可工作，但若接入后出现 I2C 读写失败，或现有的触摸、舵机开始不稳，**第一件事是拆掉 GY-521 上那两颗上拉电阻**。
+
+只读加速度计，不读陀螺仪：姿态由重力方向得出，摇晃由幅值判定，都不需要角速度。
+
+标定步骤：
+
+```sh
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 motion-modes 0x09
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 status
+```
+
+`status` 会带出 `accel` 三轴、`orientation` 和 `shake_hits`。静置时三轴合矢量应接近 8192（1g，±4g 量程下）。玩具竖立时 `orientation` 应为 1；若读到 3（倒置），说明装配方向相反，**改 `config.h` 的 `MOTION_UP_AXIS_Z` 或轴符号，不要去改判定逻辑**。
+
+姿态四态编号：0 未知、1 竖着、2 躺倒、3 倒置。竖直翻到倒置必然经过躺倒，会产生两个事件，这不是抖动。
+
+**摇晃阈值要注意一个陷阱**：判定看的是合矢量对 1g 的偏离，因此**缓慢倾斜也会被记为命中** —— 例如静态停在 0.6g 时偏离已达 0.4g，超过默认阈值 0.35g，连续三次就会误判为摇晃。若发现搬动玩具时误报摇晃，调大 `MOTION_SHAKE_DELTA` 或调大 `MOTION_SHAKE_HITS`。
+
+四个模式位含义与触摸相同，但存在独立的 NVS 键 `motion_modes`，可以单独关掉其中一类传感器。默认 `0x09`。
+
+不接传感器也能验证四条响应路径：
+
+```sh
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 simulate-motion shake
+python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 simulate-motion lying
+```
+
+取值为 `shake`、`upright`、`lying`、`inverted`，走的是与真实轮询同一条 `ApplySample` 路径。
+
+**舵机自振会被加速度计读到**，因此动作执行期间及结束后 400ms 内摇晃判定被抑制（`LimbController::busy()`）。姿态判定不抑制，它看的是静态重力。验收时务必单独测这一条：触发一次手臂动作，确认**不**产生摇晃事件。
+
 ## 验证
 
 纯渲染和二维码编码无需 ESP-IDF 或硬件：

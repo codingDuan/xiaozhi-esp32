@@ -29,6 +29,14 @@ REGRESSION_CASES = [
     ("simulate_touch", {"electrode": 0, "pressed": True}),
     ("simulate_touch", {"electrode": 0, "pressed": False}),
     ("touch_modes", {"modes": 0x09}),
+    # 运动：同样只开本地反射与诊断。姿态按 竖→躺→倒→竖 走一圈，
+    # 确认每次跨态都产生事件且能回到初态。
+    ("motion_modes", {"modes": 0x01}),
+    ("simulate_motion", {"kind": "shake"}),
+    ("simulate_motion", {"kind": "lying"}),
+    ("simulate_motion", {"kind": "inverted"}),
+    ("simulate_motion", {"kind": "upright"}),
+    ("motion_modes", {"modes": 0x09}),
     ("diagnostics", {}),
 ]
 
@@ -56,6 +64,13 @@ def build_parser() -> argparse.ArgumentParser:
     simulate = subparsers.add_parser("simulate-touch", help="fake a touch without the sensor")
     simulate.add_argument("electrode", type=int, choices=range(0, 12), default=0, nargs="?")
     simulate.add_argument("--release", action="store_true", help="send release instead of press")
+    motion_modes = subparsers.add_parser("motion-modes", help="set the motion response mask")
+    motion_modes.add_argument("modes", type=lambda v: int(v, 0),
+                              help="bitmask: 1 reflex, 2 wake, 4 report, 8 diagnostics")
+    simulate_motion = subparsers.add_parser("simulate-motion",
+                                            help="fake a motion event without moving the toy")
+    simulate_motion.add_argument("kind", choices=("shake", "upright", "lying", "inverted"),
+                                 default="shake", nargs="?")
     subparsers.add_parser("diagnostics", help="read arm driver diagnostics")
     subparsers.add_parser("run-regression", help="run the standard direct-MCP regression")
     return parser
@@ -77,6 +92,10 @@ def command_to_call(argv: list[str]) -> tuple[str, dict]:
         return "touch_modes", {"modes": args.modes}
     if args.command == "simulate-touch":
         return "simulate_touch", {"electrode": args.electrode, "pressed": not args.release}
+    if args.command == "motion-modes":
+        return "motion_modes", {"modes": args.modes}
+    if args.command == "simulate-motion":
+        return "simulate_motion", {"kind": args.kind}
     if args.command == "diagnostics":
         return "diagnostics", {}
     raise ValueError(f"{args.command} does not map to one MCP tool")
