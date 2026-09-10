@@ -16,10 +16,12 @@
 #include "led/single_led.h"
 #include "limb_controller.h"
 #include "mcp_server.h"
+#include "mpr121.h"
 #include "pca9685.h"
 #include "plush_behavior.h"
 #include "plush_toy_test_server.h"
 #include "settings.h"
+#include "touch_controller.h"
 #include "wifi_board.h"
 
 #include <esp_lcd_gc9a01.h>
@@ -57,6 +59,10 @@ private:
     LimbController* limbs_ = nullptr;
     PlushBehavior* behavior_ = nullptr;
     PlushToyTestServer* test_server_ = nullptr;
+    Mpr121* mpr121_ = nullptr;
+    TouchController* touch_ = nullptr;
+    // MPR121 要挂在同一条总线上，因此句柄必须活过 InitializeServoBus()
+    i2c_master_bus_handle_t servo_bus_ = nullptr;
 
     static std::string ExtractWebsocketHost(const std::string& url) {
         const auto scheme_end = url.find("://");
@@ -125,14 +131,13 @@ private:
         cfg.glitch_ignore_cnt = 7;
         cfg.flags.enable_internal_pullup = true;
 
-        i2c_master_bus_handle_t bus = nullptr;
-        esp_err_t err = i2c_new_master_bus(&cfg, &bus);
+        esp_err_t err = i2c_new_master_bus(&cfg, &servo_bus_);
         if (err != ESP_OK) {
             ESP_LOGE(TAG, "舵机 I2C 总线创建失败: %s（肢体动作将不可用）", esp_err_to_name(err));
             return;
         }
 
-        if (i2c_master_probe(bus, PCA9685_ADDR, 100) != ESP_OK) {
+        if (i2c_master_probe(servo_bus_, PCA9685_ADDR, 100) != ESP_OK) {
             ESP_LOGE(TAG,
                      "PCA9685(0x%02X) 无响应。请检查："
                      "SDA(GPIO%d) 与 SCL(GPIO%d) 是否接反、VCC 是否接 3V3、是否共地",
@@ -140,13 +145,31 @@ private:
             return;
         }
 
-        pca_ = new Pca9685(bus, PCA9685_ADDR, SERVO_I2C_HZ);
+        pca_ = new Pca9685(servo_bus_, PCA9685_ADDR, SERVO_I2C_HZ);
         if (!pca_->Init(SERVO_PWM_FREQ_HZ)) {
             delete pca_;
             pca_ = nullptr;
             return;
         }
         pca_->AllOff();  // 上电即泄力，避免舵机顶着未知角度堵转
+    }
+
+    // 触摸链路的任何失败都不得影响对话 —— 与舵机同一原则，只记日志不 ESP_ERROR_CHECK。
+    void InitializeTouch() {
+        if (servo_bus_ == nullptr)
+            return;
+        if (i2c_master_probe(servo_bus_, MPR121_ADDR, 100) != ESP_OK) {
+            ESP_LOGE(TAG,
+                     "MPR121(0x%02X) 无响应。请检查：VCC 是否接 3V3（接 5V 会把 "
+                     "SDA/SCL 拉到 5V 并损坏引脚）、是否共地、ADDR 是否接地",
+                     MPR121_ADDR);
+            return;
+        }
+        mpr121_ = new Mpr121(servo_bus_, MPR121_ADDR, SERVO_I2C_HZ);
+        if (!mpr121_->Init()) {
+            delete mpr121_;
+            mpr121_ = nullptr;
+        }
     }
 
     void InitializeSpi() {
@@ -345,6 +368,14 @@ public:
 
         behavior_ = new PlushBehavior(limbs_, display_);
         behavior_->Start();
+
+        InitializeTouch();
+        touch_ = new TouchController(mpr121_);
+        auto* behavior = behavior_;
+        touch_->SetHandler([behavior](int electrode, bool pressed) {
+            behavior->OnTouch(electrode, pressed);
+        });
+        touch_->Start();
         if (display_ != nullptr) {
             display_->SetBehavior(behavior_);
             display_->StartIdleAnimation();
