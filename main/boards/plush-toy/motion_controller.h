@@ -30,6 +30,8 @@ public:
 
     Orientation orientation() const { return orientation_; }
     int shake_hits() const { return shake_hits_; }
+    // 被合理性闸门丢弃的样本数。直接反映总线坏读率，用于判断电气问题是否好转。
+    int rejected_samples() const { return rejected_samples_; }
 
 private:
     static void TaskEntry(void* arg);
@@ -41,6 +43,9 @@ private:
     MotionHandler handler_;
     Suppressor suppressor_;
     Orientation orientation_ = Orientation::kUnknown;
+    Orientation pending_orientation_ = Orientation::kUnknown;
+    int pending_count_ = 0;
+    int rejected_samples_ = 0;
     int shake_hits_ = 0;
     int64_t shake_window_start_ms_ = 0;
     int64_t shake_cooldown_until_ms_ = 0;

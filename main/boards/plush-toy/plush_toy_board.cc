@@ -192,6 +192,9 @@ private:
             }
             json += ",\"orientation\":" + std::to_string((int)motion_->orientation());
             json += ",\"shake_hits\":" + std::to_string(motion_->shake_hits());
+            // 被合理性闸门丢弃的样本数。总线坏读率的直接读数，
+            // 拆上拉电阻或降速之后靠它判断是否好转。
+            json += ",\"motion_rejected\":" + std::to_string(motion_->rejected_samples());
         }
         return json;
     }

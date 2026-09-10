@@ -73,12 +73,35 @@ void MotionController::UpdateShake(int16_t ax, int16_t ay, int16_t az, int64_t n
 }
 
 void MotionController::ApplySample(int16_t ax, int16_t ay, int16_t az, int64_t now_ms) {
+    // 合理性闸门。实测 I2C 会偶发吐出全 1 的坏字节，把加速度读成 [2647,-1,-1]
+    // 或 az=-258。整帧丢弃，姿态与摇晃都不参与 —— 一个坏样本曾把姿态从竖直
+    // 翻成躺倒，眼睛跟着变 sleepy。
+    const int64_t magnitude_sq = (int64_t)ax * ax + (int64_t)ay * ay + (int64_t)az * az;
+    const int64_t min_sq = (int64_t)MOTION_PLAUSIBLE_MIN * MOTION_PLAUSIBLE_MIN;
+    const int64_t max_sq = (int64_t)MOTION_PLAUSIBLE_MAX * MOTION_PLAUSIBLE_MAX;
+    if (magnitude_sq < min_sq || magnitude_sq > max_sq) {
+        ++rejected_samples_;
+        return;
+    }
+
     const int16_t up = MOTION_UP_AXIS_Z ? az : ay;
     const Orientation next = ClassifyOrientation(up);
-    if (next != orientation_) {
-        orientation_ = next;
-        if (handler_)
-            handler_(MotionEvent::kOrientationChanged, orientation_);
+    if (next == orientation_) {
+        pending_count_ = 0;  // 回到当前态，之前攒的确认作废
+    } else {
+        // 落在合理区间内的坏样本仍可能出现，因此还要求连续若干次判定一致。
+        if (next != pending_orientation_) {
+            pending_orientation_ = next;
+            pending_count_ = 1;
+        } else {
+            ++pending_count_;
+        }
+        if (pending_count_ >= MOTION_ORIENT_CONFIRM) {
+            orientation_ = next;
+            pending_count_ = 0;
+            if (handler_)
+                handler_(MotionEvent::kOrientationChanged, orientation_);
+        }
     }
     UpdateShake(ax, ay, az, now_ms);
 }

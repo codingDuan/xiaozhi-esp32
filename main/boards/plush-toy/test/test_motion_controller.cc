@@ -63,7 +63,7 @@ static void TestInvertedProducesOneMoreEvent() {
     c.SetHandler([&](MotionEvent e, Orientation o) { log.push_back({e, o}); });
     int64_t t = 0;
     FeedUpright(c, t, 5);
-    for (int i = 0; i < 5; ++i, t += MOTION_POLL_INTERVAL_MS)
+    for (int i = 0; i < 10; ++i, t += MOTION_POLL_INTERVAL_MS)
         c.ApplySample(0, 0, -kG, t);
     // 竖直翻到倒置必然路过躺倒：先跌破竖直的离开门限，再越过倒置的进入门限。
     // 实物翻转本来就要经过水平，这不是抖动。
@@ -157,6 +157,71 @@ static void TestSuppressorBlocksShakeButNotOrientation() {
     CHECK(saw_orientation, "抑制不得影响姿态判定");
 }
 
+// 实测：I2C 偶发吐出全 1 的坏字节，az 变成 -258 或整轴变成 -1。
+// 判定层照单全收的话，一个坏样本就能把姿态从竖直翻成躺倒。
+static void TestImplausibleSampleIsRejected() {
+    std::vector<Record> log;
+    MotionController c(nullptr);
+    c.SetHandler([&](MotionEvent e, Orientation o) { log.push_back({e, o}); });
+    int64_t t = 0;
+    FeedUpright(c, t, 10);
+    const size_t before = log.size();
+    const int rejected_before = c.rejected_samples();
+    // 实测采到的两个真实坏样本
+    c.ApplySample(2647, -1, -1, t);
+    t += MOTION_POLL_INTERVAL_MS;
+    c.ApplySample(2778, -225, -258, t);
+    t += MOTION_POLL_INTERVAL_MS;
+    CHECK(log.size() == before, "不合物理的样本不得产生任何事件");
+    CHECK(c.orientation() == Orientation::kUpright, "坏样本不得改变姿态");
+    CHECK(c.rejected_samples() == rejected_before + 2, "坏样本必须被计数");
+}
+
+// 单个落在合理区间内的坏样本仍可能出现，因此姿态还要求连续若干次一致。
+static void TestOrientationNeedsConsecutiveAgreement() {
+    std::vector<Record> log;
+    MotionController c(nullptr);
+    c.SetHandler([&](MotionEvent e, Orientation o) {
+        if (e == MotionEvent::kOrientationChanged)
+            log.push_back({e, o});
+    });
+    int64_t t = 0;
+    FeedUpright(c, t, 10);
+    const size_t before = log.size();
+    // 少于确认次数的连续躺倒样本：不得切换
+    for (int i = 0; i < MOTION_ORIENT_CONFIRM - 1; ++i, t += MOTION_POLL_INTERVAL_MS)
+        c.ApplySample(kG, 0, 0, t);
+    CHECK(log.size() == before, "确认次数不足不得切换姿态");
+    CHECK(c.orientation() == Orientation::kUpright, "确认次数不足时姿态保持不变");
+    // 补足一次即达成确认
+    c.ApplySample(kG, 0, 0, t);
+    t += MOTION_POLL_INTERVAL_MS;
+    CHECK(log.size() == before + 1, "确认次数达成后必须切换姿态");
+    CHECK(c.orientation() == Orientation::kLying, "姿态应变为躺倒");
+}
+
+// 一次坏样本插在连续判定中间，不得让确认计数从头开始又不得让它蒙混过关。
+static void TestSingleOutlierDoesNotFlipOrientation() {
+    std::vector<Record> log;
+    MotionController c(nullptr);
+    c.SetHandler([&](MotionEvent e, Orientation o) {
+        if (e == MotionEvent::kOrientationChanged)
+            log.push_back({e, o});
+    });
+    int64_t t = 0;
+    FeedUpright(c, t, 10);
+    const size_t before = log.size();
+    for (int i = 0; i < 20; ++i, t += MOTION_POLL_INTERVAL_MS) {
+        // 每三次夹一个躺倒读数，模拟偶发坏样本
+        if (i % 3 == 2)
+            c.ApplySample(kG, 0, 0, t);
+        else
+            c.ApplySample(0, 0, kG, t);
+    }
+    CHECK(log.size() == before, "孤立的异常样本不得翻转姿态");
+    CHECK(c.orientation() == Orientation::kUpright, "姿态必须保持竖直");
+}
+
 static void TestHandlerIsOptional() {
     MotionController c(nullptr);
     c.ApplySample(0, 0, kG, 0);  // 未设 handler 不得崩溃
@@ -171,6 +236,9 @@ int main() {
     TestShakeCooldownCollapsesBurst();
     TestShakeFiresAgainAfterCooldown();
     TestSuppressorBlocksShakeButNotOrientation();
+    TestImplausibleSampleIsRejected();
+    TestOrientationNeedsConsecutiveAgreement();
+    TestSingleOutlierDoesNotFlipOrientation();
     TestHandlerIsOptional();
     if (g_failures)
         return 1;
