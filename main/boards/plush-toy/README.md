@@ -96,38 +96,112 @@ Vision:    http://MacBook-Pro-107.local:8003/mcp/vision/explain
 
 其中 OTA 地址由设备配网写入；WebSocket 和 Vision 地址写在服务端 `data/.config.yaml`。`.local` 方案避免普通 DHCP 地址变化，但只适用于设备与 Mac 在同一二层网络且网络允许 mDNS；手机热点可能隔离组播，必须实测。若解析失败，应在固定路由器上做 DHCP 地址保留，或使用可达的域名，不要退回每次手工追踪随机 IP。
 
-## 文本动作测试
+## 测试工具 `tools/plush_toy_test.py`
 
-固件在 TCP `8181` 提供一个仅用于验收的独立 HTTP 通道；它不经过唤醒词、语音识别、大模型、WebSocket 或本地服务。因此板子只要已连上 Wi-Fi，即使没有语音会话也可以测试。通道只接受其持久化 `websocket.url` 中的 IPv4 主机发起的请求；当前开发机地址变更后，应让设备重新获取该配置再测试。
+所有实机测试都走这一个脚本，本节是它的完整命令参考。
 
-先检查通道状态（将地址替换为板子的局域网 IP）：
+固件在 TCP `8181` 提供一个仅用于验收的独立 HTTP 通道；它不经过唤醒词、语音识别、大模型、WebSocket 或本地服务。因此板子只要已连上 Wi-Fi，即使没有语音会话也可以测试。
 
-```sh
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 status
-```
+**两个前提，不满足时命令会静默无效或被拒**：
 
-单项测试示例：
+1. 开发机必须和板子在同一网段。通道只接受与设备持久化 `websocket.url` 同网段的来源，开发机换了网络就连不上，也会被拒。
+2. `--device-url` 默认 `http://172.20.10.2:8181`，板子 IP 变了要显式传入。下文示例省略该参数以保持简洁。
 
-```sh
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 wave --side left
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 hug
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 cheer --times 3
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 eyes dragon-amber
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 emotion happy
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 diagnostics
-```
+**`{"accepted":true}` 只表示命令进了队列**，与硬件是否存在、动作是否真的发生完全无关。要确认结果，读 `status` 或目视。
 
-`emotion` 与 `eyes` 的区别：`eyes` 只换虹膜主题，`emotion` 走的是服务端 emotion 通道的同一入口 `EyeDisplay::SetEmotion`，一次调用同时改变眼睛表情并触发对应手势（happy 摆手、loving 张臂、sad 垂臂、surprised 双手上举）。angry 与 thinking 按设计只改眼睛、不产生动作。
-
-执行完整的实机动作回归：
+### 读状态
 
 ```sh
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 run-regression
+python3 tools/plush_toy_test.py status
 ```
 
-回归覆盖三组：六个眼睛主题各对应一条虹膜渲染路径（圆瞳浅巩膜、竖瞳暗巩膜、横瞳、无巩膜、照片纹理、日系画法）、三个方向的挥手与拥抱欢呼、六个情绪联动。
+这是唯一能拿到硬件真实状态的命令 —— 板子的应用层控制台目前完全静默（见 `plans/TODO.md` 技术债），打日志的诊断拿不到任何结果。
 
-`--device-url` 默认是当前开发板地址 `http://172.20.10.2:8181`，但建议每次明确传入。`{"accepted":true}` 表示请求已由板子的应用任务接收和排队；舵机是否真正转动、眼睛是否切换仍需目视验收。情绪联动尤其要看 angry 那条：眼睛应当变化而手臂必须保持不动。
+| 字段 | 含义 |
+|---|---|
+| `servo_present` | PCA9685 是否探测到并初始化成功 |
+| `servo_diagnostics` | 舵机 PWM 寄存器快照，不改变输出 |
+| `touch_present` | MPR121 是否探测到并初始化成功 |
+| `touch_modes` | 触摸响应掩码 |
+| `touch_bits` | 12 位触摸状态，bit N 对应 ELE N |
+| `touch_filtered` / `touch_baseline` | 头部电极的滤波计数与基线 |
+| `touch_all_filtered` / `touch_all_baseline` | 全部 12 路，用于确认线接在哪个电极上 |
+| `motion_present` | MPU6050 是否探测到并初始化成功 |
+| `motion_modes` | 运动响应掩码 |
+| `accel` | 三轴原始加速度，1g = 8192 |
+| `orientation` | 0 未知、1 竖着、2 躺倒、3 倒置 |
+| `shake_hits` | 当前窗口内的摇晃命中次数 |
+| `motion_rejected` | 累计被合理性闸门丢弃的坏样本数 |
+
+触摸与运动的原始读数只在各自掩码的诊断位打开时才出现，默认是打开的。
+
+### 手臂与眼睛
+
+```sh
+python3 tools/plush_toy_test.py wave --side left --times 3   # left / right / both
+python3 tools/plush_toy_test.py hug
+python3 tools/plush_toy_test.py cheer --times 3
+python3 tools/plush_toy_test.py eyes dragon-amber
+python3 tools/plush_toy_test.py emotion happy
+python3 tools/plush_toy_test.py diagnostics
+```
+
+`emotion` 与 `eyes` 的区别：`eyes` 只换虹膜主题；`emotion` 走的是服务端 emotion 通道的同一入口 `EyeDisplay::SetEmotion`，一次调用同时改变表情并触发对应手势（happy 摆手、loving 张臂、sad 垂臂、surprised 双手上举）。angry 与 thinking 按设计只改眼睛、不产生动作。
+
+### 触摸
+
+```sh
+python3 tools/plush_toy_test.py touch-modes 0x09        # 改响应掩码
+python3 tools/plush_toy_test.py simulate-touch 0        # 伪造按下 ELE0
+python3 tools/plush_toy_test.py simulate-touch 0 --release
+```
+
+`simulate-touch` 复用 `TouchController::ApplyTouchBits`，与真实触摸同一条路径，因此结果不依赖手指位置和力度。电极号取 0 到 11。
+
+### 运动
+
+```sh
+python3 tools/plush_toy_test.py motion-modes 0x09       # 改响应掩码
+python3 tools/plush_toy_test.py simulate-motion shake   # shake / upright / lying / inverted
+```
+
+`simulate-motion` 复用 `MotionController::ApplySample`，与真实轮询同一条路径。
+
+手动测真实传感器：把板子整个拿起来慢慢翻过来，盯着 `status` 的 `orientation` 从 1 变 2 再变 3，眼睛应跟着变 `sleepy` 再变 `surprised`；用力晃几下，眼睛应变 `confused` 并摆一次手。
+
+**`orientation` 需要连续三帧一致才切换**，也就是翻过去后要停住约 0.3 秒才变。这是防坏样本加的迟滞，不是卡顿。
+
+### 响应掩码
+
+触摸和运动各有一套掩码，位定义相同但**存在不同的 NVS 键**（`touch_modes` / `motion_modes`），因此可以单独关掉其中一类传感器。改完立即生效且重启保持。
+
+| 位 | 值 | 模式 |
+|---|---|---|
+| 0 | 0x01 | 本地反射：直接改眼睛、动手臂 |
+| 1 | 0x02 | 唤醒对话：进入聆听状态 |
+| 2 | 0x04 | 上报大模型：作为一句话送给服务端 |
+| 3 | 0x08 | 读值诊断：把原始计数放进 `status` |
+
+两者默认都是 `0x09`。上报位与唤醒位是包含关系：上报走 `WakeWordInvoke`，本身带唤醒效果，两位同开不会触发两轮对话。
+
+调试单条路径时，先只开要验的那一位，例如 `motion-modes 0x01` 只看本地反射。
+
+### 完整回归
+
+```sh
+python3 tools/plush_toy_test.py run-regression
+```
+
+28 条，四组：
+
+- **眼睛主题 6 条**，每条对应一种虹膜渲染路径：圆瞳浅巩膜、竖瞳暗巩膜、横瞳、无巩膜、照片纹理、日系画法。
+- **手臂 5 条**：三个方向挥手、拥抱、欢呼。
+- **情绪联动 6 条**，含 angry 这条「刻意不动作」的取舍：眼睛应变化而手臂必须不动。
+- **触摸 4 条 + 运动 6 条**：各自先只开本地反射验证反应，再恢复诊断位。姿态按 竖→躺→倒→竖 走一圈。
+
+**唤醒与上报两位不进回归** —— 它们会真的发起一轮对话，干扰后续用例。要验这两条得手动单独跑。
+
+回归跑完仍需目视验收：舵机是否真的转动、眼睛是否切换。
 
 ## 触摸标定（MPR121）
 
@@ -135,36 +209,15 @@ python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 run-regress
 
 MPR121 并入舵机那条 I2C（`I2C_NUM_0`），地址 0x5A，与 PCA9685 的 0x40 不冲突，不占用任何新引脚。引脚已用尽，IRQ 接不上，因此靠 50ms 轮询，去抖由芯片的 `DEBOUNCE` 寄存器完成。
 
-阈值必须实机标定，`config.h` 里的出厂值只是猜测 —— 布料厚度和电极面积会显著改变触发点。步骤：
-
-```sh
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 touch-modes 0x09
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 status
-```
+阈值必须实机标定，`config.h` 里的出厂值只是猜测 —— 布料厚度和电极面积会显著改变触发点。用 `status` 读数标定（命令见「测试工具」一节）。
 
 `status` 会带出 `touch_filtered` 与 `touch_baseline`。手指不碰时两者接近；手指贴上去时 `touch_filtered` 明显下降。记下这个差值，把约六成填进 `config.h` 的 `TOUCH_PRESS_THRESHOLD`，约三成填 `TOUCH_RELEASE_THRESHOLD`，然后重新烧录。
 
-**释放阈值必须低于触摸阈值**，这是迟滞的来源。两者相等或反过来会让电极在临界点反复抖动，日志里表现为一秒内几十次按下松开。
+**释放阈值必须低于触摸阈值**，这是迟滞的来源。两者相等或反过来会让电极在临界点反复抖动，表现为一秒内几十次按下松开。
 
-四个响应模式可叠加，掩码存 NVS，改完立即生效且重启保持：
+**接错脚和电极失效长得一模一样**，靠 `status` 的 `touch_all_filtered` 分辨：接了线的电极读数明显低于悬空的（2026-09-10 实测，接线的八路在 188 到 216，悬空的四路在 364 到 398）。
 
-| 位 | 值 | 模式 |
-|---|---|---|
-| 0 | 0x01 | 本地反射：直接改眼睛、动手臂 |
-| 1 | 0x02 | 唤醒对话：进入聆听状态 |
-| 2 | 0x04 | 上报大模型：把触摸作为一句话送给服务端 |
-| 3 | 0x08 | 读值诊断：把原始计数放进 status 返回 |
-
-默认 `0x09`。上报位与唤醒位是包含关系：上报走 `WakeWordInvoke`，本身就带唤醒效果，两位同开不会触发两轮对话。
-
-没接传感器也能验证四条响应路径：
-
-```sh
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 simulate-touch 0
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 simulate-touch 0 --release
-```
-
-它复用 `TouchController::ApplyTouchBits`，与真实触摸走同一条路径，因此结果不依赖手指位置和力度。
+响应掩码与模拟触摸的用法见「测试工具」一节。
 
 ## 运动标定（MPU6050）
 
@@ -184,29 +237,13 @@ INT / XDA / XCL ──► 不接
 
 只读加速度计，不读陀螺仪：姿态由重力方向得出，摇晃由幅值判定，都不需要角速度。
 
-标定步骤：
+标定同样靠 `status` 读数（命令见「测试工具」一节）。静置时三轴合矢量应接近 8192（1g，±4g 量程下）。玩具竖立时 `orientation` 应为 1；若读到 3（倒置），说明装配方向相反，**改 `config.h` 的 `MOTION_UP_AXIS_Z` 或轴符号，不要去改判定逻辑**。
 
-```sh
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 motion-modes 0x09
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 status
-```
-
-`status` 会带出 `accel` 三轴、`orientation` 和 `shake_hits`。静置时三轴合矢量应接近 8192（1g，±4g 量程下）。玩具竖立时 `orientation` 应为 1；若读到 3（倒置），说明装配方向相反，**改 `config.h` 的 `MOTION_UP_AXIS_Z` 或轴符号，不要去改判定逻辑**。
-
-姿态四态编号：0 未知、1 竖着、2 躺倒、3 倒置。竖直翻到倒置必然经过躺倒，会产生两个事件，这不是抖动。
+竖直翻到倒置必然经过躺倒，会产生两个事件，这不是抖动。
 
 **摇晃阈值要注意一个陷阱**：判定看的是合矢量对 1g 的偏离，因此**缓慢倾斜也会被记为命中** —— 例如静态停在 0.6g 时偏离已达 0.4g，超过默认阈值 0.35g，连续三次就会误判为摇晃。若发现搬动玩具时误报摇晃，调大 `MOTION_SHAKE_DELTA` 或调大 `MOTION_SHAKE_HITS`。
 
-四个模式位含义与触摸相同，但存在独立的 NVS 键 `motion_modes`，可以单独关掉其中一类传感器。默认 `0x09`。
-
-不接传感器也能验证四条响应路径：
-
-```sh
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 simulate-motion shake
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 simulate-motion lying
-```
-
-取值为 `shake`、`upright`、`lying`、`inverted`，走的是与真实轮询同一条 `ApplySample` 路径。
+**总线坏读会污染标定。** 2026-09-10 实测坏帧率约 8.8%，典型坏样本是全 1 的字节。判定层已有防御：合矢量在 0.4g 到 5g 之外的整帧丢弃，姿态还要求连续三帧一致才切换，丢弃数记在 `status` 的 `motion_rejected`。**标定前先看这个数涨得快不快** —— 涨得快说明总线还没修好，此时标出来的阈值不可信。
 
 **舵机自振会被加速度计读到**，因此动作执行期间及结束后 400ms 内摇晃判定被抑制（`LimbController::busy()`）。姿态判定不抑制，它看的是静态重力。验收时务必单独测这一条：触发一次手臂动作，确认**不**产生摇晃事件。
 
