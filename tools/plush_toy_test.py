@@ -20,9 +20,14 @@ REGRESSION_CASES = [
     ("hug", {}), ("cheer", {"times": 1}),
     # 情绪联动：一次 SetEmotion 同时改眼睛并触发手势。前四条各覆盖一种手势映射，
     # angry 覆盖“刻意不动作”那一支 —— 它必须只改眼睛、手臂保持不动。
+    #
+    # 自发手势默认全关，这里必须先开 EMOTION 位，否则整段只能验到眼睛，
+    # 手势映射根本不会执行。跑完恢复默认，免得回归改变了板子的常驻行为。
+    ("gesture_modes", {"modes": 0x08}),
     ("emotion", {"emotion": "happy"}), ("emotion", {"emotion": "loving"}),
     ("emotion", {"emotion": "sad"}), ("emotion", {"emotion": "surprised"}),
     ("emotion", {"emotion": "angry"}), ("emotion", {"emotion": "neutral"}),
+    ("gesture_modes", {"modes": 0x00}),
     # 触摸：先只开本地反射，验证眼睛和手臂；再开诊断位，让 status 带出原始计数。
     # 唤醒与上报两位不进回归 —— 它们会真的发起一轮对话，干扰后续用例。
     ("touch_modes", {"modes": 0x01}),
@@ -58,6 +63,10 @@ def build_parser() -> argparse.ArgumentParser:
     eyes.add_argument("theme", help="for example: dragon-amber or cat-gold")
     emotion = subparsers.add_parser("emotion", help="set an emotion; drives eyes and gesture")
     emotion.add_argument("emotion", help="for example: happy, loving, sad, surprised or angry")
+    gesture_modes = subparsers.add_parser("gesture-modes",
+                                          help="set the spontaneous gesture mask (default 0)")
+    gesture_modes.add_argument("modes", type=lambda v: int(v, 0),
+                               help="bitmask: 1 listening, 2 speaking, 4 idle, 8 emotion")
     touch_modes = subparsers.add_parser("touch-modes", help="set the touch response mask")
     touch_modes.add_argument("modes", type=lambda v: int(v, 0),
                              help="bitmask: 1 reflex, 2 wake, 4 report, 8 diagnostics")
@@ -88,6 +97,8 @@ def command_to_call(argv: list[str]) -> tuple[str, dict]:
         return "eyes", {"theme": args.theme}
     if args.command == "emotion":
         return "emotion", {"emotion": args.emotion}
+    if args.command == "gesture-modes":
+        return "gesture_modes", {"modes": args.modes}
     if args.command == "touch-modes":
         return "touch_modes", {"modes": args.modes}
     if args.command == "simulate-touch":

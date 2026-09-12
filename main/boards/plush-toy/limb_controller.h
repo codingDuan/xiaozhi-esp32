@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gesture.h"
 #include "pca9685.h"
 
 #include <freertos/FreeRTOS.h>
@@ -7,17 +8,6 @@
 #include <freertos/task.h>
 
 #include <stdint.h>
-
-enum class Gesture {
-    kHome,       // 双臂归中并泄力
-    kWaveLeft,
-    kWaveRight,
-    kWaveBoth,
-    kHug,        // 双臂张开并保持
-    kCheer,      // 双臂反相摆动
-    kDroop,      // 双臂下垂
-    kLean,       // 双臂微微前倾（聆听态）
-};
 
 // 舵机动作层。
 //

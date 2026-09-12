@@ -13,6 +13,14 @@ PlushBehavior::PlushBehavior(LimbController* limbs, EyeDisplay* display)
     Settings settings("plush", false);
     touch_modes_ = (uint32_t)settings.GetInt("touch_modes", TOUCH_MODES_DEFAULT);
     motion_modes_ = (uint32_t)settings.GetInt("motion_modes", MOTION_MODES_DEFAULT);
+    gesture_modes_ = (uint32_t)settings.GetInt("gesture_modes", GESTURE_MODES_DEFAULT);
+}
+
+void PlushBehavior::SetGestureModes(uint32_t modes) {
+    gesture_modes_ = modes;
+    Settings settings("plush", true);
+    settings.SetInt("gesture_modes", (int32_t)modes);
+    ESP_LOGI(TAG, "自发手势掩码改为 0x%02X", (unsigned)modes);
 }
 
 void PlushBehavior::SetMotionModes(uint32_t modes) {
@@ -71,38 +79,19 @@ void PlushBehavior::OnStateChanged(DeviceState from, DeviceState to) {
 
     if (limbs_ == nullptr || !limbs_->available())
         return;
-    switch (to) {
-        case kDeviceStateListening:
-            limbs_->Enqueue(Gesture::kLean, 1);  // 微微前倾，像在专心听
-            break;
-        case kDeviceStateSpeaking:
-            limbs_->Enqueue(Gesture::kCheer, 1);  // 说话时轻摆一次
-            break;
-        case kDeviceStateIdle:
-            limbs_->Enqueue(Gesture::kHome, 1);  // 归中泄力
-            break;
-        default:
-            break;
-    }
+    Gesture g;
+    if (StateGesture(to, gesture_modes_, g))
+        limbs_->Enqueue(g, 1);
 }
 
 void PlushBehavior::OnEmotion(const char* emotion) {
     if (emotion == nullptr || limbs_ == nullptr)
         return;
-    std::string e(emotion);
 
-    // 服务端 EMOJI_MAP（textUtils.py:8-30）共 21 种，此处只映射有明确
-    // 肢体表达的几类。其余刻意不动作 —— 动作稀疏比动作滥用更自然：
-    // angry 时静止不动比手舞足蹈更有张力，thinking 时动作会干扰"正在想"的表达。
-    if (e == "happy" || e == "laughing" || e == "funny" || e == "silly") {
-        limbs_->Enqueue(Gesture::kCheer, 2);
-    } else if (e == "loving" || e == "kissy") {
-        limbs_->Enqueue(Gesture::kHug, 1);
-    } else if (e == "sad" || e == "crying") {
-        limbs_->Enqueue(Gesture::kDroop, 1);
-    } else if (e == "surprised" || e == "shocked") {
-        limbs_->Enqueue(Gesture::kWaveBoth, 1);
-    }
+    Gesture g;
+    int times = 1;
+    if (EmotionGesture(emotion, gesture_modes_, g, times))
+        limbs_->Enqueue(g, times);
 }
 
 void PlushBehavior::OnTouch(int electrode, bool pressed) {

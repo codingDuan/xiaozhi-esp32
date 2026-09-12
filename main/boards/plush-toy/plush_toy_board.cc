@@ -116,6 +116,10 @@ private:
                 const int ch = cJSON_IsNumber(electrode) ? electrode->valueint : 0;
                 const bool down = cJSON_IsBool(pressed) ? cJSON_IsTrue(pressed) : true;
                 touch_->ApplyTouchBits(down ? (uint16_t)(1u << ch) : 0);
+            } else if (action == "gesture_modes" && behavior_ != nullptr) {
+                const auto* modes = cJSON_GetObjectItem(arguments, "modes");
+                if (cJSON_IsNumber(modes))
+                    behavior_->SetGestureModes((uint32_t)modes->valueint);
             } else if (action == "motion_modes" && behavior_ != nullptr) {
                 const auto* modes = cJSON_GetObjectItem(arguments, "modes");
                 if (cJSON_IsNumber(modes))
@@ -178,6 +182,8 @@ private:
             json += "]";
         }
 
+        json += ",\"gesture_modes\":" +
+                std::to_string(behavior_ != nullptr ? behavior_->gesture_modes() : 0);
         json += ",\"motion_modes\":" +
                 std::to_string(behavior_ != nullptr ? behavior_->motion_modes() : 0);
         json += ",\"motion_present\":";

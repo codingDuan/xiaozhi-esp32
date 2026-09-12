@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "device_state.h"
+#include "gesture_policy.h"
 #include "limb_controller.h"
 #include "motion_controller.h"
 
@@ -39,6 +40,10 @@ public:
     uint32_t motion_modes() const { return motion_modes_; }
     void SetMotionModes(uint32_t modes);
 
+    // 自发手势（状态迁移 + emotion 联动）掩码。默认全关，见 config.h 的说明。
+    uint32_t gesture_modes() const { return gesture_modes_; }
+    void SetGestureModes(uint32_t modes);
+
 private:
     static void TaskEntry(void* arg);
     void Run();
@@ -49,4 +54,5 @@ private:
     DeviceState last_state_ = kDeviceStateUnknown;
     uint32_t touch_modes_ = TOUCH_MODES_DEFAULT;
     uint32_t motion_modes_ = MOTION_MODES_DEFAULT;
+    uint32_t gesture_modes_ = GESTURE_MODES_DEFAULT;
 };

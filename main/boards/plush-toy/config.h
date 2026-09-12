@@ -178,6 +178,23 @@
 // 动作结束后机械振动还会持续一小段，这段时间内继续抑制摇晃判定。
 #define MOTION_SERVO_SETTLE_MS 400
 
+// ── 自发手势掩码 ──
+// 形状同触摸/运动，NVS 键 gesture_modes。管的是「没人碰玩具时它自己动不动」：
+// 设备状态迁移和服务端下发的 emotion。
+//
+// 默认全关（2026-09-11）。原因是实测观感：一轮对话必然走
+// Idle→Listening→Speaking→Idle 三次迁移，服务端回复又几乎每次带 emotion，
+// 于是每条指令都伴随四次手臂动作。动作稀疏才显得有意图，每句都动等于没动，
+// 还平白耗电、给 I2C 总线添噪。要表现力时按位打开，或直接用 MCP 手势工具。
+#define GESTURE_MODE_LISTEN   0x01   // 进入聆听：微微前倾
+#define GESTURE_MODE_SPEAK    0x02   // 开始说话：轻摆一次
+#define GESTURE_MODE_IDLE     0x04   // 回到空闲：归中泄力
+#define GESTURE_MODE_EMOTION  0x08   // 服务端 emotion 联动手势
+#define GESTURE_MODES_ALL                                                \
+    (GESTURE_MODE_LISTEN | GESTURE_MODE_SPEAK | GESTURE_MODE_IDLE |      \
+     GESTURE_MODE_EMOTION)
+#define GESTURE_MODES_DEFAULT 0
+
 // GPIO43(丝印TX) 保留给控制台 TX，勿占用 —— 否则日志变乱码（实测）
 // 现已无空闲脚：3=舵机SCL 14/38=屏SPI 44=舵机SDA 45/46=两屏CS
 // GPIO19/20 保持原生 USB，勿占用

@@ -126,6 +126,7 @@ python3 tools/plush_toy_test.py status
 | `touch_bits` | 12 位触摸状态，bit N 对应 ELE N |
 | `touch_filtered` / `touch_baseline` | 头部电极的滤波计数与基线 |
 | `touch_all_filtered` / `touch_all_baseline` | 全部 12 路，用于确认线接在哪个电极上 |
+| `gesture_modes` | 自发手势掩码，默认 `0`（不动） |
 | `motion_present` | MPU6050 是否探测到并初始化成功 |
 | `motion_modes` | 运动响应掩码 |
 | `accel` | 三轴原始加速度，1g = 8192 |
@@ -147,6 +148,28 @@ python3 tools/plush_toy_test.py diagnostics
 ```
 
 `emotion` 与 `eyes` 的区别：`eyes` 只换虹膜主题；`emotion` 走的是服务端 emotion 通道的同一入口 `EyeDisplay::SetEmotion`，一次调用同时改变表情并触发对应手势（happy 摆手、loving 张臂、sad 垂臂、surprised 双手上举）。angry 与 thinking 按设计只改眼睛、不产生动作。
+
+**手势那一半默认是关的**（见下文「自发手势掩码」），所以直接跑 `emotion happy` 只会看到眼睛变化。要验手势映射，先 `gesture-modes 0x08`。
+
+### 自发手势
+
+```sh
+python3 tools/plush_toy_test.py gesture-modes 0x0F      # 全开
+python3 tools/plush_toy_test.py gesture-modes 0         # 恢复默认：不动
+```
+
+指的是「没人碰玩具时它自己动不动」—— 设备状态迁移与服务端下发的 emotion。NVS 键 `gesture_modes`，**默认 `0`**。
+
+| 位 | 值 | 触发时机 | 手势 |
+|---|---|---|---|
+| 0 | 0x01 | 进入聆听 | 微微前倾 |
+| 1 | 0x02 | 开始说话 | 轻摆一次 |
+| 2 | 0x04 | 回到空闲 | 归中泄力 |
+| 3 | 0x08 | 服务端 emotion | 按情绪映射 |
+
+默认全关的理由（2026-09-11 实测观感）：一轮对话必然走 `Idle→Listening→Speaking→Idle` 三次迁移，服务端回复又几乎每次带 emotion，于是**每条指令都伴随四次手臂动作**。动作稀疏才显得有意图，每句都动等于没动，还平白耗电、给 I2C 总线添噪。
+
+这一位掩码只管自发动作。触摸反射、摇晃反射和 MCP 手势工具都走各自的路径，不受它影响 —— 关掉之后玩具照样能被摸、被晃、被大模型指挥摆手。
 
 ### 触摸
 
@@ -171,7 +194,7 @@ python3 tools/plush_toy_test.py simulate-motion shake   # shake / upright / lyin
 
 **`orientation` 需要连续三帧一致才切换**，也就是翻过去后要停住约 0.3 秒才变。这是防坏样本加的迟滞，不是卡顿。
 
-### 响应掩码
+### 传感器响应掩码
 
 触摸和运动各有一套掩码，位定义相同但**存在不同的 NVS 键**（`touch_modes` / `motion_modes`），因此可以单独关掉其中一类传感器。改完立即生效且重启保持。
 
