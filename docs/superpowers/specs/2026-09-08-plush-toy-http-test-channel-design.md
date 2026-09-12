@@ -39,11 +39,14 @@ The server starts only for the `plush-toy` board.  It does not open a WebSocket,
 The CLI moves from `--server` to required `--device-url`, for example:
 
 ```sh
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 status
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 wave --side left
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 eyes dragon-amber
-python3 tools/plush_toy_test.py --device-url http://172.20.10.2:8181 run-regression
+export PLUSH_TOY_DEVICE_URL=http://<板子IP>:8181   # 或每条都带 --device-url
+python3 tools/plush_toy_test.py status
+python3 tools/plush_toy_test.py wave --side left
+python3 tools/plush_toy_test.py eyes dragon-amber
+python3 tools/plush_toy_test.py run-regression
 ```
+
+`--device-url` 没有默认值，缺了会直接报错退出。板子 IP 随 DHCP 变，写死的默认值只会让人对着失效地址反复超时。取 IP 的方法与前提见 `main/boards/plush-toy/README.md`。
 
 `run-regression` sends the fixed sequence to the board-local endpoint.  A success result establishes direct command delivery and firmware scheduling; visual servo/display observation remains the final physical acceptance criterion.
 
