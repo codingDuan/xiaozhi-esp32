@@ -133,12 +133,25 @@ private:
                 if (value == "shake") {
                     for (int i = 0; i < MOTION_SHAKE_HITS; ++i, now += MOTION_POLL_INTERVAL_MS)
                         motion_->ApplySample(0, 0, MOTION_LSB_PER_G * 2, now);
-                } else if (value == "inverted") {
-                    motion_->ApplySample(0, 0, -MOTION_LSB_PER_G, now);
-                } else if (value == "lying") {
-                    motion_->ApplySample(MOTION_LSB_PER_G, 0, 0, now);
                 } else {
-                    motion_->ApplySample(0, 0, MOTION_LSB_PER_G, now);
+                    // 姿态必须连喂足够多帧。只喂一帧的话判定层的连续确认永远凑不满，
+                    // 而且真实轮询还在并发喂当前姿态，一帧就被 pending_count_ = 0
+                    // 清掉 —— 这三条命令曾因此完全失效。
+                    //
+                    // 喂两倍 MOTION_ORIENT_CONFIRM 而不是一倍：迟滞不允许
+                    // 竖立↔倒置直接互跳，中间必然经过侧躺（ClassifyOrientation
+                    // 的前两个分支），因此最坏情况要两段确认。多喂的帧无害 ——
+                    // 到位后 next == orientation_ 会把确认计数清零并维持原态。
+                    int16_t ax = 0, ay = 0, az = MOTION_LSB_PER_G;   // 默认 upright
+                    if (value == "inverted") {
+                        az = -MOTION_LSB_PER_G;
+                    } else if (value == "lying") {
+                        ax = MOTION_LSB_PER_G;
+                        az = 0;
+                    }
+                    for (int i = 0; i < MOTION_ORIENT_CONFIRM * 2; ++i,
+                             now += MOTION_POLL_INTERVAL_MS)
+                        motion_->ApplySample(ax, ay, az, now);
                 }
             } else if (action == "diagnostics" && pca_ != nullptr) {
                 ESP_LOGI(TAG, "test diagnostics: %s", pca_->Diagnostics().c_str());

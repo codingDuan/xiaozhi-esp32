@@ -216,6 +216,17 @@ python3 tools/plush_toy_test.py simulate-motion shake   # shake / upright / lyin
 
 `simulate-motion` 复用 `MotionController::ApplySample`，与真实轮询同一条路径。
 
+**姿态类命令的结果活不过 300ms。** 伪造样本只是插队，真实 10Hz 轮询仍在并发喂当前重力方向，三帧确认（`MOTION_ORIENT_CONFIRM`）一满就把姿态翻回原样。因此**用 CLI 连发两条命令再读 `status`，永远只会看到初态** —— 一次 CLI 调用就要几百毫秒，窗口早关了。要观测必须在同一个进程里发完立刻高频轮询：
+
+```python
+post("simulate_motion", {"kind": "lying"})
+seen = [orient() for _ in range(10)]   # 期望序列形如 [2,2,2,...,1,1]
+```
+
+看"峰值"而不是"终值"。终值回到竖立是对的，不是失败。
+
+**竖立与倒置之间不能直接互跳。** 迟滞的前两个分支决定了中间必然经过侧躺，所以伪造 `inverted` 需要两段确认共六帧，命令内部已按 `MOTION_ORIENT_CONFIRM * 2` 连喂。真实翻动玩具也是这个过程，不是缺陷。
+
 手动测真实传感器：把板子整个拿起来慢慢翻过来，盯着 `status` 的 `orientation` 从 1 变 2 再变 3，眼睛应跟着变 `sleepy` 再变 `surprised`；用力晃几下，眼睛应变 `confused` 并摆一次手。
 
 **`orientation` 需要连续三帧一致才切换**，也就是翻过去后要停住约 0.3 秒才变。这是防坏样本加的迟滞，不是卡顿。
