@@ -124,7 +124,62 @@ static void TestDiagnosticsPreservesLastWriteFailure() {
           "diagnostics should retain the last failed I2C write after read-only checks");
 }
 
+// 加热走 CH15。全开：ON_H bit4=1 且 OFF_H bit4=0（芯片规定 FULL_OFF 优先于 FULL_ON，
+// 不清掉 OFF_H 的 bit4 就开不了）。四个寄存器一次突发写完，不留半开的中间态。
+static void TestSetFullOnWritesOnBitAndClearsOffBit() {
+    FakeI2cBus bus;
+    Pca9685 pca(&bus, 0x40, 100000);
+    g_writes.clear();
+    CHECK(pca.SetFullOn(15), "SetFullOn should report success");
+    CHECK(g_writes == std::vector<std::vector<uint8_t>>({{0x42, 0x00, 0x10, 0x00, 0x00}}),
+          "SetFullOn(15) must burst-write LED15 ON_H bit4 and clear OFF_H bit4");
+}
+
+static void TestSetFullOffWritesOffBit() {
+    FakeI2cBus bus;
+    Pca9685 pca(&bus, 0x40, 100000);
+    g_writes.clear();
+    CHECK(pca.SetFullOff(15), "SetFullOff should report success");
+    CHECK(g_writes == std::vector<std::vector<uint8_t>>({{0x42, 0x00, 0x00, 0x00, 0x10}}),
+          "SetFullOff(15) must burst-write LED15 OFF_H bit4 and clear ON_H bit4");
+}
+
+// 加热的调用方必须知道写没写进去：失败时要下个周期重发，而不是以为已经关了。
+static void TestFullOnOffReportWriteFailure() {
+    FakeI2cBus bus;
+    Pca9685 pca(&bus, 0x40, 100000);
+    g_next_transmit_error = ESP_FAIL;
+    CHECK(!pca.SetFullOff(15), "SetFullOff must return false when the I2C write fails");
+    g_next_transmit_error = ESP_FAIL;
+    CHECK(!pca.SetFullOn(15), "SetFullOn must return false when the I2C write fails");
+}
+
+static void TestFullOnOffRejectInvalidChannel() {
+    FakeI2cBus bus;
+    Pca9685 pca(&bus, 0x40, 100000);
+    g_writes.clear();
+    CHECK(!pca.SetFullOn(16), "channel 16 does not exist");
+    CHECK(!pca.SetFullOff(-1), "negative channel does not exist");
+    CHECK(g_writes.empty(), "invalid channel must not touch the bus");
+}
+
+// AllOff 是舵机动作后的泄力，每个手势都会调用。它若顺带关掉 CH15，
+// 加热会被每次摆手打断，因此只动舵机通道。
+static void TestAllOffLeavesHeaterChannelAlone() {
+    FakeI2cBus bus;
+    Pca9685 pca(&bus, 0x40, 100000);
+    g_writes.clear();
+    pca.AllOff();
+    for (const auto& w : g_writes)
+        CHECK(w[0] < 0x42 || w[0] > 0x45, "AllOff must not write LED15 registers");
+}
+
 int main() {
+    TestSetFullOnWritesOnBitAndClearsOffBit();
+    TestSetFullOffWritesOffBit();
+    TestFullOnOffReportWriteFailure();
+    TestFullOnOffRejectInvalidChannel();
+    TestAllOffLeavesHeaterChannelAlone();
     TestConstructorSoftwareResetsPca();
     TestAllOffUsesOnlyServoChannels();
     TestDiagnosticsReportsOutputRegisters();

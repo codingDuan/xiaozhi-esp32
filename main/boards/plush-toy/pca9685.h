@@ -27,7 +27,14 @@ public:
     // 设置某路脉宽（微秒）。ch 为 0-15。
     void SetPulseUs(int ch, int us);
 
-    // 关闭全部 16 路输出，舵机泄力。
+    // 某路常高 / 常低，用芯片原生的 FULL_ON / FULL_OFF 位，不靠 SetPulseUs 逼近。
+    // 加热用（CH15）。返回 false 表示写失败，调用方必须重试 ——
+    // 「以为关了其实没关」对加热是不可接受的。
+    bool SetFullOn(int ch);
+    bool SetFullOff(int ch);
+
+    // 关闭舵机通道（CH0/CH1）输出，舵机泄力。不碰加热通道：
+    // 每个手势结束都会调用它，顺带关加热会让加热被每次摆手打断。
     void AllOff();
 
     uint8_t ReadPrescale();

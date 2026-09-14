@@ -173,6 +173,39 @@ void Pca9685::SetPulseUs(int ch, int us) {
     }
 }
 
+namespace {
+// 一路占 ON_L/ON_H/OFF_L/OFF_H 四个寄存器，bit4 分别是 FULL_ON / FULL_OFF。
+// 芯片规定 FULL_OFF 优先，因此全开时必须同时清掉 OFF_H 的 bit4。
+constexpr uint8_t kFullBit = 0x10;
+constexpr int kChannelCount = 16;
+}  // namespace
+
+bool Pca9685::SetFullOn(int ch) {
+    if (dev_ == nullptr || ch < 0 || ch >= kChannelCount)
+        return false;
+    uint8_t buf[5] = {(uint8_t)(kRegLed0OnL + 4 * ch), 0x00, kFullBit, 0x00, 0x00};
+    esp_err_t err = i2c_master_transmit(dev_, buf, sizeof(buf), kTimeoutMs);
+    last_write_error_ = err;
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "通道 %d 全开失败: %s", ch, esp_err_to_name(err));
+        return false;
+    }
+    return true;
+}
+
+bool Pca9685::SetFullOff(int ch) {
+    if (dev_ == nullptr || ch < 0 || ch >= kChannelCount)
+        return false;
+    uint8_t buf[5] = {(uint8_t)(kRegLed0OnL + 4 * ch), 0x00, 0x00, 0x00, kFullBit};
+    esp_err_t err = i2c_master_transmit(dev_, buf, sizeof(buf), kTimeoutMs);
+    last_write_error_ = err;
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "通道 %d 全关失败: %s", ch, esp_err_to_name(err));
+        return false;
+    }
+    return true;
+}
+
 void Pca9685::AllOff() {
     if (dev_ == nullptr)
         return;
