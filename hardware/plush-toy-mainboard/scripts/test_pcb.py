@@ -96,6 +96,61 @@ class PcbTest(unittest.TestCase):
         self.assertIn("65", heater[0])
         self.assertIn("常闭", heater[0])
 
+    def _visible_silk_texts(self):
+        """(说明, 包围盒) 列表：F.SilkS 上所有可见文字，含位号、取值与板上独立文字。"""
+        items = []
+        for ref, fp in self.fps.items():
+            for field in (fp.Reference(), fp.Value()):
+                if field.IsVisible() and field.GetLayer() == pcbnew.F_SilkS:
+                    items.append((f"{ref}:{field.GetText()}", field.GetBoundingBox()))
+        for drawing in self.board.GetDrawings():
+            if isinstance(drawing, pcbnew.PCB_TEXT) and drawing.GetLayer() == pcbnew.F_SilkS:
+                items.append((f"board:{drawing.GetText()}", drawing.GetBoundingBox()))
+        return items
+
+    def test_silkscreen_texts_do_not_overlap(self):
+        # 委托方 2026-09-14 反馈丝印太乱：可见文字之间不得互相压住
+        items = self._visible_silk_texts()
+        clashes = [(a, b) for i, (a, ba) in enumerate(items) for b, bb in items[i + 1:] if ba.Intersects(bb)]
+        self.assertEqual(clashes, [])
+
+    def test_silkscreen_texts_clear_of_pads(self):
+        # 丝印压在焊盘上会被阻焊开窗切掉，而且挡住目检。
+        # 嘉立创建议丝印距焊盘 ≥ 0.25mm（字符设计规范），焊盘框外扩 0.25mm 再判断
+        pads = []
+        for ref, fp in self.fps.items():
+            for p in fp.Pads():
+                if p.IsOnLayer(pcbnew.F_Cu):
+                    box = p.GetBoundingBox()
+                    box.Inflate(pcbnew.FromMM(0.25))
+                    pads.append((f"{ref}.{p.GetNumber()}", box))
+        clashes = [(t, p) for t, bt in self._visible_silk_texts() for p, bp in pads if bt.Intersects(bp)]
+        self.assertEqual(clashes, [])
+
+    def test_silkscreen_text_size_meets_jlcpcb(self):
+        # 嘉立创：字高绝对下限 0.8mm、建议 ≥ 1.0mm；线宽下限 0.15mm。
+        # 本板统一取 1.0mm / 0.15mm。2026-09-14 首版位号用 0.12mm 线宽，低于下限
+        undersized = []
+        for ref, fp in self.fps.items():
+            field = fp.Reference()
+            if field.IsVisible() and field.GetLayer() == pcbnew.F_SilkS:
+                h, w = field.GetTextHeight() / MM, field.GetTextThickness() / MM
+                if h < 1.0 - 1e-6 or w < 0.15 - 1e-6:
+                    undersized.append((ref, round(h, 3), round(w, 3)))
+        for drawing in self.board.GetDrawings():
+            if isinstance(drawing, pcbnew.PCB_TEXT) and drawing.GetLayer() == pcbnew.F_SilkS:
+                h, w = drawing.GetTextHeight() / MM, drawing.GetTextThickness() / MM
+                if h < 1.0 - 1e-6 or w < 0.15 - 1e-6:
+                    undersized.append((drawing.GetText(), round(h, 3), round(w, 3)))
+        self.assertEqual(undersized, [])
+
+    def test_connectors_and_ics_keep_visible_reference(self):
+        # 阻容可以不印位号，但接插件和芯片必须印：接线时要分得清左右舵机、加热、电源座，
+        # 返修时要找得到芯片。2026-09-14 首版整理曾因找不到空位把 J_SERVO_L/R 隐藏掉
+        hidden = sorted(ref for ref, fp in self.fps.items()
+                        if ref.startswith(("J_", "U")) and not fp.Reference().IsVisible())
+        self.assertEqual(hidden, [])
+
     def test_single_sided_assembly(self):
         flipped = sorted(ref for ref, fp in self.fps.items() if fp.IsFlipped())
         self.assertEqual(flipped, [])

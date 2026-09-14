@@ -85,6 +85,90 @@ def spiral(cx: float, cy: float, step: float = 0.5, max_r: float = 40.0):
         r += step
 
 
+# 丝印尺寸按嘉立创字符设计规范：字高绝对下限 0.8mm、建议 ≥ 1.0mm；线宽下限 0.15mm；
+# 距焊盘建议 ≥ 0.25mm。本板统一取建议值 1.0mm 字高、0.15mm 线宽。
+SILK_HEIGHT = 1.0
+SILK_STROKE = 0.15
+SILK_PAD_CLEARANCE = 0.25
+
+
+def must_label(part) -> bool:
+    # 接插件与芯片必须印位号：接线要分清左右舵机、加热、电源座，返修要找得到芯片
+    return part.ref.startswith(("J_", "U"))
+
+
+def tidy_silkscreen(fitted, fps, reserved) -> int:
+    """整理丝印：委托方 2026-09-14 反馈丝印太乱。
+
+    - 取值一律不印（取值在 BOM 和 F.Fab 层里有）
+    - 0402 阻容与 12 个触摸电极焊盘不印位号：数量多、位置密，印出来只会互相压住
+    - 其余位号统一 1.0mm / 0.15mm，在器件四周由近到远找第一个不压焊盘（外扩 0.25mm）、
+      不压其他文字、不出板的位置，横排找不到再试竖排
+    - 接插件与芯片先排、必须印出来，找不到位置直接报错；其余找不到的隐藏，返回隐藏个数
+    """
+    blocked = list(reserved)
+    for fp in fps.values():
+        for p in fp.Pads():
+            if p.IsOnLayer(pcbnew.F_Cu):
+                box = p.GetBoundingBox()
+                box.Inflate(pcbnew.FromMM(SILK_PAD_CLEARANCE))
+                blocked.append(box)
+    board_box = pcbnew.BOX2I(v(0.3, 0.3), v(pl.W - 0.6, pl.H - 0.6))
+
+    labelled = [p for p in fitted
+                if not (p.symbol in ("Device:R", "Device:C") or p.ref.startswith("TP_E"))]
+    for part in fitted:
+        fps[part.ref].Value().SetVisible(False)
+        if part not in labelled:
+            fps[part.ref].Reference().SetVisible(False)
+
+    # 必须印的先排，同类里大器件先排
+    order = sorted(labelled, key=lambda p: (not must_label(p), -fps[p.ref].GetBoundingBox(False).GetArea()))
+    hidden, failed = 0, []
+    for part in order:
+        fp = fps[part.ref]
+        ref = fp.Reference()
+        ref.SetLayer(pcbnew.F_SilkS)
+        ref.SetTextSize(v(SILK_HEIGHT, SILK_HEIGHT))
+        ref.SetTextThickness(pcbnew.FromMM(SILK_STROKE))
+        fp.BuildCourtyardCaches()
+        court = fp.GetCourtyard(pcbnew.F_CrtYd)
+        box = court.BBox() if court.OutlineCount() else fp.GetBoundingBox(False)
+        if part.ref == "U1":
+            # U1 庭院层含板外的天线净空区，用焊盘范围代替
+            box = fp.GetBoundingBox(False)
+        l, t = box.GetX() * TO_MM, box.GetY() * TO_MM
+        r, b = box.GetRight() * TO_MM, box.GetBottom() * TO_MM
+        cx, cy = (l + r) / 2, (t + b) / 2
+        candidates = []
+        for d in (0.8, 1.6, 2.6, 3.8):         # 由近到远的几圈
+            candidates += [(cx, t - d), (cx, b + d), (l - d - 1.5, cy), (r + d + 1.5, cy),
+                           (l, t - d), (r, t - d), (l, b + d), (r, b + d)]
+        candidates.append((cx, cy))
+        placed = False
+        for angle in (0, 90):
+            ref.SetTextAngleDegrees(angle)
+            for x, y in candidates:
+                ref.SetPosition(v(x, y))
+                bb = ref.GetBoundingBox()
+                if board_box.Contains(bb.GetOrigin()) and board_box.Contains(bb.GetEnd()) \
+                        and not any(bb.Intersects(o) for o in blocked):
+                    blocked.append(bb)
+                    placed = True
+                    break
+            if placed:
+                break
+        if not placed:
+            ref.SetVisible(False)
+            if must_label(part):
+                failed.append(part.ref)
+            else:
+                hidden += 1
+    if failed:
+        raise RuntimeError(f"这些接插件/芯片的位号找不到丝印位置：{failed}，需要调整 placement.py")
+    return hidden
+
+
 def add_outline(board: pcbnew.BOARD) -> None:
     corners = [(0, 0), (pl.W, 0), (pl.W, pl.H), (0, pl.H)]
     for (x1, y1), (x2, y2) in zip(corners, corners[1:] + corners[:1]):
@@ -203,12 +287,7 @@ def main() -> Path:
             if net and not net.startswith("NC_"):
                 pad.SetNet(board.FindNet(net))
 
-    # 分区铺铜：L2 整层 GND；L3 的 3V3 只铺逻辑区；L4 功率区铺 PGND（设计方案 4.3、6.1 节）
-    add_zone(board, "GND", pcbnew.In1_Cu, 0, 0, pl.W, pl.H)
-    add_zone(board, "+3V3", pcbnew.In2_Cu, 0, 0, 62.0, pl.H)
-    add_zone(board, "PGND", pcbnew.B_Cu, 64.0, 0, pl.W, pl.H)
-
-    # HC-6 丝印
+    # HC-6 丝印（先放，位号避让它）
     text, tx, ty = pl.HEATER_SILK
     silk = pcbnew.PCB_TEXT(board)
     silk.SetText(text)
@@ -217,6 +296,14 @@ def main() -> Path:
     silk.SetTextSize(v(1.0, 1.0))
     silk.SetTextThickness(pcbnew.FromMM(0.15))
     board.Add(silk)
+
+    hidden = tidy_silkscreen(fitted, fps, [silk.GetBoundingBox()])
+    print(f"丝印：{hidden} 个位号找不到空位已隐藏")
+
+    # 分区铺铜：L2 整层 GND；L3 的 3V3 只铺逻辑区；L4 功率区铺 PGND（设计方案 4.3、6.1 节）
+    add_zone(board, "GND", pcbnew.In1_Cu, 0, 0, pl.W, pl.H)
+    add_zone(board, "+3V3", pcbnew.In2_Cu, 0, 0, 62.0, pl.H)
+    add_zone(board, "PGND", pcbnew.B_Cu, 64.0, 0, pl.W, pl.H)
 
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     board.Save(str(PCB))
