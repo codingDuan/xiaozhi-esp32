@@ -159,6 +159,8 @@ python3 tools/plush_toy_test.py status
 | `orientation` | 0 未知、1 竖着、2 躺倒、3 倒置 |
 | `shake_hits` | 当前窗口内的摇晃命中次数 |
 | `motion_rejected` | 累计被合理性闸门丢弃的坏样本数 |
+| `thermal_available` | ADS1115 是否探测到并初始化成功 |
+| `thermal_code` | A0 原始码值（PGA ±4.096V）。25℃ 约 13200，越热越小；断线约 26400，短路约 0。读失败时不出现 |
 
 触摸与运动的原始读数只在各自掩码的诊断位打开时才出现，默认是打开的。
 

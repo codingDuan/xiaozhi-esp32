@@ -195,6 +195,16 @@
      GESTURE_MODE_EMOTION)
 #define GESTURE_MODES_DEFAULT 0
 
+// ── 体温：ADS1115 并入同一条 I2C，不占新引脚 ──
+// 分压：3V3 ──[10kΩ 1%]── 节点 N ── NTC 10K B3950 ── GND，节点 N 接 A0，
+// 并对地接 0.1µF。25℃ 时节点约 1.65V，码值约 13200（PGA ±4.096V）。
+// 设计见 docs/superpowers/specs/2026-09-10-plush-toy-thermal-design.md。
+//
+// 模块板载通常是 10k 上拉，接入后总上拉从约 2.4k 降到约 2.0k。
+// 若接入后触摸、运动或舵机变得更不稳，先拆掉 ADS1115 模块上的两颗上拉。
+#define ADS1115_ADDR          0x48   // ADDR 接 GND
+#define THERMAL_NTC_CHANNEL   0      // ADS1115 A0
+
 // GPIO43(丝印TX) 保留给控制台 TX，勿占用 —— 否则日志变乱码（实测）
 // 现已无空闲脚：3=舵机SCL 14/38=屏SPI 44=舵机SDA 45/46=两屏CS
 // GPIO19/20 保持原生 USB，勿占用

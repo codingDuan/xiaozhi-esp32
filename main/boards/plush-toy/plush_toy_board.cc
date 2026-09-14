@@ -6,6 +6,7 @@
 //
 //   3. 双 GC9A01 圆屏做眼睛，参数化直绘（不走 LVGL）
 
+#include "ads1115.h"
 #include "application.h"
 #include "button.h"
 #include "codecs/no_audio_codec.h"
@@ -66,6 +67,7 @@ private:
     TouchController* touch_ = nullptr;
     Mpu6050* mpu6050_ = nullptr;
     MotionController* motion_ = nullptr;
+    Ads1115* ads1115_ = nullptr;
     // MPR121 要挂在同一条总线上，因此句柄必须活过 InitializeServoBus()
     i2c_master_bus_handle_t servo_bus_ = nullptr;
 
@@ -215,6 +217,17 @@ private:
             // 拆上拉电阻或降速之后靠它判断是否好转。
             json += ",\"motion_rejected\":" + std::to_string(motion_->rejected_samples());
         }
+
+        // 本期只有驱动，直接读一次 A0。ThermalController 接入后改为读它缓存的码值，
+        // 并受 THERMAL_MODE_DIAG 控制 —— 届时它独占 ADS1115，这里不能再直接读。
+        json += ",\"thermal_available\":";
+        json += (ads1115_ != nullptr ? "true" : "false");
+        if (ads1115_ != nullptr) {
+            int16_t code = 0;
+            // 读失败就不报，而不是报 0 —— 0 是合法码值（节点短路）。
+            if (ads1115_->ReadSingleEnded(THERMAL_NTC_CHANNEL, &code))
+                json += ",\"thermal_code\":" + std::to_string(code);
+        }
         return json;
     }
 
@@ -301,6 +314,25 @@ private:
         if (!mpu6050_->Init()) {
             delete mpu6050_;
             mpu6050_ = nullptr;
+        }
+    }
+
+    // 测温链路的任何失败都不得影响对话 —— 与舵机、触摸、运动同一原则。
+    void InitializeThermalSensor() {
+        if (servo_bus_ == nullptr)
+            return;
+        if (i2c_master_probe(servo_bus_, ADS1115_ADDR, 100) != ESP_OK) {
+            ESP_LOGE(TAG,
+                     "ADS1115(0x%02X) 无响应。请检查：VDD 是否接 3V3（接 5V 会把 "
+                     "SDA/SCL 拉到 5V）、是否共地、ADDR 是否接 GND。若同时触摸或"
+                     "运动也开始不稳，先拆掉模块板载的上拉电阻",
+                     ADS1115_ADDR);
+            return;
+        }
+        ads1115_ = new Ads1115(servo_bus_, ADS1115_ADDR, SERVO_I2C_HZ);
+        if (!ads1115_->Init()) {
+            delete ads1115_;
+            ads1115_ = nullptr;
         }
     }
 
@@ -517,6 +549,8 @@ public:
             behavior->OnMotion(event, orientation);
         });
         motion_->Start();
+
+        InitializeThermalSensor();
         if (display_ != nullptr) {
             display_->SetBehavior(behavior_);
             display_->StartIdleAnimation();
