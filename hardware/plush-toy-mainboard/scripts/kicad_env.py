@@ -1,0 +1,35 @@
+"""定位本机 KiCad 10 安装，并提供库查询。只读，不修改 KiCad 任何文件。"""
+import re
+from pathlib import Path
+
+APP = Path("/Applications/KiCad/KiCad.app")
+KICAD_CLI = str(APP / "Contents/MacOS/kicad-cli")
+KICAD_PYTHON = str(APP / "Contents/Frameworks/Python.framework/Versions/Current/bin/python3")
+SHARED = APP / "Contents/SharedSupport"
+SYMBOL_DIR = SHARED / "symbols"
+FOOTPRINT_DIR = SHARED / "footprints"
+
+
+def symbol_exists(lib: str, name: str) -> bool:
+    path = SYMBOL_DIR / f"{lib}.kicad_sym"
+    if not path.exists():
+        return False
+    return f'(symbol "{name}"' in path.read_text(encoding="utf-8")
+
+
+def footprint_exists(lib: str, name: str) -> bool:
+    return (FOOTPRINT_DIR / f"{lib}.pretty" / f"{name}.kicad_mod").exists()
+
+
+def _read_sch_version() -> int:
+    # 不猜文件格式版本号：取 KiCad 自带工程里的实际值，保证生成的原理图能被这个版本打开。
+    # demos 目录在 dmg 里与 KiCad.app 并列，不一定被装上；template 在 app 包内，一定存在。
+    for folder in (SHARED / "template", APP.parent / "demos"):
+        for sch in sorted(folder.rglob("*.kicad_sch")):
+            m = re.search(r"\(version (\d+)\)", sch.read_text(encoding="utf-8", errors="ignore"))
+            if m:
+                return int(m.group(1))
+    raise RuntimeError("KiCad 自带 template 与 demos 中都找不到 .kicad_sch，无法确定文件格式版本")
+
+
+SCH_FILE_VERSION = _read_sch_version()
