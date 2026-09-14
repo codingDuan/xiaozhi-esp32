@@ -9,16 +9,33 @@ SHARED = APP / "Contents/SharedSupport"
 SYMBOL_DIR = SHARED / "symbols"
 FOOTPRINT_DIR = SHARED / "footprints"
 
+# 工程自带库：官方库没有的器件放在 hardware/plush-toy-mainboard/lib/，库名 plush。
+# 与工程目录下的 sym-lib-table / fp-lib-table 保持一致。
+PROJECT_DIR = Path(__file__).resolve().parents[1]
+PROJECT_LIBS = {"plush"}
+
+
+def symbol_file(lib: str) -> Path:
+    if lib in PROJECT_LIBS:
+        return PROJECT_DIR / "lib" / f"{lib}.kicad_sym"
+    return SYMBOL_DIR / f"{lib}.kicad_sym"
+
+
+def footprint_dir(lib: str) -> Path:
+    if lib in PROJECT_LIBS:
+        return PROJECT_DIR / "lib" / f"{lib}.pretty"
+    return FOOTPRINT_DIR / f"{lib}.pretty"
+
 
 def symbol_exists(lib: str, name: str) -> bool:
-    path = SYMBOL_DIR / f"{lib}.kicad_sym"
+    path = symbol_file(lib)
     if not path.exists():
         return False
     return f'(symbol "{name}"' in path.read_text(encoding="utf-8")
 
 
 def footprint_exists(lib: str, name: str) -> bool:
-    return (FOOTPRINT_DIR / f"{lib}.pretty" / f"{name}.kicad_mod").exists()
+    return (footprint_dir(lib) / f"{name}.kicad_mod").exists()
 
 
 def _read_sch_version() -> int:

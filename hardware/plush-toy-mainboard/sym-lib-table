@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "plush")(type "KiCad")(uri "${KIPRJMOD}/lib/plush.kicad_sym")(options "")(descr "plush-toy 主板工程专用符号，官方库没有的器件"))
+)

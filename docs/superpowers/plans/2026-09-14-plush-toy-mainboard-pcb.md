@@ -6,7 +6,9 @@
 
 **Architecture:** 全板连接关系只写在一份 Python 数据文件 `board_spec.py` 里，它是唯一事实来源。单元测试对它机械地核对 `config.h` 引脚与六条硬约束。原理图（`.kicad_sch`，按网络标签连接）和 PCB（pcbnew SWIG 脚本放置 + Freerouting 自动布线 + 手工关键线）都从它生成。任何连接改动只改数据文件，重新生成，测试先行。
 
-**Tech Stack:** KiCad 10.0.6（`kicad-cli`、自带 Python 的 `pcbnew` SWIG 绑定，KiCad 11 才移除）、Freerouting 2.4.1（Java 21）、Python 3 `unittest`。
+**Tech Stack:** KiCad 10.0.6（`kicad-cli`、自带 Python 3.9 的 `pcbnew` SWIG 绑定，KiCad 11 才移除）、Freerouting 2.4.1（class file 69，**需要 Java 25 及以上**，本机用 Homebrew `openjdk` 26）、Python 3 `unittest`。
+
+> **实施修正（2026-09-14）**：原稿写 Java 21，实测 Freerouting 2.4.1 在 21 上报 `UnsupportedClassVersionError`，已改用 `$(brew --prefix openjdk)/bin/java`。KiCad 通过复制 dmg 安装（Homebrew cask 需要 sudo 建 `/Library/Application Support/kicad`，无法无人值守），`demos` 未随包安装，原理图格式版本改从 app 包内 `template` 读取。
 
 **Spec:** `docs/superpowers/specs/2026-09-14-plush-toy-pcb-4layer-design.md`。第 12 节「器件定稿」优先于前文的选型要求。
 

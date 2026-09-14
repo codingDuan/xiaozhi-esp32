@@ -17,6 +17,11 @@ REQUIRED_FOOTPRINTS = [
     ("Resistor_SMD", "R_0402_1005Metric"),
     ("Capacitor_SMD", "C_0402_1005Metric"),
 ]
+# 工程自带库（lib/），官方库没有的器件
+REQUIRED_PROJECT = [
+    ("symbol", "plush", "INMP441"),
+    ("footprint", "plush", "InvenSense_INMP441_LGA-9_4.72x3.76mm"),
+]
 
 
 class KicadEnvTest(unittest.TestCase):
@@ -33,6 +38,17 @@ class KicadEnvTest(unittest.TestCase):
         for lib, name in REQUIRED_FOOTPRINTS:
             with self.subTest(lib=lib, name=name):
                 self.assertTrue(kicad_env.footprint_exists(lib, name))
+
+    def test_project_library_resolves_like_official(self):
+        for kind, lib, name in REQUIRED_PROJECT:
+            with self.subTest(kind=kind, name=name):
+                check = kicad_env.symbol_exists if kind == "symbol" else kicad_env.footprint_exists
+                self.assertTrue(check(lib, name))
+
+    def test_symbol_file_and_footprint_dir_for_project_lib(self):
+        self.assertEqual(kicad_env.symbol_file("plush").name, "plush.kicad_sym")
+        self.assertEqual(kicad_env.footprint_dir("plush").name, "plush.pretty")
+        self.assertEqual(kicad_env.footprint_dir("RF_Module").parent, kicad_env.FOOTPRINT_DIR)
 
     def test_schematic_version_read_from_bundled_demo(self):
         self.assertGreaterEqual(kicad_env.SCH_FILE_VERSION, 20250000)
