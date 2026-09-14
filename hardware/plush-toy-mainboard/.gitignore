@@ -1,0 +1,10 @@
+# 布线中间产物与 64MB 的 Freerouting jar 不进 git
+build/
+tools/*.jar
+# KiCad 本地缓存与备份
+*-backups/
+fp-info-cache
+*.kicad_prl
+*.tmp.kicad_pcb
+*.tmp.kicad_pro
+~*.lck

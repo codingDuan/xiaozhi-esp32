@@ -36,8 +36,11 @@ def load(part: board_spec.Part) -> pcbnew.FOOTPRINT:
     return fp
 
 
-def local_rect(fp: pcbnew.FOOTPRINT, ref: str) -> tuple[float, float, float, float]:
-    """封装在原点、0° 时的占位矩形 (x1, y1, x2, y2)。"""
+def local_rect(fp: pcbnew.FOOTPRINT, ref: str, include_pads: bool = True) -> tuple[float, float, float, float]:
+    """封装在原点、0° 时的占位矩形 (x1, y1, x2, y2)。
+
+    include_pads=False 只取庭院层，供旋转自检与 KiCad 的庭院层包围盒对比。
+    """
     court = fp.GetCourtyard(pcbnew.F_CrtYd)
     if court.OutlineCount():
         outline = court.Outline(0)
@@ -46,8 +49,13 @@ def local_rect(fp: pcbnew.FOOTPRINT, ref: str) -> tuple[float, float, float, flo
             # 只取模组本体：净空区宽 ±24，本体宽 ±9.74（ESP32-S3-WROOM-1 封装实测）
             pts = [p for p in pts if abs(p[0]) <= 10.0]
     else:
+        pts = []
+    # 占位还要包住焊盘：有些第三方封装的庭院层比焊盘小（RVT1A102M1010 焊盘到 ±6.75mm，
+    # 庭院层只到 ±5.2mm），只看庭院层会把别的器件放到它焊盘上。2026-09-14 首版因此
+    # 把 C_VMOT_HF 的 PGND 焊盘压在 C_VMOT_BULK 的 VMOT 焊盘上，DRC 报短路
+    if ref != "U1" and (include_pads or not pts):
         box = fp.GetBoundingBox(False)
-        pts = [(box.GetX() * TO_MM, box.GetY() * TO_MM), (box.GetRight() * TO_MM, box.GetBottom() * TO_MM)]
+        pts += [(box.GetX() * TO_MM, box.GetY() * TO_MM), (box.GetRight() * TO_MM, box.GetBottom() * TO_MM)]
     xs, ys = [p[0] for p in pts], [p[1] for p in pts]
     return min(xs), min(ys), max(xs), max(ys)
 
@@ -193,7 +201,10 @@ def add_zone(board: pcbnew.BOARD, net: str, layer: int, x1: float, y1: float, x2
 
 
 def main() -> Path:
-    board = pcbnew.NewBoard(str(PCB))
+    # 先写临时文件，全部成功后再替换正式文件。NewBoard 会直接占用目标路径，
+    # 2026-09-14 一次定点器件报错后正式板文件被清空，只能从 git 恢复
+    tmp = PCB.with_name(PCB.stem + ".tmp.kicad_pcb")
+    board = pcbnew.NewBoard(str(tmp))
     board.SetCopperLayerCount(4)
     add_outline(board)
     for name in board_spec.nets():
@@ -270,7 +281,8 @@ def main() -> Path:
         fp.BuildCourtyardCaches()
         box = fp.GetCourtyard(pcbnew.F_CrtYd).BBox()
         x, y, angle = where[ref]
-        mine = placed_rect(local_rect(load(next(p for p in fitted if p.ref == ref)), ref), x, y, angle)
+        mine = placed_rect(local_rect(load(next(p for p in fitted if p.ref == ref)), ref, include_pads=False),
+                           x, y, angle)
         kicad = (box.GetX() * TO_MM, box.GetY() * TO_MM, box.GetRight() * TO_MM, box.GetBottom() * TO_MM)
         # 比中心与宽高，不比四条边：KiCad 的庭院层包围盒把 0.05mm 线宽也算进去，
         # 四边各大 0.05mm。旋转算错时宽高会互换，比宽高足以抓住
@@ -305,6 +317,14 @@ def main() -> Path:
     add_zone(board, "+3V3", pcbnew.In2_Cu, 0, 0, 62.0, pl.H)
     add_zone(board, "PGND", pcbnew.B_Cu, 64.0, 0, pl.W, pl.H)
 
+    board.Save(str(tmp))
+    tmp.replace(PCB)
+    # NewBoard 会顺带给临时板建同名 .kicad_pro / .kicad_prl，正式规则在真正的工程文件里，删掉
+    for leftover in (tmp.with_suffix(".kicad_pro"), tmp.with_suffix(".kicad_prl")):
+        leftover.unlink(missing_ok=True)
+    # 铺铜必须在加载正式工程规则之后再灌：临时板没有工程文件，按默认规则灌出来的铜
+    # 离孔、离板边都不够（2026-09-14 DRC 报 15 处 hole_clearance、3 处 copper_edge_clearance）
+    board = pcbnew.LoadBoard(str(PCB))
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     board.Save(str(PCB))
     return PCB

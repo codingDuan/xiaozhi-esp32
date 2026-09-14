@@ -29,7 +29,10 @@ class Inmp441FootprintTest(unittest.TestCase):
         self.assertEqual(sorted(self.pads(), key=int), [str(n) for n in range(1, 10)])
         holes = [p for p in self.fp.Pads() if p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH]
         self.assertEqual(len(holes), 1)
-        self.assertAlmostEqual(holes[0].GetDrillSize().x / MM, 0.5, places=3)
+        # 0.4mm：铜环内径 0.96，孔到铜 (0.96-0.4)/2 = 0.28mm，满足工程规则 min_hole_clearance 0.25。
+        # 原取 0.5（数据手册推荐 0.5-1）时只剩 0.23mm，DRC 报 hole_clearance。
+        # 0.4 仍大于声孔下限 0.25，不影响灵敏度（DS-INMP441-00 第 17 页）
+        self.assertAlmostEqual(holes[0].GetDrillSize().x / MM, 0.4, places=3)
 
     def test_rows_follow_mirrored_bottom_view(self):
         expected = {

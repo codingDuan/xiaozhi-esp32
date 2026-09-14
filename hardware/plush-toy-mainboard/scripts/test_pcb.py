@@ -96,6 +96,18 @@ class PcbTest(unittest.TestCase):
         self.assertIn("65", heater[0])
         self.assertIn("常闭", heater[0])
 
+    def test_pads_of_different_parts_do_not_touch(self):
+        # 庭院层不重叠不等于焊盘不重叠：第三方封装的庭院层可能比焊盘小。
+        # 2026-09-14 首版 C_VMOT_HF 的 PGND 焊盘压在 C_VMOT_BULK 的 VMOT 焊盘上
+        pads = [(ref, p.GetNumber(), p.GetNetname(), p.GetBoundingBox())
+                for ref, fp in self.fps.items() for p in fp.Pads() if p.IsOnLayer(pcbnew.F_Cu)]
+        touching = []
+        for i, (ra, na, neta, ba) in enumerate(pads):
+            for rb, nb, netb, bb in pads[i + 1:]:
+                if ra != rb and ba.Intersects(bb):
+                    touching.append((f"{ra}.{na}[{neta}]", f"{rb}.{nb}[{netb}]"))
+        self.assertEqual(touching, [])
+
     def _visible_silk_texts(self):
         """(说明, 包围盒) 列表：F.SilkS 上所有可见文字，含位号、取值与板上独立文字。"""
         items = []

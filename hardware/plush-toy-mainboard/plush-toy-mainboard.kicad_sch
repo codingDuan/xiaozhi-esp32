@@ -2,7 +2,7 @@
 	(version 20250114)
 	(generator "plush_gen")
 	(generator_version "10.0")
-	(uuid "20c4a71e-8b66-42cb-8330-d5b6f9f0dd08")
+	(uuid "6a11e91c-bc49-401f-a4f5-f4ea92f187fb")
 	(paper "A0")
 	(lib_symbols
 		(symbol "RF_Module:ESP32-S3-WROOM-1"
@@ -7892,7 +7892,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "653672ec-8f55-49bf-b289-3b13221bcff6")
+		(uuid "46acf4ca-b235-4f04-baba-ce789341669f")
 		(property "Reference" "U1"
 			(at 50.80 116.84 0)
 			(effects
@@ -7939,131 +7939,131 @@
 			)
 		)
 		(pin "1"
-			(uuid "60ed7f40-0d8e-4b9f-8713-04507a1bc2d4")
+			(uuid "94ee8e05-dc4d-46e7-b18b-81469ff03f27")
 		)
 		(pin "2"
-			(uuid "6aea5ed0-9ee6-467d-acb2-c7fced15ae74")
+			(uuid "5bcd82a1-e3b1-4be2-a7fe-9af4faf91fa0")
 		)
 		(pin "3"
-			(uuid "60e5603a-081f-4b78-890a-0bfa04ee2e09")
+			(uuid "c50eb0b1-ea80-4adb-a044-347c60ed594f")
 		)
 		(pin "4"
-			(uuid "c3d7e79b-a362-4af9-9082-5d9efd66f360")
+			(uuid "31905368-68a3-4479-a709-6118dfdfd8ea")
 		)
 		(pin "5"
-			(uuid "2587120c-51c6-48b7-9736-a750bd920d91")
+			(uuid "6f99cf36-83d0-4793-a084-a6c8f2e6d007")
 		)
 		(pin "6"
-			(uuid "cdc3ac73-6cc7-42c6-b3ec-4ddf246265ea")
+			(uuid "8e2cfa0f-3e84-4099-a9ba-4816b5d267c0")
 		)
 		(pin "7"
-			(uuid "1f2195c1-f028-42c9-bbde-5121965fa159")
+			(uuid "3336c970-5151-494f-9dbb-466137216a4d")
 		)
 		(pin "8"
-			(uuid "c7fcf819-9bf5-402b-93b5-21d8b2ac7293")
+			(uuid "dbdd576a-01b2-41b4-9cfe-b81a8506a318")
 		)
 		(pin "9"
-			(uuid "7e32291a-774d-4a47-9267-074ecb935c25")
+			(uuid "84e704c3-2434-44d7-bfba-fa7e1fd6f2f6")
 		)
 		(pin "10"
-			(uuid "42e1a407-31d1-42a1-ac2e-c0dc7b9b9bd9")
+			(uuid "16a74a87-54ff-41f1-9201-a27faa9444b1")
 		)
 		(pin "11"
-			(uuid "4c26b4b4-1841-44ab-9d7c-b8e0a00c2be1")
+			(uuid "2e42d2db-76f0-4a56-b6b2-bbfc51f9c004")
 		)
 		(pin "12"
-			(uuid "07872acf-eb33-4001-9ee6-01a4ce3b8378")
+			(uuid "b16bdfad-0fd3-404c-8165-70c683e5346e")
 		)
 		(pin "13"
-			(uuid "f0a05d60-818a-4127-b0a2-3f57127e24f3")
+			(uuid "dc552f6a-352a-4b89-9a91-293b78ddef1b")
 		)
 		(pin "14"
-			(uuid "fc629229-00d4-4800-8e82-e72b7b58431f")
+			(uuid "f3d6396d-2d43-4d1a-a5c3-582ffd9bf208")
 		)
 		(pin "15"
-			(uuid "efd0b442-f3ea-4880-9a4b-4eeb782101d4")
+			(uuid "04ef73a8-5483-47d6-b36e-4e9becd392dd")
 		)
 		(pin "16"
-			(uuid "28b8f5b6-c991-441e-8df8-325cd8387ab3")
+			(uuid "8231b63a-2fd2-4688-b278-f564956f01ec")
 		)
 		(pin "17"
-			(uuid "7bd99385-178d-460a-a9cb-51cee026e5bb")
+			(uuid "27ac3868-2c4c-4d0a-a360-78c61c911501")
 		)
 		(pin "18"
-			(uuid "e90be551-057b-42f5-b07b-fd5cfcc8b987")
+			(uuid "edf74057-bfdf-46b0-8836-e24a23e58e79")
 		)
 		(pin "19"
-			(uuid "518a9098-5ce0-49f7-9819-e35eb70a6268")
+			(uuid "77f6a29d-f10a-457c-9a4b-d0572986bb6b")
 		)
 		(pin "20"
-			(uuid "65134569-05f3-4917-9eeb-4230bbe7c8c3")
+			(uuid "a2e74706-e4af-4708-baee-7b117f975fea")
 		)
 		(pin "21"
-			(uuid "6b60738b-92e0-42c4-837e-b2cf3528e6ae")
+			(uuid "4b1db88e-57d8-461b-a3f6-9a087466d03d")
 		)
 		(pin "22"
-			(uuid "380141bd-fad6-4d85-a638-92fdfd669d23")
+			(uuid "e1c7d7b0-a073-4f04-8c94-6643e1bfaa8b")
 		)
 		(pin "23"
-			(uuid "95ba7474-8601-4e71-a884-921f2b1158d4")
+			(uuid "3bf4f520-b977-4e6d-b6ed-29711fd45a55")
 		)
 		(pin "24"
-			(uuid "74be075b-f1ce-43d2-9239-57792f906d0d")
+			(uuid "1ec3ba26-6d73-441f-ae40-d805982df08e")
 		)
 		(pin "25"
-			(uuid "a93a71ae-82c2-4d9f-8b1c-2bad8919bc94")
+			(uuid "c2fa15f9-6f1e-4eb8-9d71-41b2d19bf960")
 		)
 		(pin "26"
-			(uuid "24c8d262-8aa5-4fda-873a-0e54afde0a3d")
+			(uuid "df340187-5106-4e0b-a844-49abc44defb8")
 		)
 		(pin "27"
-			(uuid "c4fa90dc-81ec-4437-8302-1c0f8df50aff")
+			(uuid "b6990540-f580-4d96-a45d-e7a2ec4058c4")
 		)
 		(pin "28"
-			(uuid "c555ae90-e1f0-4156-8f47-6f287134de7b")
+			(uuid "2eb1b038-0374-47cc-9484-9382c6b8af90")
 		)
 		(pin "29"
-			(uuid "2a27056e-c313-4077-b028-ccf246356024")
+			(uuid "60e8880c-97c8-4593-ab6b-6b0a4c98ed3d")
 		)
 		(pin "30"
-			(uuid "34521144-31f9-4f97-b7ed-650f251caca2")
+			(uuid "96a0fe09-efc7-4a5d-88cc-37fed59e0f97")
 		)
 		(pin "31"
-			(uuid "04a94042-4a04-4b54-8653-045d800710b1")
+			(uuid "2e66f3ed-06f1-421f-9a56-3a9c7cb4bd3a")
 		)
 		(pin "32"
-			(uuid "13c7fe74-9691-4c28-b4b6-d91e3203f6ac")
+			(uuid "f5fb24fd-c15e-4755-97c7-9bf8b24affd4")
 		)
 		(pin "33"
-			(uuid "a257ac3f-42d7-4b3f-ade2-26b03e78d160")
+			(uuid "1516b3a6-1fc5-4efe-9055-9d698ebb2a3d")
 		)
 		(pin "34"
-			(uuid "bcc4218d-851b-4718-b97d-815c6a7f4013")
+			(uuid "85f181d5-959e-4966-983f-2ee849a7d6ae")
 		)
 		(pin "35"
-			(uuid "af5c0fad-529d-49a8-ab6d-3486abc14935")
+			(uuid "5b97fcfa-b0c6-4991-ba22-e20b561abf6c")
 		)
 		(pin "36"
-			(uuid "ea03cfbc-4c19-40ea-aa9a-dd83d62efdfb")
+			(uuid "d655b0a6-0399-4332-8d89-b51a27e2a9cd")
 		)
 		(pin "37"
-			(uuid "edce1fbd-d056-4c75-925f-b440e8ca546a")
+			(uuid "22502267-3301-4f9e-9325-fd3ca93fd6a2")
 		)
 		(pin "38"
-			(uuid "8753e831-6115-4578-a604-19adeab21fd9")
+			(uuid "4cb2522d-e5cb-432b-85e7-f01b4b4caabc")
 		)
 		(pin "39"
-			(uuid "6fd9eb6c-90d6-43b6-8ee2-4e2264aa8947")
+			(uuid "4f1e1575-c853-4dac-ac6f-e9c41843a33b")
 		)
 		(pin "40"
-			(uuid "1a144edf-ce5e-444b-b383-31edde4e4396")
+			(uuid "10e90234-7117-4396-9cdc-f3e48ff029dd")
 		)
 		(pin "41"
-			(uuid "ae3175c7-7da5-44c9-9e13-01ad76165c4f")
+			(uuid "b788b4e3-d453-4787-b173-728f3325d095")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "U1")
 					(unit 1)
 				)
@@ -8078,7 +8078,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "6bc0c95c-a0e1-426e-8342-005db6bf8941")
+		(uuid "552d3796-8459-48f7-ac55-42349e7e5b9d")
 	)
 	(label "+3V3"
 		(at 66.04 43.18 90)
@@ -8088,7 +8088,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "ac9c2bfe-365e-43f8-8c2a-984cb1720c1d")
+		(uuid "d7e83b4b-c3f9-4563-b2ef-f1baa6f0c16e")
 	)
 	(label "EN"
 		(at 50.80 48.26 0)
@@ -8098,7 +8098,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "d59d405b-838d-4dc4-a343-98752c960ba6")
+		(uuid "5b0d1975-6831-48bc-b47d-e54bf41e5d4c")
 	)
 	(label "GND"
 		(at 66.04 99.06 90)
@@ -8108,7 +8108,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "2b2bcbd2-2fee-4105-a7ab-62c680c059b3")
+		(uuid "5473edd1-b2d0-481c-9836-d1970b7013e3")
 	)
 	(label "GND"
 		(at 66.04 99.06 90)
@@ -8118,19 +8118,19 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "a7235d78-e19e-4902-aeca-15bd04b66b4c")
+		(uuid "c832dfb6-c6cd-4a53-86a1-82facaf20886")
 	)
 	(no_connect
 		(at 81.28 66.04)
-		(uuid "1d60097d-6af7-45d5-9b8d-e434cd1a516c")
+		(uuid "58d7acbd-9518-460e-9992-c73116cc01cd")
 	)
 	(no_connect
 		(at 81.28 68.58)
-		(uuid "39f486c1-06bb-444a-a01a-4b6584c9e88b")
+		(uuid "3235f5c7-48c0-44b7-a359-2c07ac99ff28")
 	)
 	(no_connect
 		(at 81.28 71.12)
-		(uuid "74883394-5982-4718-97dd-b477cc31d2dc")
+		(uuid "9553cc0c-aca3-4e03-9e2d-14b885a3aa2e")
 	)
 	(label "CAM_SIOD"
 		(at 50.80 63.50 0)
@@ -8140,7 +8140,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "2dceeead-93df-47a3-8709-02308b335db8")
+		(uuid "fcdb6942-b1f2-4a65-b1b2-512371653ece")
 	)
 	(label "CAM_SIOC"
 		(at 50.80 66.04 0)
@@ -8150,7 +8150,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "84cc0fdd-bb1e-40f8-99da-e80c558e1196")
+		(uuid "126384d5-6640-4a23-a0b9-0d0289f8213b")
 	)
 	(label "CAM_VSYNC"
 		(at 50.80 68.58 0)
@@ -8160,7 +8160,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "5f9ca139-64b3-4d45-8fc2-f33396a8ef7c")
+		(uuid "58a69e8b-8b13-4303-8cf6-1e5c3b3b2dc7")
 	)
 	(label "CAM_HREF"
 		(at 50.80 71.12 0)
@@ -8170,7 +8170,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "0f364608-bdfc-47b8-8ad6-20d80649b117")
+		(uuid "e1840c76-555d-4c88-9008-dfa22b88a4b1")
 	)
 	(label "CAM_XCLK"
 		(at 50.80 91.44 0)
@@ -8180,7 +8180,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "d3767ad6-5cf6-4474-9acf-4ed4922ca7c3")
+		(uuid "eca2eb4f-b019-4cc6-9253-61eb904d9419")
 	)
 	(label "CAM_Y9"
 		(at 50.80 93.98 0)
@@ -8190,7 +8190,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "d183165b-f51f-4ab1-979c-ded10ddfb00f")
+		(uuid "e735afc9-08c6-4501-90e1-b8fe5d6889e0")
 	)
 	(label "CAM_Y8"
 		(at 81.28 53.34 0)
@@ -8200,7 +8200,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "d8e70fad-14c2-4bb6-a776-718dbe58315b")
+		(uuid "cc7a8c7e-9e28-4d56-9a88-1cf97d40df72")
 	)
 	(label "CAM_Y7"
 		(at 81.28 55.88 0)
@@ -8210,7 +8210,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "6031af9d-4e4d-48a9-b30c-c411836cea39")
+		(uuid "43ce83a5-86a7-4171-b5e4-9f8daaac0624")
 	)
 	(label "CAM_Y4"
 		(at 50.80 73.66 0)
@@ -8220,7 +8220,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "5ce4f83e-33f1-44cb-9e3e-80b29d914725")
+		(uuid "a865c751-6ec7-43a0-a271-2a713ee0adac")
 	)
 	(label "USB_DN"
 		(at 81.28 58.42 0)
@@ -8230,7 +8230,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "1db701a2-125a-4b75-b910-afd55686a438")
+		(uuid "b5d4b01f-a5a1-4166-a1b2-434344c55a32")
 	)
 	(label "USB_DP"
 		(at 81.28 60.96 0)
@@ -8240,7 +8240,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "f75b6d93-3ec4-44ec-9e8c-2774ecbf8175")
+		(uuid "3fab54c3-564f-4fb1-bcbe-1b90135e295b")
 	)
 	(label "I2C_SCL"
 		(at 50.80 60.96 0)
@@ -8250,7 +8250,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "3230faa8-5222-4f64-8cb2-c4739cafdff9")
+		(uuid "cf3f7dde-605c-4592-bfd6-90055a74ca04")
 	)
 	(label "LCD_CS_R"
 		(at 81.28 88.90 0)
@@ -8260,7 +8260,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "71f527ae-ca11-44e7-97b3-56f14819dfb9")
+		(uuid "bb7be99e-9893-4617-b815-713b617eb603")
 	)
 	(label "CAM_Y3"
 		(at 50.80 76.20 0)
@@ -8270,7 +8270,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "1bbd5e8d-057e-4ddd-8961-d24b3e2eaeb1")
+		(uuid "f5d24aaa-3640-4e90-a887-3280c0f6cdff")
 	)
 	(label "CAM_Y5"
 		(at 50.80 78.74 0)
@@ -8280,7 +8280,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "f717d2ef-c0e2-4ef7-b7a6-1afb690ae0d3")
+		(uuid "25ba33db-8c6e-4813-9715-cf7a2f5d1b2a")
 	)
 	(label "CAM_Y2"
 		(at 50.80 81.28 0)
@@ -8290,7 +8290,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "0f82a17f-1a85-4fca-8b7d-6ade08cf300c")
+		(uuid "bea17c4b-7108-4a90-89a3-c8c813a40814")
 	)
 	(label "CAM_Y6"
 		(at 50.80 83.82 0)
@@ -8300,7 +8300,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "91b08801-b76f-4675-8610-a6cb70fa961c")
+		(uuid "b8f25243-5ac7-44f2-a8d8-e9a95ddad15e")
 	)
 	(label "CAM_PCLK"
 		(at 50.80 86.36 0)
@@ -8310,7 +8310,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "7757f934-0d38-4759-a5d6-31f9c67b6e66")
+		(uuid "4f16d059-6329-4138-9344-8b013b0bd9db")
 	)
 	(label "LCD_MOSI"
 		(at 50.80 88.90 0)
@@ -8320,7 +8320,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "c6eef500-94ef-4da5-9a7d-f67c3a29712d")
+		(uuid "d85630fa-3bc0-4bc8-8188-89c8eb02a13b")
 	)
 	(label "LCD_RST"
 		(at 81.28 63.50 0)
@@ -8330,7 +8330,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "df632ab3-ccdd-4a22-84aa-9561fd7b936c")
+		(uuid "34aefa5d-86bb-4f3a-b15b-2dac24188e80")
 	)
 	(label "LCD_DC"
 		(at 81.28 91.44 0)
@@ -8340,7 +8340,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "fec99397-3e9c-4af1-be36-da42ccbcc8a0")
+		(uuid "61c147ce-34e3-4aae-92a7-77bc82b2851d")
 	)
 	(label "LED_RGB"
 		(at 81.28 93.98 0)
@@ -8350,7 +8350,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "b53561f7-194c-43d7-abb8-eb7b19351958")
+		(uuid "ef89ab65-2e48-4786-b61f-7f47bed1cc6a")
 	)
 	(label "LCD_CS_L"
 		(at 81.28 86.36 0)
@@ -8360,7 +8360,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "160d6f81-1dbf-43e5-b580-3968d056f0ae")
+		(uuid "36d533ca-f84c-453b-afa9-13cb34742a1a")
 	)
 	(label "BOOT"
 		(at 50.80 53.34 0)
@@ -8370,7 +8370,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "2df85c8a-e730-4f06-b1ca-2df994b5c94e")
+		(uuid "fd3126ec-ce63-4ff3-9207-94377f25e40c")
 	)
 	(label "LCD_CLK"
 		(at 81.28 73.66 0)
@@ -8380,7 +8380,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "71c28477-6c39-49b0-92bc-0fae7871ad69")
+		(uuid "c70f8048-af16-429d-9637-26a118bd8b36")
 	)
 	(label "AMP_DIN"
 		(at 81.28 76.20 0)
@@ -8390,7 +8390,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "76945909-207d-4f71-bc49-72c7126c9d24")
+		(uuid "2be09a29-6945-4cdf-8ef6-2991161cb39a")
 	)
 	(label "AMP_BCLK"
 		(at 81.28 78.74 0)
@@ -8400,7 +8400,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "c16e8c76-fa9a-4c68-817a-af0de5df5f41")
+		(uuid "c7206c64-917a-41c5-bb9c-e28de4b38487")
 	)
 	(label "AMP_LRCLK"
 		(at 81.28 81.28 0)
@@ -8410,7 +8410,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "1aec8d4b-cd12-4ef8-a952-e25e86eb8c2b")
+		(uuid "59770400-953d-4523-8ea5-c1a7a74b465e")
 	)
 	(label "MIC_SD"
 		(at 81.28 83.82 0)
@@ -8420,7 +8420,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "97965b93-cb18-4669-b53d-244d6b17d456")
+		(uuid "e01016bc-9de2-4d7a-85a2-6650b576af9a")
 	)
 	(label "I2C_SDA"
 		(at 81.28 50.80 0)
@@ -8430,7 +8430,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "2505856d-e3e0-4c78-8947-c255df4b34f1")
+		(uuid "0dd7050c-a47e-4388-9b7b-ef2f648fe899")
 	)
 	(label "UART_TX"
 		(at 81.28 48.26 0)
@@ -8440,7 +8440,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "37218307-db02-4a55-be23-de636e9756db")
+		(uuid "b232560e-5233-4ed5-a87d-4fe399133178")
 	)
 	(label "MIC_SCK"
 		(at 50.80 58.42 0)
@@ -8450,7 +8450,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "870b13a5-326a-4c77-be09-642f48672b14")
+		(uuid "b6fde1e6-8056-4bd4-92b2-5bd216f72391")
 	)
 	(label "MIC_WS"
 		(at 50.80 55.88 0)
@@ -8460,7 +8460,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "d6e01e01-5b21-4e42-9780-ca7c2f422680")
+		(uuid "e071ba8d-ffbf-4839-8b80-a31fc1757300")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -8470,7 +8470,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "9a400a92-3095-43c3-a24f-925b4e5e0408")
+		(uuid "edbc50d5-f239-4004-9e33-7759d5f1799d")
 		(property "Reference" "C_U1_BULK"
 			(at 134.62 44.45 0)
 			(effects
@@ -8517,14 +8517,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "a55d9088-966a-4f5a-86d5-9783610314f3")
+			(uuid "0cd38173-aa99-4161-89cf-a8d032194f50")
 		)
 		(pin "2"
-			(uuid "ec9dc054-7234-4edd-84e8-d4378e3ecfa3")
+			(uuid "db47e46d-78bc-4f6a-b9c3-aebd7208c91f")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_U1_BULK")
 					(unit 1)
 				)
@@ -8539,7 +8539,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "2bd63870-4357-4631-976f-dcf9883b8730")
+		(uuid "e2c81475-3365-41c8-a7cc-12e040e9489b")
 	)
 	(label "GND"
 		(at 132.08 49.53 90)
@@ -8549,7 +8549,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "ffdc5b2e-800c-489d-a615-d67b98a68f66")
+		(uuid "e3eef086-4116-4f51-96da-c30e49bc9de2")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -8559,7 +8559,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d9be7b0f-39da-4687-93e1-79fc899c2636")
+		(uuid "372aacc4-3ab4-4696-a3c9-ec9fb128eaa7")
 		(property "Reference" "C_U1"
 			(at 185.42 44.45 0)
 			(effects
@@ -8606,14 +8606,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "aa1c11ca-627a-4547-a0b8-5c24fb38754e")
+			(uuid "57d413e1-73d7-4b32-a7c1-a9bf9d234127")
 		)
 		(pin "2"
-			(uuid "6d876154-cf14-4c15-8eaf-a49c0c436c24")
+			(uuid "55d42b16-ee73-4028-bfd5-491bf2898185")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_U1")
 					(unit 1)
 				)
@@ -8628,7 +8628,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "e5ef9e68-ee8f-48d5-9b2b-6f2c1b0187af")
+		(uuid "94de1f1a-37e6-4a30-91e0-3e543860dcc4")
 	)
 	(label "GND"
 		(at 182.88 49.53 90)
@@ -8638,7 +8638,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "3024df29-2f8a-4156-8bd8-a8478a9f2129")
+		(uuid "b34c575e-57dc-42a8-8e11-15d582879a86")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -8648,7 +8648,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "00de2683-e62e-4080-854f-ba3fb6144331")
+		(uuid "8f555324-c6fc-46ea-83fe-f2ae4dd86568")
 		(property "Reference" "R_EN"
 			(at 236.22 44.45 0)
 			(effects
@@ -8695,14 +8695,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "431e5f6c-edbd-40d1-9c0e-3a0feba70ffe")
+			(uuid "f90e42c3-1e74-4f1e-93bf-f743d5075d6d")
 		)
 		(pin "2"
-			(uuid "33813e2c-b4f8-4764-b3ee-393cbcd4026b")
+			(uuid "8cc35e7a-af87-4385-9402-5b1a3d221ab1")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_EN")
 					(unit 1)
 				)
@@ -8717,7 +8717,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "0490d29e-6089-4967-a649-52a568d9b081")
+		(uuid "be57d941-017e-4186-9fe3-392d77b50f5c")
 	)
 	(label "EN"
 		(at 233.68 49.53 90)
@@ -8727,7 +8727,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "fd6ec4e0-1e38-4da7-b8bd-0028b02f2bd2")
+		(uuid "90c5a47b-d44c-4acf-8a34-31879cc04974")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -8737,7 +8737,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "6d165a9d-a142-4b7a-be07-fa43928dcae7")
+		(uuid "fb684e1a-09dd-459f-8a7e-cdb72e608883")
 		(property "Reference" "C_EN"
 			(at 287.02 44.45 0)
 			(effects
@@ -8784,14 +8784,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "29893c74-30f6-4755-aa3c-e5a179f1ede4")
+			(uuid "983da769-7b45-42aa-824b-bf8488f87211")
 		)
 		(pin "2"
-			(uuid "e03f0a01-39e7-4453-a8b1-0f82c62cec1f")
+			(uuid "31defc2a-6207-41bc-8219-593e4911168b")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_EN")
 					(unit 1)
 				)
@@ -8806,7 +8806,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "f7bbe7ca-e9d2-470a-b5c6-7b0600f839aa")
+		(uuid "bd675a0e-a95f-46cb-89bc-2e4a77eaaf3d")
 	)
 	(label "GND"
 		(at 284.48 49.53 90)
@@ -8816,7 +8816,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "1096ee61-7eac-4464-a810-358b2620859c")
+		(uuid "e798f601-0149-454a-911f-5db8f9ac5d29")
 	)
 	(symbol
 		(lib_id "lcsc:TS-1187A-B-A-B")
@@ -8826,7 +8826,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "beab3148-e683-47e5-8ee6-85a219a513e6")
+		(uuid "d8713224-ff2c-49b9-a8c6-7e04c6230ca9")
 		(property "Reference" "SW_RST"
 			(at 342.90 44.45 0)
 			(effects
@@ -8873,20 +8873,20 @@
 			)
 		)
 		(pin "2"
-			(uuid "a7064fde-952a-4088-b077-2ef916759e54")
+			(uuid "f029c898-23b0-4fa8-ba39-ab1248455713")
 		)
 		(pin "1"
-			(uuid "8f4e37e3-b59f-4eac-886c-aabc2b3ae14a")
+			(uuid "d9bd9a5b-0dc9-4abf-a694-ddf665cb619c")
 		)
 		(pin "4"
-			(uuid "76a3f7ab-9acd-4073-bbb9-500b855467a2")
+			(uuid "fa9c705d-b716-45d0-9d6c-be664667ddb9")
 		)
 		(pin "3"
-			(uuid "7789696d-fbff-41f6-bfaa-f69c30616958")
+			(uuid "dea67aeb-c391-4d86-a772-8f296f6f419a")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "SW_RST")
 					(unit 1)
 				)
@@ -8901,7 +8901,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "05c227c5-18af-4450-a552-f766b20e06a1")
+		(uuid "864287ab-bcd4-4cea-9c5e-7c82534e2079")
 	)
 	(label "EN"
 		(at 345.44 43.18 0)
@@ -8911,7 +8911,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "91dcc6ac-7178-49b9-bc47-45df290a37b4")
+		(uuid "06f340f9-d127-44c7-aa20-87acaa4f9923")
 	)
 	(label "GND"
 		(at 335.28 50.80 0)
@@ -8921,7 +8921,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "97fce84d-e3c7-4bfe-9d9d-4458367e4603")
+		(uuid "cc6f8d6d-30a0-474b-91a5-9053ede78032")
 	)
 	(label "GND"
 		(at 345.44 50.80 0)
@@ -8931,7 +8931,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "4600b06d-de92-41c8-8e9f-8b0c83929fb6")
+		(uuid "4e7bafd8-ca27-4735-866d-1eb58d1966e8")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -8941,7 +8941,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "3361fda1-7b44-42a5-8bc6-b0abac180d76")
+		(uuid "5748d728-760f-4c98-9502-8a4518500498")
 		(property "Reference" "R_BOOT"
 			(at 398.78 44.45 0)
 			(effects
@@ -8988,14 +8988,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "2438fa79-7078-42fc-8aad-9ca0855de4ff")
+			(uuid "f3a573e9-8be4-4afc-b90f-1dcd8bb69e77")
 		)
 		(pin "2"
-			(uuid "08a80826-4df9-4053-8ba0-89ba53069bc0")
+			(uuid "9286737f-6e8d-495e-8d80-bb5e964ccc84")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_BOOT")
 					(unit 1)
 				)
@@ -9010,7 +9010,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "9ae3200b-3ca0-449e-8b02-780e86746985")
+		(uuid "ed83f45c-061b-49dc-8f55-fdaf14177e6d")
 	)
 	(label "BOOT"
 		(at 396.24 49.53 90)
@@ -9020,7 +9020,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "b3ee421e-e5b0-4620-9b8e-8112d0d0543b")
+		(uuid "24955ee9-e223-4a54-b593-03590c1f7bd3")
 	)
 	(symbol
 		(lib_id "lcsc:TS-1187A-B-A-B")
@@ -9030,7 +9030,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ded9abe5-6ba7-41b5-a9f2-d6701b303709")
+		(uuid "f736ad8f-666a-4fcc-bb76-00a285d9f3e4")
 		(property "Reference" "SW_BOOT"
 			(at 454.66 44.45 0)
 			(effects
@@ -9077,20 +9077,20 @@
 			)
 		)
 		(pin "2"
-			(uuid "c6f86eb5-9416-4d98-baa4-cb5992ca2e38")
+			(uuid "ef76ceb1-37b8-4006-9b08-2c3461ec50e2")
 		)
 		(pin "1"
-			(uuid "cbd6d371-dc75-4e89-9a79-cc9b9e9d6ce7")
+			(uuid "2c3c495b-7a3e-4377-82a3-dda569848b01")
 		)
 		(pin "4"
-			(uuid "ebc9a889-0a64-43e8-b46d-9e2b48657d2d")
+			(uuid "ad081059-3f77-4aab-a99d-2fa70bf5661e")
 		)
 		(pin "3"
-			(uuid "1d42e918-2f40-45b2-93ff-aa38c4001d6e")
+			(uuid "8ca6a4aa-f68f-41d7-b237-fa655aef1bd2")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "SW_BOOT")
 					(unit 1)
 				)
@@ -9105,7 +9105,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "4b04bd85-5fe2-4de3-a10a-6f4009e3e808")
+		(uuid "6c759ce9-3617-4e26-b422-22bc4124b5c7")
 	)
 	(label "BOOT"
 		(at 457.20 43.18 0)
@@ -9115,7 +9115,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "69228157-c122-40a7-9a3b-95b4f48a6907")
+		(uuid "1030901a-4de9-434e-9e1d-e42407053c64")
 	)
 	(label "GND"
 		(at 447.04 50.80 0)
@@ -9125,7 +9125,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "4244b8b4-5a11-4a2a-a1b5-06d9b3e6ae16")
+		(uuid "38af6bca-0ba0-4522-add0-cd55bf79f9ec")
 	)
 	(label "GND"
 		(at 457.20 50.80 0)
@@ -9135,7 +9135,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "c15f1b3c-accc-454a-8c41-f6e120113564")
+		(uuid "c4d5ea17-226f-4137-9cab-1dc80a61dfd6")
 	)
 	(symbol
 		(lib_id "LED:WS2812B-2020")
@@ -9145,7 +9145,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "4ea1730d-068e-4c59-bc4c-9fb4bf32795b")
+		(uuid "eb27d4f8-437e-43a2-a61f-36c526f63eae")
 		(property "Reference" "D_LED"
 			(at 518.16 49.53 0)
 			(effects
@@ -9192,20 +9192,20 @@
 			)
 		)
 		(pin "1"
-			(uuid "b77253fe-1cb4-487e-895c-0cb3c4f43342")
+			(uuid "3dc53c02-a062-43f5-90ef-bf1df968c1bf")
 		)
 		(pin "2"
-			(uuid "854ec9fe-2a89-4401-a760-6809bd618d54")
+			(uuid "c2c93d2f-62c6-4c8c-9bf8-d10d81596fef")
 		)
 		(pin "3"
-			(uuid "63421051-18be-4250-8dda-cd1266bdf578")
+			(uuid "173e4dc9-61fd-4c1f-b6bf-711a79cd31e5")
 		)
 		(pin "4"
-			(uuid "89062d1e-c319-454e-a71f-200f8541f3c2")
+			(uuid "762295a7-a33b-4cc6-9d3c-9da6bf4d30db")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "D_LED")
 					(unit 1)
 				)
@@ -9214,7 +9214,7 @@
 	)
 	(no_connect
 		(at 523.24 50.80)
-		(uuid "996a86b0-57df-44bd-906e-8e160bccbfa0")
+		(uuid "9776bad5-7bcb-441c-a049-4121ff6bd2af")
 	)
 	(label "GND"
 		(at 515.62 58.42 90)
@@ -9224,7 +9224,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "d2b7bee9-12b9-4f61-a240-de55c2502807")
+		(uuid "417b8e5d-8a7c-4692-89b4-6870e52d5219")
 	)
 	(label "LED_RGB"
 		(at 508.00 50.80 0)
@@ -9234,7 +9234,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "6d150d5d-58aa-4df0-8ead-33fdd65cd6d8")
+		(uuid "1a7d1439-f7d5-4fe8-a6db-a68e8185b0b0")
 	)
 	(label "+3V3"
 		(at 515.62 43.18 90)
@@ -9244,7 +9244,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "69063433-7349-45c8-9d56-02fca13eed2e")
+		(uuid "2d48abd0-1630-4f41-81dc-438c33c8949a")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -9254,7 +9254,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "c86a8e5f-5b53-4e14-9f6a-24dc50e63124")
+		(uuid "1903561e-43c6-4b4e-9104-6124fd981ba4")
 		(property "Reference" "C_LED"
 			(at 576.58 44.45 0)
 			(effects
@@ -9301,14 +9301,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "1966b6f4-f6ac-4c44-8264-956a5cef3b1a")
+			(uuid "a7e5f366-bf53-406f-9232-8854eae423a9")
 		)
 		(pin "2"
-			(uuid "4b75b242-f31d-4296-9245-bf4cfd22403b")
+			(uuid "ec20d867-7d1a-41f4-9ec6-a1b0e9f14ae5")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_LED")
 					(unit 1)
 				)
@@ -9323,7 +9323,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "6848464c-5bd7-47a9-abba-3430f0f70c59")
+		(uuid "45d9e1cb-5677-45d2-862d-1527bcdcfc5f")
 	)
 	(label "GND"
 		(at 574.04 49.53 90)
@@ -9333,7 +9333,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "43008082-3eb8-4c20-9c32-d2e1df7faae3")
+		(uuid "d9959bf9-d610-43fc-b1c9-b7ac21195886")
 	)
 	(symbol
 		(lib_id "Connector:USB_C_Receptacle_USB2.0_16P")
@@ -9343,7 +9343,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ff45319a-04da-4c64-9fa3-e27e060ebb2d")
+		(uuid "fe47f07f-bd0a-4b36-ba5c-1bb7fac389cb")
 		(property "Reference" "J_USB"
 			(at 624.84 99.06 0)
 			(effects
@@ -9390,59 +9390,59 @@
 			)
 		)
 		(pin "A1"
-			(uuid "46ab704f-9177-44b0-bb96-2a0c943cd97c")
+			(uuid "0f6a02bc-7edf-43ed-8f93-90dea65681ea")
 		)
 		(pin "A4"
-			(uuid "d90d3d75-8a37-430b-b7fb-4bcebd2cd0b8")
+			(uuid "a0f7bedc-66de-4ffb-ba64-0242a94bce40")
 		)
 		(pin "A5"
-			(uuid "1412028d-3f51-4136-b801-b0fc37d026be")
+			(uuid "b86e70e4-fb3b-41c2-9121-7f6000c4245a")
 		)
 		(pin "A6"
-			(uuid "7baf6798-5d36-430c-af44-9106c58c61b2")
+			(uuid "43fd171e-9fa9-421a-b557-261e0aab3444")
 		)
 		(pin "A7"
-			(uuid "0c0d4763-f8d1-4fe3-9d8c-5c2e47404928")
+			(uuid "8dfb5289-6dd9-4570-81b7-f3082083cd8f")
 		)
 		(pin "A8"
-			(uuid "ec53174a-e675-4d53-a677-ea8596e02417")
+			(uuid "13cbdcd3-08f1-4699-b136-436371b0bd67")
 		)
 		(pin "A9"
-			(uuid "be03c0dd-d900-42ce-8d59-0a5fc77be7ca")
+			(uuid "5c6f09f9-4d5d-42b8-8596-9a739ab4146b")
 		)
 		(pin "A12"
-			(uuid "acb393ed-ae9f-49d5-8a96-eb8d7b4bdf06")
+			(uuid "df45f94c-ffdd-4801-8486-82cc3de602ee")
 		)
 		(pin "B1"
-			(uuid "b6741be6-d1b7-44fa-bdb0-d7d96bc959f2")
+			(uuid "8c6a00dc-83f1-42e7-a06d-20c65f8741f1")
 		)
 		(pin "B4"
-			(uuid "d762fdbf-d4f4-4ffe-a959-204b252352be")
+			(uuid "4189b6f6-5071-494c-9abb-a7d9d8441670")
 		)
 		(pin "B5"
-			(uuid "160e6524-968c-483c-aafa-4b2dcbeeef53")
+			(uuid "fa708ad6-fb96-42bc-8f2d-27a078ae39ea")
 		)
 		(pin "B6"
-			(uuid "a83e2792-b5bd-4beb-8c24-1da25c380e3d")
+			(uuid "1b888a17-98b7-4013-a5c6-1a7e40054800")
 		)
 		(pin "B7"
-			(uuid "a4ba026d-a445-47fd-bf49-d273d49228a0")
+			(uuid "b6f84960-5072-4cb0-be41-e460331749f0")
 		)
 		(pin "B8"
-			(uuid "af31df0e-b1cb-4c94-a0a6-a069b6ca7fc6")
+			(uuid "40f8d7c9-7fc4-40a3-a0c4-75b096695c8b")
 		)
 		(pin "B9"
-			(uuid "3eebbe7e-04c8-42b1-9c88-118b4453cb44")
+			(uuid "82efee3a-42e4-473f-b0ad-7367de654d2c")
 		)
 		(pin "B12"
-			(uuid "27524f8e-f0a1-4c76-9151-8d8bad5c383f")
+			(uuid "30902341-daa5-4e66-abe7-dcc88318de37")
 		)
 		(pin "SH"
-			(uuid "1365240d-980b-49ba-b41b-a731baf3cc2f")
+			(uuid "ea92f447-40cd-4efd-9cfc-4e38066ebce3")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "J_USB")
 					(unit 1)
 				)
@@ -9457,7 +9457,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "7838f3d6-db59-415a-b602-419444fbc17a")
+		(uuid "795b013e-8f08-4f4a-92f3-6b12516309a2")
 	)
 	(label "GND"
 		(at 632.46 81.28 90)
@@ -9467,7 +9467,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "6771d438-5ec9-499c-b99e-fd03af536209")
+		(uuid "dd48878b-8023-42a9-8106-022a92edbd45")
 	)
 	(label "GND"
 		(at 632.46 81.28 90)
@@ -9477,7 +9477,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "55b74daf-bc79-4048-b87c-0a15aabc13cf")
+		(uuid "6b98308f-8490-4af6-97bf-1295240a6005")
 	)
 	(label "GND"
 		(at 632.46 81.28 90)
@@ -9487,7 +9487,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "3e2b308b-4a20-41e7-9d35-b47e404afa93")
+		(uuid "e6eb304b-d2a4-46a3-9104-6ee27a7d2871")
 	)
 	(label "VBUS_IN"
 		(at 647.70 43.18 0)
@@ -9497,7 +9497,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "8821dd74-4d79-4f60-9a4c-05c5e65584a9")
+		(uuid "eead0512-c1b8-4da6-8af8-374c0390583a")
 	)
 	(label "VBUS_IN"
 		(at 647.70 43.18 0)
@@ -9507,7 +9507,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "e15e02ac-2a8c-4479-8358-f155e431e09c")
+		(uuid "0754e7f7-0401-4324-b78b-c194674d1944")
 	)
 	(label "VBUS_IN"
 		(at 647.70 43.18 0)
@@ -9517,7 +9517,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "dbd727de-c47a-42dc-be1f-2f3a8130fb58")
+		(uuid "c9e96ec3-e7fe-45e3-a54f-8b490fba2f67")
 	)
 	(label "VBUS_IN"
 		(at 647.70 43.18 0)
@@ -9527,7 +9527,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "c358cf21-4275-45f3-9977-80f5986d4b55")
+		(uuid "a31e97b2-7849-413a-90f9-9594d325fb1a")
 	)
 	(label "USB_CC1"
 		(at 647.70 48.26 0)
@@ -9537,7 +9537,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "52f7dc11-592c-4e19-8326-d6de3134fe9a")
+		(uuid "31a18b3b-c5fe-4728-b6df-5382d9ed5bdf")
 	)
 	(label "USB_CC2"
 		(at 647.70 50.80 0)
@@ -9547,7 +9547,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "faa26b09-b539-482a-ae78-cf238acc9804")
+		(uuid "05f8237c-8d40-457e-a62b-a812a3d1ed62")
 	)
 	(label "USB_DP"
 		(at 647.70 60.96 0)
@@ -9557,7 +9557,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "bd07550f-fe48-403e-8249-dc03c9e27471")
+		(uuid "bb7e6739-49a2-455f-a5c7-cd2597eea8a9")
 	)
 	(label "USB_DP"
 		(at 647.70 63.50 0)
@@ -9567,7 +9567,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "73fe8266-2ed2-4175-8715-ebcab9b20ced")
+		(uuid "1a2a4514-1e00-424a-aa68-eb770da6c832")
 	)
 	(label "USB_DN"
 		(at 647.70 55.88 0)
@@ -9577,7 +9577,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "7a513088-0493-4044-a401-cfaf4d8487c6")
+		(uuid "ad178989-155f-40ee-afe9-583dd246f89d")
 	)
 	(label "USB_DN"
 		(at 647.70 58.42 0)
@@ -9587,15 +9587,15 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "b6757732-97c7-46b9-9104-fbd3f6f879f7")
+		(uuid "5f6b8bf7-b117-4519-8d38-033bcd4e6aae")
 	)
 	(no_connect
 		(at 647.70 71.12)
-		(uuid "54b08123-b9d9-4484-a856-4ad3a6a30b2f")
+		(uuid "3882c8a7-43a2-44f2-b2b3-5a504e77b96b")
 	)
 	(no_connect
 		(at 647.70 73.66)
-		(uuid "46926050-a6cb-4242-9e75-78af446f526c")
+		(uuid "364fcb0e-8a3c-4004-a071-523e6f996cff")
 	)
 	(label "GND"
 		(at 624.84 81.28 90)
@@ -9605,7 +9605,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "103f704f-fa4d-4abb-9023-e785f79dae0d")
+		(uuid "6ea5e8a7-20a3-42f1-ac6b-c2557f6da9f7")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -9615,7 +9615,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "6b255a98-eb10-4f0f-95ba-337ec7275c19")
+		(uuid "43bc72a5-f31f-4d6d-8bd8-391a3367b704")
 		(property "Reference" "R_CC1"
 			(at 701.04 44.45 0)
 			(effects
@@ -9662,14 +9662,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "a1a51234-b3cd-4273-b0d0-f6d3c2acac92")
+			(uuid "16e1bbd4-4470-4e61-80f8-ad3297dcde12")
 		)
 		(pin "2"
-			(uuid "655c34bf-0476-4433-81aa-f1d94c00a0f9")
+			(uuid "c108dba0-1dd8-413d-8114-89aa9fb532f4")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_CC1")
 					(unit 1)
 				)
@@ -9684,7 +9684,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "fd654123-588e-4469-80fb-854455c9952d")
+		(uuid "d9d284e9-33da-4340-81ad-d59bd5e32b3b")
 	)
 	(label "GND"
 		(at 698.50 49.53 90)
@@ -9694,7 +9694,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "25203292-038f-4c02-a0e6-b7fe7e55f741")
+		(uuid "6ea1c818-4ca8-4680-9234-3475ab93cb5c")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -9704,7 +9704,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "2fe46071-d1cb-407c-9b33-0227229c1c70")
+		(uuid "56f2e3c0-f65e-4d9e-82af-c5503605f059")
 		(property "Reference" "R_CC2"
 			(at 751.84 44.45 0)
 			(effects
@@ -9751,14 +9751,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "b920726c-c5ed-4963-8a0f-e6e1642a6a7b")
+			(uuid "adffa676-2f50-4d89-acb5-8dc1e7e8f3b8")
 		)
 		(pin "2"
-			(uuid "d03bd834-321a-43e1-bda8-2a2bafcbd064")
+			(uuid "eae3daf5-b913-42d5-8331-fd8aa7d51218")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_CC2")
 					(unit 1)
 				)
@@ -9773,7 +9773,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "6891a34a-890f-4074-801e-865326cd728c")
+		(uuid "2e483a9c-8cbb-4aa5-93f7-858f0d6f79b6")
 	)
 	(label "GND"
 		(at 749.30 49.53 90)
@@ -9783,7 +9783,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "3f1e94a6-a274-4fda-8ef2-02acc25b46d3")
+		(uuid "1ce638dc-2d91-436d-aac6-435507479ae0")
 	)
 	(symbol
 		(lib_id "Device:Fuse")
@@ -9793,7 +9793,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "4529eefc-98e2-4bf9-840e-95fb91a14e25")
+		(uuid "0359f7df-73d8-498c-9ec9-9bacf8197fe9")
 		(property "Reference" "F_USB"
 			(at 802.64 44.45 0)
 			(effects
@@ -9840,14 +9840,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "c15c7408-7ff2-448e-b274-f358cfe3ac1c")
+			(uuid "cab4f786-92b2-4b50-83cc-191f57585079")
 		)
 		(pin "2"
-			(uuid "7d674ca5-a525-4684-9edc-fb87edd1ec73")
+			(uuid "6e3d332a-30d8-46a5-98fc-5119cd30232c")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "F_USB")
 					(unit 1)
 				)
@@ -9862,7 +9862,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "67878b16-2ab0-4f55-8638-88ecf33c8fd0")
+		(uuid "02afbcdc-0fc8-412b-bf3d-c15238569e18")
 	)
 	(label "VBUS"
 		(at 800.10 49.53 90)
@@ -9872,7 +9872,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "4cc97923-f827-4c52-8995-17440d2edcad")
+		(uuid "95276ec7-52c8-4540-9a02-5861e3a85e49")
 	)
 	(symbol
 		(lib_id "Device:D_TVS")
@@ -9882,7 +9882,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8140717d-2f0e-472b-b3fa-03a9b379408b")
+		(uuid "a3a71823-dcbd-4da6-a9e8-8f34e4674557")
 		(property "Reference" "D_USB_DP"
 			(at 855.98 41.91 0)
 			(effects
@@ -9929,14 +9929,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "0f6b59d8-7147-47ac-976f-f8e89acf52a5")
+			(uuid "939f9bb5-1244-4b63-9dff-407593ee44ae")
 		)
 		(pin "2"
-			(uuid "6e92939a-d8ad-4f0d-860a-a9c70b7dfffd")
+			(uuid "cca43785-7566-49d5-8204-a8c32a2f6efc")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "D_USB_DP")
 					(unit 1)
 				)
@@ -9951,7 +9951,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "5729f0a6-35b1-4cd9-ab89-de025d1394ce")
+		(uuid "d8493fad-b42c-4941-9c0f-ef50b9cf85e7")
 	)
 	(label "GND"
 		(at 857.25 43.18 0)
@@ -9961,7 +9961,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "c807dc8d-57b4-48c9-aeb7-164728282aaa")
+		(uuid "a56871a3-790c-464e-85eb-020df768360a")
 	)
 	(symbol
 		(lib_id "Device:D_TVS")
@@ -9971,7 +9971,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "80094823-bc39-4377-baa7-7a66d8993cf0")
+		(uuid "b3ec869e-4c4e-4535-ab43-e8a024ea08d3")
 		(property "Reference" "D_USB_DN"
 			(at 914.40 41.91 0)
 			(effects
@@ -10018,14 +10018,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "46f5b596-8599-4d38-8276-7164679d14e9")
+			(uuid "e7df0e44-ad18-4baf-a0e9-2a06bc3aa9a2")
 		)
 		(pin "2"
-			(uuid "b017a90d-3b25-4646-a9b0-756c346c08ba")
+			(uuid "3871bc50-9b6b-4a46-b908-cd7d70194715")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "D_USB_DN")
 					(unit 1)
 				)
@@ -10040,7 +10040,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "c3fb399a-c819-47a0-a7b8-99f886d74f5c")
+		(uuid "99ca89f3-df39-4b69-b9a9-47b2633a402b")
 	)
 	(label "GND"
 		(at 915.67 43.18 0)
@@ -10050,7 +10050,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "057d1625-29c5-49f4-bf9b-b7cbc92b06f8")
+		(uuid "2f0eb816-8895-4fef-b178-0ae413b29a16")
 	)
 	(symbol
 		(lib_id "Regulator_Switching:TLV62569DBV")
@@ -10060,7 +10060,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "9aa79f3c-1f3b-4c9f-a845-fb6774515563")
+		(uuid "a2582a30-1942-4948-9f5b-21cf5121060c")
 		(property "Reference" "U_BUCK"
 			(at 967.74 71.12 0)
 			(effects
@@ -10107,23 +10107,23 @@
 			)
 		)
 		(pin "1"
-			(uuid "509636ea-d5dc-4a42-a036-b94ba061382b")
+			(uuid "1d2cad7e-0e57-443c-9155-0fede04c98b9")
 		)
 		(pin "2"
-			(uuid "2985f952-44a1-46a4-a602-1640f37b0dfe")
+			(uuid "204b6240-d857-47db-a4d2-35d59b560b5b")
 		)
 		(pin "3"
-			(uuid "6d863f29-f487-4f59-97fc-7163d0ba0b57")
+			(uuid "0c949b17-6726-4393-b421-57c4cfa38d5c")
 		)
 		(pin "4"
-			(uuid "0b73e86c-4434-4674-a634-2ffd24c7fb09")
+			(uuid "b5ef6351-57ae-496f-b479-31818c5ea8a4")
 		)
 		(pin "5"
-			(uuid "fa4a692e-76d0-439a-84b7-32b347c4838f")
+			(uuid "b535b622-4952-4695-8643-a2a6521de4ac")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "U_BUCK")
 					(unit 1)
 				)
@@ -10138,7 +10138,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "0cad00d7-77d5-4261-afd6-d66d637ccab2")
+		(uuid "f0a1c441-a740-4e5d-9291-b876cef6126e")
 	)
 	(label "GND"
 		(at 975.36 53.34 90)
@@ -10148,7 +10148,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "59487fda-bc27-48c0-bd4e-69613c04c1d0")
+		(uuid "05e99895-9f30-4257-9e52-e19ee8fe4dc5")
 	)
 	(label "BUCK_SW"
 		(at 982.98 43.18 0)
@@ -10158,7 +10158,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "93f412ec-3e5a-454c-927c-4c9f826eb771")
+		(uuid "f63e886b-2963-4cb6-843e-c6ef0b7026d2")
 	)
 	(label "VBUS"
 		(at 967.74 43.18 0)
@@ -10168,7 +10168,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "b040c18b-03e5-41a7-b64a-20e8e2bc23e7")
+		(uuid "58e3c998-8944-42c9-9084-25c9d534f06e")
 	)
 	(label "BUCK_FB"
 		(at 982.98 45.72 0)
@@ -10178,7 +10178,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "5714d9f0-4dd8-494a-9a3d-f905ef574381")
+		(uuid "c09ed8c3-3214-41e7-b9ad-5a9f058b8428")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -10188,7 +10188,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f9b5f4fa-86a6-488a-80eb-78dd9d2fbf87")
+		(uuid "c42f0dda-2d9c-4716-af5f-9b2924b16c52")
 		(property "Reference" "R_BUCK_EN"
 			(at 1036.32 44.45 0)
 			(effects
@@ -10235,14 +10235,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "fd9f0a2b-0c68-4a01-94dc-fa51bf5e9f43")
+			(uuid "eb8cec80-83d6-48f7-9073-a39bf8a41c34")
 		)
 		(pin "2"
-			(uuid "b3998e2c-a225-4073-9f2b-e728bd5244d6")
+			(uuid "8bab01dc-77b5-4318-ac5a-98fa48000c5b")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_BUCK_EN")
 					(unit 1)
 				)
@@ -10257,7 +10257,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "59abef84-eefc-4e88-b116-a8ffe01ec6a9")
+		(uuid "037cca77-c1b6-4936-b49a-e6d609d2832d")
 	)
 	(label "BUCK_EN"
 		(at 1033.78 49.53 90)
@@ -10267,7 +10267,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "bb261011-933c-4546-8cbf-bafcc8334b1b")
+		(uuid "79de25ac-c8a4-4c8c-9cc4-8a88b9f2a55a")
 	)
 	(symbol
 		(lib_id "lcsc:YHNR4020-2R2M")
@@ -10277,7 +10277,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "dd5a5916-c518-4dd7-a942-dd702766525f")
+		(uuid "9fdadb12-7db1-4d4d-94ec-29fb600a48be")
 		(property "Reference" "L_BUCK"
 			(at 1092.20 41.91 0)
 			(effects
@@ -10324,14 +10324,14 @@
 			)
 		)
 		(pin "2"
-			(uuid "5b1a267d-61f5-43ff-babd-4111656949b9")
+			(uuid "a0942b97-8b92-41ec-9d98-7e5095854905")
 		)
 		(pin "1"
-			(uuid "2ffd7452-7b1a-4310-9abb-309bed16123d")
+			(uuid "a5747c47-c6dd-474e-b9e1-e26cefcbc10c")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "L_BUCK")
 					(unit 1)
 				)
@@ -10346,7 +10346,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "e809b65e-61f0-457e-af02-c4fa0deba098")
+		(uuid "3e53e8a4-6a04-4baa-8be6-076c0cb464d1")
 	)
 	(label "+3V3"
 		(at 1094.74 43.18 0)
@@ -10356,7 +10356,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "2bca8623-5e5a-49f3-823b-075f62fc1f0b")
+		(uuid "a374d37f-7dd6-4df0-9783-3f9ea7217930")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -10366,7 +10366,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "fdda9df5-f811-4bca-9e4e-5c55cd16533a")
+		(uuid "6461c9e2-1eeb-4d08-bfb0-51d7a7a1eecd")
 		(property "Reference" "C_BUCK_IN"
 			(at 53.34 156.21 0)
 			(effects
@@ -10413,14 +10413,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "0da61189-95a3-4e45-a60e-9195e3fcf677")
+			(uuid "7e6446b2-bc99-4e67-b5bb-5d9b24346889")
 		)
 		(pin "2"
-			(uuid "8e3f894c-a3bb-4e61-a0a6-5ebceea64c5f")
+			(uuid "2d36da3b-0d2e-449e-93ce-1b2597e92a63")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_BUCK_IN")
 					(unit 1)
 				)
@@ -10435,7 +10435,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "4ea1be0f-0acd-4ce0-98da-736bd9e9c31e")
+		(uuid "e243ea31-0c11-4b75-9eca-7f922f22a842")
 	)
 	(label "GND"
 		(at 50.80 161.29 90)
@@ -10445,7 +10445,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "e5395b62-7d09-4f09-96a7-2af36aab6f6b")
+		(uuid "5f961fee-d319-4cd1-a6e1-88bce98cecf9")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -10455,7 +10455,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "34310341-c40f-49c2-a894-ca5d2491f0c9")
+		(uuid "15dd744d-7dec-418e-86b0-c350e0c2e80e")
 		(property "Reference" "C_BUCK_OUT1"
 			(at 104.14 156.21 0)
 			(effects
@@ -10502,14 +10502,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "537650ca-2bf4-4af2-bcd7-971dc91f8da5")
+			(uuid "a901fe31-5630-4898-9e39-a7a1911421b9")
 		)
 		(pin "2"
-			(uuid "8584fc46-9bc9-450b-afb5-1ebd04a92391")
+			(uuid "e93d1591-5818-4532-9701-d1e7611da5d0")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_BUCK_OUT1")
 					(unit 1)
 				)
@@ -10524,7 +10524,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "6b1819fd-9c1b-4390-a139-93f5fa25c7ac")
+		(uuid "26342b16-fa0e-4061-90c7-d8fffa6bf001")
 	)
 	(label "GND"
 		(at 101.60 161.29 90)
@@ -10534,7 +10534,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "7745b4c4-2e19-4552-80c3-fb7054c7618c")
+		(uuid "2cc7c4d7-aa5c-4bdd-9f29-8428339cdfa5")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -10544,7 +10544,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "1bbcf6a8-8c78-48bc-9f1b-152852d94ff4")
+		(uuid "f2ddae9a-e800-452e-84fc-7888d7190cbf")
 		(property "Reference" "C_BUCK_OUT2"
 			(at 154.94 156.21 0)
 			(effects
@@ -10591,14 +10591,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "2466a598-a6b1-4350-8f29-b4ad98c0f213")
+			(uuid "5305aba9-636c-441a-827f-01635894ca26")
 		)
 		(pin "2"
-			(uuid "ff6d892c-745e-45d0-94f1-6c255f9e28ea")
+			(uuid "b80f24c6-abe9-4a78-862c-8ecf003807f0")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_BUCK_OUT2")
 					(unit 1)
 				)
@@ -10613,7 +10613,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "9f033416-14dc-4ab7-8719-ffe31216d5f4")
+		(uuid "8e2bf775-a3c5-4874-86ba-d294ca9fb170")
 	)
 	(label "GND"
 		(at 152.40 161.29 90)
@@ -10623,7 +10623,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "22dbd291-b4a1-419d-a200-2c53d078dd8c")
+		(uuid "8ec4ca8e-cf39-4f74-a7a0-b3b16ae7242c")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -10633,7 +10633,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f1a4f202-3250-4ce8-98bd-9cb62bcbec34")
+		(uuid "d8bc02bd-3488-460a-8637-785fa6d1a84b")
 		(property "Reference" "R_FB1"
 			(at 205.74 156.21 0)
 			(effects
@@ -10680,14 +10680,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "c915de81-9c52-4ae9-ad7f-e59e98b6330a")
+			(uuid "157437e1-7dfc-4607-9325-f396d738e12a")
 		)
 		(pin "2"
-			(uuid "89271d9e-0cbe-4db9-91b8-920d4f588638")
+			(uuid "956906d6-bdfb-48f9-8847-09d837fdde40")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_FB1")
 					(unit 1)
 				)
@@ -10702,7 +10702,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "e794c8bb-0b85-4c5b-bcaf-8624763ea540")
+		(uuid "dafbff11-d315-4a07-9cf1-89979f1de5a5")
 	)
 	(label "BUCK_FB"
 		(at 203.20 161.29 90)
@@ -10712,7 +10712,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "b7749cdf-2004-42bb-aeff-e2a631d00bf9")
+		(uuid "7a143d6c-9902-43f8-a994-ea4610a0e56d")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -10722,7 +10722,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "5eb4af22-9d62-48b8-9e44-d2fb16f327ed")
+		(uuid "0fdb55d7-f42c-484f-a87d-6d38c155ee35")
 		(property "Reference" "R_FB2"
 			(at 256.54 156.21 0)
 			(effects
@@ -10769,14 +10769,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "22e893cd-8456-4c47-8548-1d9e798fec5e")
+			(uuid "a546172f-8616-40e6-b20d-9890100b4a96")
 		)
 		(pin "2"
-			(uuid "34bacc0f-8061-4416-b4e8-4b6ea109f94e")
+			(uuid "567d88d2-2a51-41a4-82a1-efb40cafbcef")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_FB2")
 					(unit 1)
 				)
@@ -10791,7 +10791,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "fa6f4879-29cb-4016-a1fd-9993dde329ec")
+		(uuid "99496f34-3164-454d-b4cc-09976707bced")
 	)
 	(label "GND"
 		(at 254.00 161.29 90)
@@ -10801,7 +10801,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "7ed3ff9a-283e-4775-86a9-281c8d2aef0b")
+		(uuid "b562b215-f2b3-45cd-ac3c-42f6569db995")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -10811,7 +10811,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "5e312111-436c-4454-812f-0afb1ee55544")
+		(uuid "203530c0-323c-4530-95fb-017d639bc20c")
 		(property "Reference" "C_FF"
 			(at 307.34 156.21 0)
 			(effects
@@ -10858,14 +10858,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "bda0d826-d082-470d-9b86-1d77ed5d500a")
+			(uuid "a23bbff7-de3b-4283-8a6a-fd9de92ce4ec")
 		)
 		(pin "2"
-			(uuid "870092f4-a790-4e96-a4a1-35f8eb321d52")
+			(uuid "98ba693d-9300-4f0d-902b-925d403158b6")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_FF")
 					(unit 1)
 				)
@@ -10880,7 +10880,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "8859fb19-e085-4ade-a8b6-910f28665cb0")
+		(uuid "ba96cedb-30d3-4191-adb3-ad8ac6de65d7")
 	)
 	(label "BUCK_FB"
 		(at 304.80 161.29 90)
@@ -10890,7 +10890,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "a46818c3-a677-4d84-8eee-4e7c987bfc37")
+		(uuid "1d307a8a-5580-4872-841e-c6a81276ad0a")
 	)
 	(symbol
 		(lib_id "Regulator_Linear:ME6211C28M5")
@@ -10900,7 +10900,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ae97106e-7ebe-4351-a0a4-5f48f4ab1480")
+		(uuid "dcad6ff9-1452-44c9-8d11-2a9b56b7661e")
 		(property "Reference" "U_LDO28"
 			(at 355.60 180.34 0)
 			(effects
@@ -10947,23 +10947,23 @@
 			)
 		)
 		(pin "1"
-			(uuid "d5c2252b-e1df-4db4-ab3e-c2ca01172d80")
+			(uuid "c3691f63-a033-4c84-a9f8-a4a51cd29626")
 		)
 		(pin "2"
-			(uuid "2541a9db-0c21-4c84-ac1e-9f5aca73898b")
+			(uuid "ed03a51b-44c4-493f-a2d8-7ae9629f011d")
 		)
 		(pin "3"
-			(uuid "63233c4f-4d75-48a5-ab1a-88e8f64defb1")
+			(uuid "8dcb1225-d850-417d-8f86-82b317e81b1b")
 		)
 		(pin "4"
-			(uuid "6f3341c6-d204-4954-9bd6-4e9010bf1925")
+			(uuid "7077186d-5b73-4a26-a626-56894a0a9185")
 		)
 		(pin "5"
-			(uuid "6f655b9e-4383-4cf0-a29a-d56c459229bc")
+			(uuid "aa27383c-89db-4d84-a92d-b68f71a65cd3")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "U_LDO28")
 					(unit 1)
 				)
@@ -10978,7 +10978,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "3f486e7d-7fec-47b1-be9c-eb89310bacd6")
+		(uuid "8325af6c-afcf-442a-821b-de83c0ab3eb7")
 	)
 	(label "GND"
 		(at 363.22 162.56 90)
@@ -10988,7 +10988,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "e3681faf-147b-4aaf-803f-f00a6f262443")
+		(uuid "3c4a7870-3797-4ed0-8510-91e113723688")
 	)
 	(label "+3V3"
 		(at 355.60 154.94 0)
@@ -10998,11 +10998,11 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "561ddf2e-9b03-400b-9044-f3f543b5b746")
+		(uuid "c6967e06-9a84-4afd-a8d1-12d499a4413b")
 	)
 	(no_connect
 		(at 368.30 154.94)
-		(uuid "ee0e5046-9961-4c2d-9674-a77ff1ec4aa4")
+		(uuid "3715deea-4681-49c2-8640-22d583bd59f4")
 	)
 	(label "+2V8"
 		(at 370.84 152.40 0)
@@ -11012,7 +11012,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "e8e07f59-7f45-4a0c-aeae-9b2314009749")
+		(uuid "c3331da6-f735-4828-bf59-697fdbf931ca")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -11022,7 +11022,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "b939369c-6160-4993-9f67-ecad5979e738")
+		(uuid "117e685f-1a8c-4bf2-86d2-5e3767de6b54")
 		(property "Reference" "C_LDO28_IN"
 			(at 424.18 156.21 0)
 			(effects
@@ -11069,14 +11069,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "e154c302-526a-4695-9a7b-3718549fea32")
+			(uuid "4bd25689-97b3-47f7-9f28-427025f49141")
 		)
 		(pin "2"
-			(uuid "5682f5af-e6a5-4360-88d5-a9cc6022b99b")
+			(uuid "37d7cf3d-7e21-47fb-81e8-b2d4d8be79f8")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_LDO28_IN")
 					(unit 1)
 				)
@@ -11091,7 +11091,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "92102c16-c218-4cf3-94ac-856a361a6bf5")
+		(uuid "74a06e83-1b3f-460d-9ca6-261a5e53d4c8")
 	)
 	(label "GND"
 		(at 421.64 161.29 90)
@@ -11101,7 +11101,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "1de60794-9f81-4ea9-95bf-e8d23dcf97c5")
+		(uuid "0a9f339e-ef2b-4967-b7c4-6823e8d049e8")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -11111,7 +11111,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "38449c30-813d-424b-bdb6-5a664c09a119")
+		(uuid "a3ec3b42-5e1c-4fcd-b6f2-133c9c3addb4")
 		(property "Reference" "C_LDO28_OUT"
 			(at 474.98 156.21 0)
 			(effects
@@ -11158,14 +11158,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "f9093999-bf24-49f7-bc47-29d1dd7c2788")
+			(uuid "44be8b9c-5de5-49ce-8605-329644d28eb6")
 		)
 		(pin "2"
-			(uuid "cc7582a7-236d-4441-a928-434ebf7b59ac")
+			(uuid "de2be23a-cd6b-4226-910a-e9235053a4dd")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_LDO28_OUT")
 					(unit 1)
 				)
@@ -11180,7 +11180,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "b0e1ec8a-c746-4e95-8629-e13467ad652f")
+		(uuid "f6869fba-2eec-467f-8e27-a63b1920d2bf")
 	)
 	(label "GND"
 		(at 472.44 161.29 90)
@@ -11190,7 +11190,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "ea7d7c90-4320-4084-a289-100f21a99c14")
+		(uuid "a7b41a3e-f192-4f7f-8d7f-55951a97cb80")
 	)
 	(symbol
 		(lib_id "Regulator_Linear:ME6211C15M5")
@@ -11200,7 +11200,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d3e189b6-b13f-40ee-aba4-780335e0a457")
+		(uuid "d7a71a8d-5743-41eb-9f6b-fb84c589f74e")
 		(property "Reference" "U_LDO15"
 			(at 523.24 180.34 0)
 			(effects
@@ -11247,23 +11247,23 @@
 			)
 		)
 		(pin "1"
-			(uuid "9f01053d-27df-43c2-aa4a-2209017f688e")
+			(uuid "dcde1922-d85d-4560-ac61-557e1743f9c4")
 		)
 		(pin "2"
-			(uuid "40ad12f3-c7a6-45a8-9a13-9773e18e31ec")
+			(uuid "7d516010-27cb-462d-b655-e2019c494f1f")
 		)
 		(pin "3"
-			(uuid "d7fff68a-7643-4c7d-9608-82043690cbb3")
+			(uuid "67dbca25-2a0a-40af-b17a-d0d1876b7aa7")
 		)
 		(pin "4"
-			(uuid "447a51ce-8ec9-423b-8efb-eb23833585df")
+			(uuid "127aaf57-0215-4ca5-bd84-6282df198b2b")
 		)
 		(pin "5"
-			(uuid "1b739654-7cab-4e93-98f9-b4a0120f4e23")
+			(uuid "940bf42c-91c8-4f07-96f4-f61812a629f9")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "U_LDO15")
 					(unit 1)
 				)
@@ -11278,7 +11278,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "c730d84c-21b7-4266-b520-924422c8a3e8")
+		(uuid "e281ebd7-f9f0-4196-8dab-354ea72bcf55")
 	)
 	(label "GND"
 		(at 530.86 162.56 90)
@@ -11288,7 +11288,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "f716270a-8c30-4a22-8fee-97edfc48641b")
+		(uuid "6d90f44f-77d9-4621-9a3d-9331ea6caf6d")
 	)
 	(label "+3V3"
 		(at 523.24 154.94 0)
@@ -11298,11 +11298,11 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "3c5062c3-c146-4ba3-acb5-856f6b209ea4")
+		(uuid "2ac0ee7f-71f5-41e6-9e7c-79fd2a49825c")
 	)
 	(no_connect
 		(at 535.94 154.94)
-		(uuid "351529b9-6f0c-40c2-aa96-729697588729")
+		(uuid "d4abd4a8-e04f-41b6-b903-957f3f97f926")
 	)
 	(label "+1V5"
 		(at 538.48 152.40 0)
@@ -11312,7 +11312,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "314ed114-5758-4bff-aee7-5365ea52408b")
+		(uuid "b7699443-0aa3-459d-bc49-aa6b73636359")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -11322,7 +11322,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "40b7e7a8-98da-4324-92c8-2ca3a687a7ab")
+		(uuid "4f29289f-3d94-4200-989f-a3538ae0516f")
 		(property "Reference" "C_LDO15_IN"
 			(at 591.82 156.21 0)
 			(effects
@@ -11369,14 +11369,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "6f3efc54-1852-4885-866c-6c630a7124c2")
+			(uuid "08ccb68f-1323-4e0d-bac3-126f5fa3ba96")
 		)
 		(pin "2"
-			(uuid "a900837b-5852-46e6-b2e4-787ad899e6b9")
+			(uuid "7a25fe2e-17ac-486f-89c9-66ccec5fc745")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_LDO15_IN")
 					(unit 1)
 				)
@@ -11391,7 +11391,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "fe660a7e-341e-4407-8ad0-a8734456f3c7")
+		(uuid "5a1dfb71-7639-4add-96e0-3ebc2c91384b")
 	)
 	(label "GND"
 		(at 589.28 161.29 90)
@@ -11401,7 +11401,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "f1b6076c-0d9e-47c2-ab35-fd4775e90359")
+		(uuid "998c70a3-ba32-4eb2-9c1d-95fe3e2fd419")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -11411,7 +11411,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ea8c21f8-8c24-4eb1-af76-c06657968843")
+		(uuid "4529c034-4602-4489-bd07-7ee5cc140804")
 		(property "Reference" "C_LDO15_OUT"
 			(at 642.62 156.21 0)
 			(effects
@@ -11458,14 +11458,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "13a05066-140b-473e-9584-cd3ec37aa7f6")
+			(uuid "7f345ddb-d115-4761-807b-fc2798e8a568")
 		)
 		(pin "2"
-			(uuid "c06225be-337e-49fa-985a-ff87298e1f30")
+			(uuid "48bb6aba-dfa3-48f7-836d-586799c5652b")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_LDO15_OUT")
 					(unit 1)
 				)
@@ -11480,7 +11480,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "f3c3b670-9976-4e79-bf1a-d2721031c413")
+		(uuid "aabe0b95-0daf-4d38-98b7-e609b2e1591a")
 	)
 	(label "GND"
 		(at 640.08 161.29 90)
@@ -11490,7 +11490,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "470b7a2f-ce80-4628-b5b0-002660aba549")
+		(uuid "f8b481ad-e7e2-4a10-9372-2357ca906bfb")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
@@ -11500,7 +11500,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "52b57e75-3b81-4b39-b778-a1cbbbb5e565")
+		(uuid "5fedf363-85e8-4c80-a596-c86b2d4bc899")
 		(property "Reference" "J_VMOT"
 			(at 698.50 151.13 0)
 			(effects
@@ -11538,14 +11538,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "24a8162d-5c55-46bb-9d6a-014a32672ffa")
+			(uuid "2b4b7750-1355-4c58-8382-8799b8590aa3")
 		)
 		(pin "2"
-			(uuid "801db2a2-c0bd-4c27-9db0-a04fe80eb27a")
+			(uuid "42e5a6b2-a6fe-4bb7-ba4a-0d43b458958a")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "J_VMOT")
 					(unit 1)
 				)
@@ -11560,7 +11560,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "e60bd067-f1dd-4bea-9dfe-e205d0290110")
+		(uuid "ad1d5a57-4834-4635-bbd8-d060e5666ec6")
 	)
 	(label "PGND"
 		(at 690.88 154.94 0)
@@ -11570,7 +11570,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "afd8301e-28d8-447f-9cf2-e2a1a07e2691")
+		(uuid "ca1a63c0-df57-440f-b0bc-87f98572e3e2")
 	)
 	(symbol
 		(lib_id "Transistor_FET:AO3401A")
@@ -11580,7 +11580,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ff69cd1e-b814-4140-908d-2abf0d6bb99c")
+		(uuid "25ce9680-6165-4e32-b36a-026ade647af1")
 		(property "Reference" "Q_REV"
 			(at 749.30 156.21 0)
 			(effects
@@ -11627,17 +11627,17 @@
 			)
 		)
 		(pin "1"
-			(uuid "51d2f68d-996c-442c-8946-26d40417251e")
+			(uuid "89344531-6bc1-4136-9eeb-25e6946fbe7e")
 		)
 		(pin "2"
-			(uuid "e6f63e12-a9ab-4d16-abe5-d60f7f103454")
+			(uuid "97e0a117-808e-4881-ac26-9ce5674c7f8f")
 		)
 		(pin "3"
-			(uuid "b3e04c19-6c6f-449d-ae23-0bb89592ee0d")
+			(uuid "913540d4-2725-4b64-a64b-14db918d0884")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "Q_REV")
 					(unit 1)
 				)
@@ -11652,7 +11652,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "5451f286-86f2-4559-895b-382d5a8a594a")
+		(uuid "d2d862c4-7a01-489e-a0f6-d77173d1a192")
 	)
 	(label "VMOT"
 		(at 749.30 162.56 90)
@@ -11662,7 +11662,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "7c37802b-3274-4413-ae97-600d4ddea939")
+		(uuid "e5b11ba6-4fc2-42ce-9a2d-9d5da5e39552")
 	)
 	(label "VMOT_IN"
 		(at 749.30 152.40 90)
@@ -11672,7 +11672,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "785bedba-ef63-4d70-a675-be88ca67452f")
+		(uuid "113d089a-8d6b-41f9-86fe-ddc564008e2b")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -11682,7 +11682,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "bb695cad-1be5-466c-ae71-39fa157d42d1")
+		(uuid "822b43c1-5068-4f3b-b270-729f188c4f97")
 		(property "Reference" "R_REV"
 			(at 802.64 156.21 0)
 			(effects
@@ -11729,14 +11729,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "d1ec5faa-3129-4fa8-89e0-6d44597b6e64")
+			(uuid "77c0062e-62d4-46f9-97cb-0a1121677268")
 		)
 		(pin "2"
-			(uuid "37a3aa8f-550d-4118-929f-96314e42d34c")
+			(uuid "3d2b4400-424e-41d9-b7cc-b6a1a6099098")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_REV")
 					(unit 1)
 				)
@@ -11751,7 +11751,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "b39d6f25-f7d1-4233-baf2-ec219c056fda")
+		(uuid "511c1f51-bcde-4032-90b3-69a8ab4d7817")
 	)
 	(label "PGND"
 		(at 800.10 161.29 90)
@@ -11761,7 +11761,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "0f8e333f-fcfc-4428-ba85-db2e8898aa9a")
+		(uuid "eee327a6-2b94-4b85-8662-146fd7ec4b83")
 	)
 	(symbol
 		(lib_id "Device:D_Zener")
@@ -11771,7 +11771,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ce560794-38d4-4d8b-a787-b6724ae4cf52")
+		(uuid "7b6e3ed4-d53b-4687-af78-15937e86f071")
 		(property "Reference" "D_VMOT_TVS"
 			(at 855.98 151.13 0)
 			(effects
@@ -11818,14 +11818,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "029c476a-92a9-4232-b483-6ca89dbb4b6d")
+			(uuid "c3ccf642-421c-415e-939a-9fb429449899")
 		)
 		(pin "2"
-			(uuid "85772f89-cb77-4067-808d-e894611fc75a")
+			(uuid "fca0bd36-07fd-4809-b60f-28a435e3649f")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "D_VMOT_TVS")
 					(unit 1)
 				)
@@ -11840,7 +11840,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "24010418-e0ab-41e6-8ad8-60fc301504be")
+		(uuid "6115068a-08dc-45db-ad71-74588c923ff0")
 	)
 	(label "PGND"
 		(at 857.25 152.40 0)
@@ -11850,7 +11850,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "85b3415a-3b3a-49d9-948b-86aa94dc8b9a")
+		(uuid "65ed161e-af81-4ab5-9c16-9ee74b2a3c75")
 	)
 	(symbol
 		(lib_id "lcsc:RVT1A102M1010_C970713")
@@ -11860,7 +11860,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "743a142f-0acc-4986-a0c7-470c2fdce450")
+		(uuid "4c1a66b5-dde5-4d95-ac0d-be08cc668014")
 		(property "Reference" "C_VMOT_BULK"
 			(at 911.86 156.21 0)
 			(effects
@@ -11907,14 +11907,14 @@
 			)
 		)
 		(pin "2"
-			(uuid "38698258-f35f-4123-826b-1e3fb01de96c")
+			(uuid "bc0b5702-8996-466d-b021-ed6c863de0d3")
 		)
 		(pin "1"
-			(uuid "bd090493-be52-40bf-83c8-2e3d91cd0981")
+			(uuid "589f8165-b5a6-49f2-89e3-f2b95d9f1d0f")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_VMOT_BULK")
 					(unit 1)
 				)
@@ -11929,7 +11929,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "87ca1009-eef3-440f-8989-ffce92f129c0")
+		(uuid "27220683-72e1-4b72-b50e-f2e8756fd76f")
 	)
 	(label "PGND"
 		(at 909.32 161.29 90)
@@ -11939,7 +11939,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "95350187-b176-445a-a5e6-12875948d061")
+		(uuid "33d8f099-214f-404c-aaaa-9beeee172c4d")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -11949,7 +11949,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "c63add99-bfc4-468b-b4b3-d8a72c0a621a")
+		(uuid "ec883812-7488-41a7-a7e2-1f12e903f2b6")
 		(property "Reference" "C_VMOT_HF"
 			(at 962.66 156.21 0)
 			(effects
@@ -11996,14 +11996,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "e6ae7e55-001c-4b70-ba32-8245901d4d0f")
+			(uuid "d7aed877-2e28-4adb-a80f-371ff68ae3ad")
 		)
 		(pin "2"
-			(uuid "0e00934b-da93-41cc-85ef-e60ae8ca47a3")
+			(uuid "6f00eea6-19e0-4c1d-8c9c-000543709e25")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_VMOT_HF")
 					(unit 1)
 				)
@@ -12018,7 +12018,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "d7c97a0f-e090-4c1e-a653-0922a15561a9")
+		(uuid "0f1a2579-09d5-496b-b30a-a698affddcb1")
 	)
 	(label "PGND"
 		(at 960.12 161.29 90)
@@ -12028,7 +12028,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "d6cd8960-d5a7-4853-991c-e68abfa12205")
+		(uuid "c0222d2e-1397-498f-83ea-fc394899a8fc")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -12038,7 +12038,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "72a11579-1e94-47da-a2aa-f0da1080c70c")
+		(uuid "cfc718c4-57d9-497c-84cf-a1381e3861c9")
 		(property "Reference" "R_STAR"
 			(at 1013.46 156.21 0)
 			(effects
@@ -12085,14 +12085,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "6abeb0d0-892b-4981-a9de-90a1dbd5c254")
+			(uuid "7e8273e1-954d-4d30-aa5a-09714b870597")
 		)
 		(pin "2"
-			(uuid "f3f74362-0356-4bd0-9240-a5e90e5e8226")
+			(uuid "ddcacf91-27d8-45fc-a5b4-be09f3ccd09f")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_STAR")
 					(unit 1)
 				)
@@ -12107,7 +12107,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "0aa532be-5507-43c2-bf8c-d0ca19f29bce")
+		(uuid "2692624d-4c55-403c-9a5d-493f55e04f80")
 	)
 	(label "GND"
 		(at 1010.92 161.29 90)
@@ -12117,7 +12117,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "36857d8a-ea23-42bf-aa61-c35b101d44dc")
+		(uuid "f5a12186-6e45-48e6-98f0-00e2dbfa0915")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -12127,7 +12127,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "888d4add-7ad9-4e54-971a-909d88a0a1ba")
+		(uuid "1281a68b-1f78-4217-bb55-c481d944d7ef")
 		(property "Reference" "R_SDA"
 			(at 1064.26 156.21 0)
 			(effects
@@ -12174,14 +12174,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "d344caa0-2132-4499-a1ea-35f13155ce8b")
+			(uuid "6827c3dc-dadc-4524-96a2-8ad75a4f92ba")
 		)
 		(pin "2"
-			(uuid "07a805c0-0abc-4fa3-aae4-ec00e6dc9d7b")
+			(uuid "ef58fcee-8a5f-4451-b5d1-00b7fdd7db29")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_SDA")
 					(unit 1)
 				)
@@ -12196,7 +12196,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "228b8351-1aa2-4999-9941-2f008ab469a9")
+		(uuid "3cf9d4f0-389c-4843-a12c-92c367af9950")
 	)
 	(label "+3V3"
 		(at 1061.72 161.29 90)
@@ -12206,7 +12206,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "a82b6cfe-6541-4c42-b8f5-52d12e21657d")
+		(uuid "da8c9c8b-8900-4747-b443-988d9bffa319")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -12216,7 +12216,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "156db48a-3ed2-47d2-9411-a7a931023388")
+		(uuid "a597a2cd-d339-46d9-9eba-6dce098b6069")
 		(property "Reference" "R_SCL"
 			(at 1115.06 156.21 0)
 			(effects
@@ -12263,14 +12263,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "d773cfc2-c294-4a04-bd38-a7d086b4d0fd")
+			(uuid "46891b4f-6ad0-4a7d-8c0a-eadb9d2cda1a")
 		)
 		(pin "2"
-			(uuid "a238143c-f56f-4bc8-8056-d7e1e80ba50c")
+			(uuid "02fb79a6-b0be-4a8b-a2ad-5eff1d2051fb")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_SCL")
 					(unit 1)
 				)
@@ -12285,7 +12285,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "4e7c0e5a-f467-443f-af15-1ea306140a6c")
+		(uuid "983753c5-9c86-4d41-bf03-5d874a108564")
 	)
 	(label "+3V3"
 		(at 1112.52 161.29 90)
@@ -12295,7 +12295,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "aacb205a-6862-46a8-880d-69d373f0f846")
+		(uuid "9d4adf4c-7cc0-4da2-ba79-f941232c6719")
 	)
 	(symbol
 		(lib_id "Driver_LED:PCA9685PW")
@@ -12305,7 +12305,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "806827cc-002f-4adc-8c53-04cfbd12eccd")
+		(uuid "4aab9424-e7ec-4ec2-8ff3-65180a377c93")
 		(property "Reference" "U_PWM"
 			(at 50.80 287.02 0)
 			(effects
@@ -12352,92 +12352,92 @@
 			)
 		)
 		(pin "1"
-			(uuid "58852a64-ced3-472b-9859-50151a130002")
+			(uuid "a4eeb250-8fbb-48f9-bca6-2166f68f7934")
 		)
 		(pin "2"
-			(uuid "e42873a5-af57-47ae-8098-13aef0b6aa43")
+			(uuid "fb8e97ea-bfd2-4d9a-a08d-57cc065c21d1")
 		)
 		(pin "3"
-			(uuid "665bc298-fd94-498f-b870-a3fe4af035d4")
+			(uuid "d6f08915-54a7-493a-9d7f-a8d880ed89b5")
 		)
 		(pin "4"
-			(uuid "7bd0ca46-ee7a-4f38-ae79-9ba2dda495ca")
+			(uuid "bff588ef-4c8a-4ffc-8cad-f58f57729ccb")
 		)
 		(pin "5"
-			(uuid "3f0f9e0d-d410-4ead-8266-92036db1ed9a")
+			(uuid "3743a6a4-d4f2-45e8-a9dc-7c0ee96e022a")
 		)
 		(pin "6"
-			(uuid "df058050-e81a-48c0-8875-c1dc41803981")
+			(uuid "121795a0-2831-4bb9-9084-5056063b1081")
 		)
 		(pin "7"
-			(uuid "9bbaebff-d7d5-43b2-b881-267552742853")
+			(uuid "998f25ac-06c0-43d7-bc19-890500503ef7")
 		)
 		(pin "8"
-			(uuid "b3e93b42-2f5e-49a1-96ab-51650a975fce")
+			(uuid "caffe625-0fc3-4721-981c-0650f0ac5875")
 		)
 		(pin "9"
-			(uuid "86cf1fa0-8ed7-49eb-b6dd-a4e07e859e60")
+			(uuid "fa1963c8-8df0-4b94-8003-c3190b7f0645")
 		)
 		(pin "10"
-			(uuid "62f61c45-7e6a-4816-ac56-2fed70136cc6")
+			(uuid "bffc35bb-7ab2-40e0-a86f-da732b37c5ef")
 		)
 		(pin "11"
-			(uuid "aabf4916-4b86-4daa-b88f-ac63cc91fe20")
+			(uuid "fa31d162-dc89-4563-8cda-0e1919774b3a")
 		)
 		(pin "12"
-			(uuid "b66e791a-e624-4fa3-85d1-2cc1f14b6f0c")
+			(uuid "b0b22115-db72-4a2c-9c7d-0262e953ed73")
 		)
 		(pin "13"
-			(uuid "416d9157-8455-4dcb-a2b4-906c80612a06")
+			(uuid "b1b3d292-2d6c-4487-9ac1-90b5625061d8")
 		)
 		(pin "14"
-			(uuid "64a58740-868d-4f08-a5ac-d5b90c815998")
+			(uuid "a9fb121c-ddd5-4c35-8dcf-f83e3cfa15fe")
 		)
 		(pin "15"
-			(uuid "69678c4f-cc00-4ada-a4e1-3f5c4b7d235f")
+			(uuid "318dc51a-c686-4cc4-99bb-6c66394edff4")
 		)
 		(pin "16"
-			(uuid "86d57b24-f01c-4a5d-8ee6-7187439c20eb")
+			(uuid "171e93d4-a6dd-44a2-a108-ffda0fe94f49")
 		)
 		(pin "17"
-			(uuid "ce99c246-33c6-48ac-a622-0d54b1f5924c")
+			(uuid "ae8d17c2-9337-48ab-a95d-de714f51fd3e")
 		)
 		(pin "18"
-			(uuid "5b4a3e34-f710-429b-b329-181b018d6039")
+			(uuid "c6bba8ab-6e2e-4f32-a4d2-3059b3deb3ad")
 		)
 		(pin "19"
-			(uuid "5da91cf4-6452-4f25-a785-81dd8ed37b38")
+			(uuid "45685e20-49ad-4c94-843d-f0ff84c9ef41")
 		)
 		(pin "20"
-			(uuid "991f95aa-dac8-4155-ba64-52c38348d759")
+			(uuid "0ad9edd1-1fb3-4471-b1f4-63de063b0430")
 		)
 		(pin "21"
-			(uuid "51b3390b-9b35-4ea3-93a3-ca83dd3a0673")
+			(uuid "cd26b83d-bde7-46c2-a0e6-55ab1bd00fe4")
 		)
 		(pin "22"
-			(uuid "1ab64bb3-0010-4d8b-9d5d-87b5efadd930")
+			(uuid "3287f96f-1169-4e74-99f9-e38cfa62dee4")
 		)
 		(pin "23"
-			(uuid "076c8c48-1697-4eab-bfab-16a8c4d465f4")
+			(uuid "46b1acac-6842-48ed-9ef0-e4bd30f950f5")
 		)
 		(pin "24"
-			(uuid "f89ed255-f563-454b-a956-eacbc137a9cd")
+			(uuid "74ddc0e9-3cc1-46cd-8b76-7e6b13fdaa9e")
 		)
 		(pin "25"
-			(uuid "ec57fc7c-dc84-42bc-a360-767edc578690")
+			(uuid "f260d55b-7ba3-4153-a300-9a745fc20664")
 		)
 		(pin "26"
-			(uuid "bb8be64c-18ae-4bf1-8f2d-3b757e7d35e0")
+			(uuid "2477cd61-bcd8-4642-87b9-63317055dc28")
 		)
 		(pin "27"
-			(uuid "0ac94d15-c65a-4cec-bd34-1ead8471af2c")
+			(uuid "a5f68cea-dc72-498a-8c96-fef2ad0cfa66")
 		)
 		(pin "28"
-			(uuid "936f40ff-1b21-4e82-9899-695c5da06391")
+			(uuid "860ad346-8718-4ac6-ac19-ae7b3bddfd42")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "U_PWM")
 					(unit 1)
 				)
@@ -12452,7 +12452,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "267bdfff-4914-49e2-bd36-dc513f69b01e")
+		(uuid "8b407df9-9cfe-4718-9ab5-c74f596aabcd")
 	)
 	(label "GND"
 		(at 50.80 248.92 0)
@@ -12462,7 +12462,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "10f1ad72-5341-4856-8f1c-737698dcf134")
+		(uuid "0c2443ae-1df9-4f54-81a6-86bd0bea67b1")
 	)
 	(label "GND"
 		(at 50.80 251.46 0)
@@ -12472,7 +12472,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "926da653-5c9c-4130-8edb-cffd9d1ac64f")
+		(uuid "35275b24-c2ae-4937-be3e-f17d63904804")
 	)
 	(label "GND"
 		(at 50.80 254.00 0)
@@ -12482,7 +12482,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "0e4463e9-15b8-47f2-870c-682742bc9c2f")
+		(uuid "b7d6e0c8-e292-42b9-894f-bb6c29d98298")
 	)
 	(label "GND"
 		(at 50.80 256.54 0)
@@ -12492,7 +12492,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "902ea848-32e2-48e2-a4df-e2c96ed9c76f")
+		(uuid "fda3e6fd-b27d-4dc0-a180-720bc1efef3d")
 	)
 	(label "GND"
 		(at 50.80 259.08 0)
@@ -12502,7 +12502,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "cdde013b-ed04-4e3e-831c-69bf1776b69c")
+		(uuid "1f15ae8a-cb91-4bc5-a7c4-b4416cf93869")
 	)
 	(label "SERVO_L_PWM"
 		(at 86.36 223.52 0)
@@ -12512,7 +12512,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "fece2eec-8956-40d8-83eb-05cca43ff9de")
+		(uuid "f1f3b5bb-96a3-426e-b29f-a17b95983d9c")
 	)
 	(label "SERVO_R_PWM"
 		(at 86.36 226.06 0)
@@ -12522,7 +12522,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "a696722d-2826-4bbb-9b53-72e7a8a515f7")
+		(uuid "bbf098a0-ce4c-4cee-9cfb-3e6cf9a55d0b")
 	)
 	(label "HEAT_PWM"
 		(at 86.36 261.62 0)
@@ -12532,59 +12532,59 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "8a9a2071-ad04-43e6-807a-db922637a00c")
+		(uuid "8dd1d2d9-8941-490c-85a3-28ac6eaa01f3")
 	)
 	(no_connect
 		(at 86.36 228.60)
-		(uuid "2213f6b6-5abd-4eb4-8991-e33bbc1992c9")
+		(uuid "674b6a47-387c-40e9-a317-3a4f1d034571")
 	)
 	(no_connect
 		(at 86.36 231.14)
-		(uuid "a37923e0-a597-4cb9-9a31-ad038a33c6cc")
+		(uuid "071a4416-bab4-4897-89e1-00ccf4bbb518")
 	)
 	(no_connect
 		(at 86.36 233.68)
-		(uuid "305d85b3-e40a-498e-86d0-d584c015f071")
+		(uuid "eb916ee1-1f2a-4c04-be1d-5c77ecfd935c")
 	)
 	(no_connect
 		(at 86.36 236.22)
-		(uuid "8d769a36-2662-45ff-889d-c2d0b1f749e3")
+		(uuid "5f3b2077-2190-4a6f-aa63-ba3ab42778f4")
 	)
 	(no_connect
 		(at 86.36 238.76)
-		(uuid "cc5c46bd-b4c1-4570-8e47-a225b8069c9d")
+		(uuid "e79008dd-c5c3-4925-abaa-bd79ecb5cf8a")
 	)
 	(no_connect
 		(at 86.36 241.30)
-		(uuid "bac93af0-bd59-45d3-8bf9-36743556efb8")
+		(uuid "4b2b78d8-b6f5-44d4-b670-e3522b85f5b3")
 	)
 	(no_connect
 		(at 86.36 243.84)
-		(uuid "c682b575-f04a-44e2-a016-ac37e2d5e8f7")
+		(uuid "557f607d-72d4-4e6b-843e-f08aee56004a")
 	)
 	(no_connect
 		(at 86.36 246.38)
-		(uuid "0910e0e8-c055-4120-8183-6710c44239d2")
+		(uuid "8c678cf3-35df-476a-ba7a-b940d1b0a842")
 	)
 	(no_connect
 		(at 86.36 248.92)
-		(uuid "2873904c-d3ac-45f8-a4c4-1db6afbb71d1")
+		(uuid "5299f110-1618-4a72-b124-84ba88fc388b")
 	)
 	(no_connect
 		(at 86.36 251.46)
-		(uuid "f77d042d-7607-4d20-a2f3-824d0c20e57b")
+		(uuid "619499e8-d751-4adf-87ed-654a6b30dc9f")
 	)
 	(no_connect
 		(at 86.36 254.00)
-		(uuid "19d9d0e3-1d4e-474b-85a4-4195a4c15c4e")
+		(uuid "b7d13e93-b386-429c-8edf-d17eeb1c70a1")
 	)
 	(no_connect
 		(at 86.36 256.54)
-		(uuid "2aa9d9ff-43fa-43a9-936f-4b7133ddadec")
+		(uuid "15c3530c-d331-4f3a-ae62-2f8a2c1566bd")
 	)
 	(no_connect
 		(at 86.36 259.08)
-		(uuid "4542ea5d-f1a6-4b1e-9c9a-1ccf6b76bc5a")
+		(uuid "bf89267c-4697-421b-a9c4-b84cd30a75b1")
 	)
 	(label "GND"
 		(at 68.58 269.24 90)
@@ -12594,7 +12594,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "933a6e0f-ff94-448d-a945-b03ceeca2868")
+		(uuid "387e33b6-5a8e-48f9-b0b4-293ca48a6aa1")
 	)
 	(label "PWM_OE"
 		(at 50.80 231.14 0)
@@ -12604,7 +12604,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "ee800208-4664-479e-b340-895880a3f935")
+		(uuid "b5d54a6a-2d6f-44cd-9ffb-23e03c106979")
 	)
 	(label "GND"
 		(at 50.80 228.60 0)
@@ -12614,7 +12614,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "84bc98be-92c5-44c9-93e8-9b369f4a482b")
+		(uuid "4bc96948-a185-4139-b0b5-ec70c9ffec78")
 	)
 	(label "I2C_SCL"
 		(at 50.80 223.52 0)
@@ -12624,7 +12624,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "95cc4b09-8987-4b85-805d-b15a8927b006")
+		(uuid "9627352c-8237-434a-966a-6694da538aba")
 	)
 	(label "I2C_SDA"
 		(at 50.80 226.06 0)
@@ -12634,7 +12634,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "b27caf4f-5f81-470f-9601-18f264b13a77")
+		(uuid "323870b0-d327-41c1-a104-126c3da627b7")
 	)
 	(label "+3V3"
 		(at 68.58 215.90 90)
@@ -12644,7 +12644,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "09e6a946-b419-4b57-8fb6-967d40e6f3ff")
+		(uuid "9aebe620-51df-4db5-aaf3-8b064c363883")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -12654,7 +12654,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e1dfa7bf-4834-4605-9548-4a7beaae67a5")
+		(uuid "e171739a-8655-43e9-978c-4bef90b4ff75")
 		(property "Reference" "C_PWM"
 			(at 139.70 217.17 0)
 			(effects
@@ -12701,14 +12701,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "4fb555b4-0c76-4d9e-ac45-456c9cbc90e7")
+			(uuid "1d96dbd7-06c6-487d-a732-2be7b126edaa")
 		)
 		(pin "2"
-			(uuid "0bfea438-4b69-4d19-be3e-1749354af8c8")
+			(uuid "05139df0-3a00-473d-a026-a1cf95f7e5cc")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_PWM")
 					(unit 1)
 				)
@@ -12723,7 +12723,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "940839b4-f184-40e0-9d22-1d3e95ef9525")
+		(uuid "045970b6-26ef-4d51-a625-2d4266bf0d1b")
 	)
 	(label "GND"
 		(at 137.16 222.25 90)
@@ -12733,7 +12733,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "f8246b65-fdea-4693-b6f4-786d50f8ad19")
+		(uuid "647fc2f4-f8c7-4fe9-a9af-dc38199cc090")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -12743,7 +12743,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "3daddf7a-563e-4821-8fd1-84ac52d17878")
+		(uuid "fa80e0bf-ee16-4676-9c45-dece4c6598d5")
 		(property "Reference" "R_OE"
 			(at 190.50 217.17 0)
 			(effects
@@ -12790,14 +12790,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "a30c3772-dae3-4313-bfc4-68abdc76df3e")
+			(uuid "529f8b22-f759-4e17-8278-2daf91e7993f")
 		)
 		(pin "2"
-			(uuid "39d46212-c547-4d34-bde4-015f3e402d07")
+			(uuid "0166b17d-76d7-4020-b8cf-a2fc5422b7dc")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_OE")
 					(unit 1)
 				)
@@ -12812,7 +12812,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "9cab1c53-07b9-47e3-8113-af92551a09e1")
+		(uuid "5fd9526f-fbdb-4e76-befc-02110946e637")
 	)
 	(label "GND"
 		(at 187.96 222.25 90)
@@ -12822,7 +12822,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "acac339d-e6e5-431e-8ba1-a42d7d4223dc")
+		(uuid "6a56dac6-fdf7-4a5b-84c7-72aee4187a71")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -12832,7 +12832,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "bdb59b0f-b614-43c4-adc4-a28154735cc2")
+		(uuid "bc877dcb-e453-4714-941f-c21cf9354839")
 		(property "Reference" "TP_OE"
 			(at 241.30 214.63 0)
 			(effects
@@ -12870,11 +12870,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "dc2b9ea1-2692-4f96-bd9b-49cc5ee744cc")
+			(uuid "100f5f7e-88b1-4e68-b2f6-0da280a54e1a")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_OE")
 					(unit 1)
 				)
@@ -12889,7 +12889,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "653292b5-0b29-4355-91b6-d77249fca7e8")
+		(uuid "ae83c5ef-5923-41ee-8cb8-b491c83552da")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x03")
@@ -12899,7 +12899,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f7a51448-35b1-412c-98a5-ade9bfd54f2b")
+		(uuid "c4a230da-d276-44cb-a27f-aa9d97242ba0")
 		(property "Reference" "J_SERVO_L"
 			(at 297.18 217.17 0)
 			(effects
@@ -12937,17 +12937,17 @@
 			)
 		)
 		(pin "1"
-			(uuid "bd8a30d9-e0ca-479e-aef4-56281bec23d2")
+			(uuid "7d2d5371-2579-4fdb-a351-e18eb03dc8e4")
 		)
 		(pin "2"
-			(uuid "c05de2e9-d5b2-49ed-9901-a76e78bdcb9d")
+			(uuid "5fce356e-b00d-4a6b-b2d1-11f074082f90")
 		)
 		(pin "3"
-			(uuid "89b01d0a-48d9-45bd-a7ef-0f3b34b4db59")
+			(uuid "2bf4f658-5d82-4a04-bfdb-b2034e05d153")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "J_SERVO_L")
 					(unit 1)
 				)
@@ -12962,7 +12962,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "af9866af-835e-46d7-8b1d-dfc0c46cba24")
+		(uuid "869f0dd9-d7a9-4765-bf41-9e95dcfbd889")
 	)
 	(label "VMOT"
 		(at 289.56 218.44 0)
@@ -12972,7 +12972,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "a77cf7f5-98be-4cb9-ac15-d2e4dc37d282")
+		(uuid "d75daa32-3137-4c75-9269-6bd9ce506d5f")
 	)
 	(label "PGND"
 		(at 289.56 220.98 0)
@@ -12982,7 +12982,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "4f747052-dd54-4d24-8fbd-e38a67bec436")
+		(uuid "3f65cd93-aaa2-4132-98f1-0613ed9f8269")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x03")
@@ -12992,7 +12992,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "dfd275ee-340f-46d7-9598-ba3a40b84bd3")
+		(uuid "d5eb3488-8c07-439a-ac15-5ca38a9cd9c6")
 		(property "Reference" "J_SERVO_R"
 			(at 347.98 217.17 0)
 			(effects
@@ -13030,17 +13030,17 @@
 			)
 		)
 		(pin "1"
-			(uuid "f6560e98-9c07-439a-974e-c88ea24b08f0")
+			(uuid "67115c36-db2b-44fc-bd79-cd8758fa5d50")
 		)
 		(pin "2"
-			(uuid "35d50e52-3530-4e48-ad33-3b9a53d127ab")
+			(uuid "6740a7f6-f9cc-45d3-b940-0e1799d7936e")
 		)
 		(pin "3"
-			(uuid "e27ec1be-bef1-435b-a557-8014badaec64")
+			(uuid "e28347e4-f49b-403a-90aa-895fb5b5d45c")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "J_SERVO_R")
 					(unit 1)
 				)
@@ -13055,7 +13055,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "fa9f0a6c-3ba1-41a7-a697-1be627aad6ff")
+		(uuid "3719d29a-60c9-4fa5-8982-7028f46a34ea")
 	)
 	(label "VMOT"
 		(at 340.36 218.44 0)
@@ -13065,7 +13065,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "1b6bce66-1d3b-4c5b-a32c-e649733e4a08")
+		(uuid "cf1a381d-eef5-432e-9682-80ebacc18a92")
 	)
 	(label "PGND"
 		(at 340.36 220.98 0)
@@ -13075,7 +13075,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "fe30486a-ea18-42ab-a738-15c0827eb68f")
+		(uuid "df0d09a8-e42c-4407-adb1-342287f1ec89")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -13085,7 +13085,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "609daa8d-7902-44b3-a7f4-e9daedafade7")
+		(uuid "88f84983-4d53-4651-8bf9-519d97235bf5")
 		(property "Reference" "R_GATE"
 			(at 393.70 217.17 0)
 			(effects
@@ -13132,14 +13132,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "9f41ac19-441c-4605-a586-929a353b44cb")
+			(uuid "cb18ffda-79ed-4c5d-a928-4d4a57b7c735")
 		)
 		(pin "2"
-			(uuid "2dd76887-4526-446f-ad5c-e62fdf317cc3")
+			(uuid "6b2139d0-7d19-401c-bb60-8f4795e56f4d")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_GATE")
 					(unit 1)
 				)
@@ -13154,7 +13154,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "07e4eaa2-378f-4a85-9820-3f8703e89211")
+		(uuid "8b621e97-e7d1-4f31-bdcc-9c22a3cb6310")
 	)
 	(label "HEAT_GATE"
 		(at 391.16 222.25 90)
@@ -13164,7 +13164,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "46d1fb93-2994-4a45-8edc-d6b6c1b0d07c")
+		(uuid "f5337f52-7977-499d-acc1-5d76233e8772")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -13174,7 +13174,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "4ecded2e-dd4e-4009-9658-1422635fb64c")
+		(uuid "5a01f8eb-e398-4e9c-a96d-993971df04ff")
 		(property "Reference" "R_GATE_PD"
 			(at 444.50 217.17 0)
 			(effects
@@ -13221,14 +13221,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "5e7df1db-21c6-45d3-a976-e95dd54f3c6f")
+			(uuid "a45b7c5a-ff5b-465f-b669-cd7d2d635372")
 		)
 		(pin "2"
-			(uuid "91d1f543-1202-47b2-b7a6-418bf8291d15")
+			(uuid "488aa0ae-1748-4a6c-ab09-9d5af3b6b7af")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_GATE_PD")
 					(unit 1)
 				)
@@ -13243,7 +13243,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "417e62af-0847-42f9-9961-d0e5fd34dcd0")
+		(uuid "db55ff05-9b15-4a58-9726-c8d5624ef776")
 	)
 	(label "PGND"
 		(at 441.96 222.25 90)
@@ -13253,7 +13253,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "5bb633f3-3a93-4943-bb65-4669f42d296b")
+		(uuid "5533eadb-e580-4980-b419-456199522eb3")
 	)
 	(symbol
 		(lib_id "Transistor_FET:AO3400A")
@@ -13263,7 +13263,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "a071eab2-f4d6-46db-9621-d0f0dcf8bad5")
+		(uuid "dfc58396-c250-45e3-9fc5-cf7d49d16176")
 		(property "Reference" "Q_HEAT"
 			(at 500.38 219.71 0)
 			(effects
@@ -13310,17 +13310,17 @@
 			)
 		)
 		(pin "1"
-			(uuid "965ae467-4752-48f8-9143-a2d264583d79")
+			(uuid "f8523ea7-5059-463e-90d8-ec191958a3c5")
 		)
 		(pin "2"
-			(uuid "61eeab03-b8dc-4cb1-b798-88e2618c42d3")
+			(uuid "5e5fe07d-4379-444f-87cd-543bd3cf4bf0")
 		)
 		(pin "3"
-			(uuid "c3fbf184-1403-4b6d-be70-ecc020d41309")
+			(uuid "fe05fe5f-d332-40ea-8214-9075287ad7fc")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "Q_HEAT")
 					(unit 1)
 				)
@@ -13335,7 +13335,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "f021c5d1-d6a6-48e0-bc47-7afd4f787562")
+		(uuid "965c9075-c7e7-46ae-b8c2-984a9fcb8fa1")
 	)
 	(label "PGND"
 		(at 500.38 226.06 90)
@@ -13345,7 +13345,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "75ac9735-f3a4-42b4-b3f7-d51554113b75")
+		(uuid "dbacdd4d-aea1-4beb-8e9c-d3b005a5eebf")
 	)
 	(label "HEAT_LOW"
 		(at 500.38 215.90 90)
@@ -13355,7 +13355,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "c04c6550-2e15-4842-8a84-8e6b52be1871")
+		(uuid "b258ccf2-4c72-4232-aa38-00f53062d513")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
@@ -13365,7 +13365,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "7d8855fc-b184-4917-90c8-2baa97d66eab")
+		(uuid "aedfc359-7569-40d4-b610-2dd59e026fd2")
 		(property "Reference" "J_HEAT"
 			(at 558.80 214.63 0)
 			(effects
@@ -13403,14 +13403,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "606ba1f7-9a43-430f-87f1-35ea6c59e2d3")
+			(uuid "82d1ed0d-9f01-4322-8674-f37fc5e70bd1")
 		)
 		(pin "2"
-			(uuid "54b790bd-9176-4e1f-acc2-7c92a8832aa1")
+			(uuid "523d9faa-0f2f-46e0-858c-a1033d22ab0c")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "J_HEAT")
 					(unit 1)
 				)
@@ -13425,7 +13425,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "88618297-ac75-4b92-878f-16f1253e1e5c")
+		(uuid "b7cc8870-a90a-4ff5-87d3-16c5a4b36c05")
 	)
 	(label "HEAT_LOW"
 		(at 551.18 218.44 0)
@@ -13435,7 +13435,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "216f7a24-95d8-442d-b7ce-37ee80993ae1")
+		(uuid "2bb15d87-ee53-4ba9-b539-9d99c4c5d0ad")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -13445,7 +13445,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d8f7e512-ec08-4a30-aa39-cdd87eacc255")
+		(uuid "0a982e76-cce1-40c7-875e-972db9494380")
 		(property "Reference" "TP_GATE"
 			(at 604.52 214.63 0)
 			(effects
@@ -13483,11 +13483,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "679ef4e5-e49f-49fc-a668-b47e7e1e50bf")
+			(uuid "8eda3c25-e95a-4b2a-bd55-a75fc6b11387")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_GATE")
 					(unit 1)
 				)
@@ -13502,7 +13502,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "cf8f35de-1fe7-40cc-a461-f1306ce98541")
+		(uuid "4d94f34e-a291-46bc-8a64-e0b9b718b2a8")
 	)
 	(symbol
 		(lib_id "Analog_ADC:ADS1115IDGS")
@@ -13512,7 +13512,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "58d1df68-31e8-4784-949f-47ab6aa708b2")
+		(uuid "acca1ed3-0940-4f15-94c4-31ee5e5cb387")
 		(property "Reference" "U_ADC"
 			(at 652.78 256.54 0)
 			(effects
@@ -13559,38 +13559,38 @@
 			)
 		)
 		(pin "1"
-			(uuid "7aad9930-0134-4252-8562-e3e4f59dabcf")
+			(uuid "d085a5c7-20b6-4bd7-913d-6fdfe9c890cb")
 		)
 		(pin "2"
-			(uuid "8783ef2f-20f1-4f35-bad0-cf3c4b0340e9")
+			(uuid "ee35605f-032e-4d82-bd31-42f1cbf45ca4")
 		)
 		(pin "3"
-			(uuid "4c578ac8-0b91-4007-8fc3-3ed06fb49e83")
+			(uuid "fdca6f9b-84d6-4f48-8036-12806708b332")
 		)
 		(pin "4"
-			(uuid "a4c04db8-838d-41e3-b64a-d747a60e33fc")
+			(uuid "04689883-17d8-4fcc-bb78-639dbb9fa9f6")
 		)
 		(pin "5"
-			(uuid "4f26e560-6bd7-4ea7-84d8-70a405378e37")
+			(uuid "094787bc-e9ed-4855-b7aa-d9f05d91137b")
 		)
 		(pin "6"
-			(uuid "a1c10131-8f09-4e0d-a2ce-5a7da6f0a492")
+			(uuid "127ea2a3-d8e5-4d73-9e17-a5756bb6e809")
 		)
 		(pin "7"
-			(uuid "0206301c-1f11-43c2-aeff-f390adc651ee")
+			(uuid "39838e8d-c956-4b01-a1aa-865fd061d4b4")
 		)
 		(pin "8"
-			(uuid "e29d68e6-92a4-45c9-8b7f-739b98755bed")
+			(uuid "f10809a3-b102-496d-b83f-8895df8a1bf4")
 		)
 		(pin "9"
-			(uuid "d5171c19-a6f6-4e38-8208-02368975e043")
+			(uuid "af2e6369-0561-424a-9463-b8f89b7b2c13")
 		)
 		(pin "10"
-			(uuid "bca11293-df4f-4e2c-8e01-3cd30be4efad")
+			(uuid "2048200e-bbc9-4d39-8d48-cdec56e2131e")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "U_ADC")
 					(unit 1)
 				)
@@ -13605,11 +13605,11 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "ccfdd035-e3ac-4c32-a601-b1eed9e7f01e")
+		(uuid "9af27932-7394-4c9c-b78a-73692311db55")
 	)
 	(no_connect
 		(at 673.10 223.52)
-		(uuid "a617618f-be5d-40f3-b567-af6c0b282e95")
+		(uuid "e9d82f96-09c3-484b-b311-48177c4e17c7")
 	)
 	(label "GND"
 		(at 662.94 238.76 90)
@@ -13619,7 +13619,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "57f6db90-9dd8-414b-afa5-d0473745ff22")
+		(uuid "726b20d9-e12a-435e-9756-fafeb8d8fd5c")
 	)
 	(label "NTC_SENSE"
 		(at 652.78 226.06 0)
@@ -13629,19 +13629,19 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "0cf90336-a6a1-4dd6-8bb4-19222646a9a6")
+		(uuid "69625209-dc27-4283-8fac-6f3e0f094afb")
 	)
 	(no_connect
 		(at 652.78 228.60)
-		(uuid "1734320d-af28-483f-ac9b-438490e79aea")
+		(uuid "0c9ec153-5803-4886-a222-212872871cde")
 	)
 	(no_connect
 		(at 652.78 231.14)
-		(uuid "94e469bf-c0da-429c-9585-6263f62404cf")
+		(uuid "6d882cf7-7789-4d5b-80f2-03c7a455b298")
 	)
 	(no_connect
 		(at 652.78 233.68)
-		(uuid "91d95339-df42-492d-bdb7-b8ef6d223d9f")
+		(uuid "16c7a4ab-0e4a-4c09-98bf-1ac31f622d33")
 	)
 	(label "+3V3"
 		(at 662.94 215.90 90)
@@ -13651,7 +13651,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "1c22b339-95ab-437d-acf1-47cf80af603e")
+		(uuid "3407bea3-ce84-4bf1-8f38-0727ea7edd5f")
 	)
 	(label "I2C_SDA"
 		(at 673.10 231.14 0)
@@ -13661,7 +13661,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "277a085b-df0f-4c96-84de-1c1618b8c4ec")
+		(uuid "122a1fe9-abcf-4524-b8ce-b4bc30830d6f")
 	)
 	(label "I2C_SCL"
 		(at 673.10 228.60 0)
@@ -13671,7 +13671,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "f7a4d999-ba72-41a9-9eb0-fc75f169bae0")
+		(uuid "5178c340-e342-4a16-ac18-29c419507cb1")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -13681,7 +13681,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "16b8070c-e56f-428a-9ebb-bda7f9396630")
+		(uuid "451968cb-1621-4df0-872a-32400ca740fe")
 		(property "Reference" "C_ADC"
 			(at 726.44 217.17 0)
 			(effects
@@ -13728,14 +13728,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "9262b6b9-76b9-4451-a83a-fb0581ee31dc")
+			(uuid "5d5c8b1f-8046-4fed-a739-48801a543955")
 		)
 		(pin "2"
-			(uuid "9bbda9da-214d-460e-990b-b8fc80941dc5")
+			(uuid "064d892c-cd7b-426d-ac83-75d58ee4da9f")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_ADC")
 					(unit 1)
 				)
@@ -13750,7 +13750,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "77ccda2e-9726-41d6-bb4a-8d8d54ea057f")
+		(uuid "cf7b4c41-a106-4cf9-a4ca-e07a8c206174")
 	)
 	(label "GND"
 		(at 723.90 222.25 90)
@@ -13760,7 +13760,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "a37830c3-9dd9-483d-a455-fe9bdea37f4b")
+		(uuid "98f55f4e-ba23-4247-a17d-598345bcf5ff")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -13770,7 +13770,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "55c2cbd0-95b6-47fa-8fe9-a79473d813c6")
+		(uuid "3743ab22-0a0f-42ea-99a8-2ebb5b49274f")
 		(property "Reference" "R_NTC"
 			(at 777.24 217.17 0)
 			(effects
@@ -13817,14 +13817,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "1d5d5817-fa1f-427d-b99c-23c052b65df8")
+			(uuid "b64a4301-f53e-4d51-970d-515e7c76e410")
 		)
 		(pin "2"
-			(uuid "3ee4225f-c781-49b5-a1a2-0f1246518897")
+			(uuid "b0ddf7cb-0561-42ed-93ee-e2f190ca37c4")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_NTC")
 					(unit 1)
 				)
@@ -13839,7 +13839,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "eda2675b-16af-494b-a715-9236465e41a9")
+		(uuid "6add8eb2-c0ed-4f15-af1b-72c098844c7c")
 	)
 	(label "NTC_SENSE"
 		(at 774.70 222.25 90)
@@ -13849,7 +13849,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "942d798d-7d4b-4615-b3e6-8741496eb077")
+		(uuid "f635dc20-ac76-4774-ba7a-58b61fa47ffc")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -13859,7 +13859,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "7db8c99e-3b75-48b4-844b-690b92209f20")
+		(uuid "53d6869e-35f0-447e-892f-2a8258bca7f7")
 		(property "Reference" "C_NTC"
 			(at 828.04 217.17 0)
 			(effects
@@ -13906,14 +13906,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "51e94dce-579c-45f3-aecf-40bb5e85367f")
+			(uuid "8db45f67-a855-4cbf-905e-98dd6f8297b7")
 		)
 		(pin "2"
-			(uuid "00c252b9-2d79-44ee-81a1-3ae0341dc33d")
+			(uuid "04f36053-521e-4cfa-a990-bf55d7ab5519")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_NTC")
 					(unit 1)
 				)
@@ -13928,7 +13928,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "05521968-50e5-4f95-9fcf-de7df6da9e80")
+		(uuid "8afe29b1-8b86-4ea1-be72-e01fd84a48b5")
 	)
 	(label "GND"
 		(at 825.50 222.25 90)
@@ -13938,7 +13938,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "9b4c026b-cd8d-46ee-8deb-ad4c94d66920")
+		(uuid "aac6c89a-341e-4aaf-b5db-b8e034f2f460")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
@@ -13948,7 +13948,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "6d936cf6-584d-4692-8eb5-9abdc900c38c")
+		(uuid "1b3cf2d1-2ad8-4765-910d-9748c729ca55")
 		(property "Reference" "J_NTC"
 			(at 883.92 214.63 0)
 			(effects
@@ -13986,14 +13986,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "d853d954-41ff-4d50-a1f4-30c3240a5b24")
+			(uuid "6d9ac62c-fd62-44d4-9d6c-e0df76aa5c7c")
 		)
 		(pin "2"
-			(uuid "7b011ab1-6705-4711-b35b-f7e4c37788c1")
+			(uuid "bdd8d271-8ff0-4e00-a166-6b598717c953")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "J_NTC")
 					(unit 1)
 				)
@@ -14008,7 +14008,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "8741fcad-0c45-4b35-a886-859d4c3d5942")
+		(uuid "be71a807-be77-45db-9a7d-b1fc358bb1e1")
 	)
 	(label "GND"
 		(at 876.30 218.44 0)
@@ -14018,7 +14018,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "c46cf5aa-4e14-4cad-b852-6770555fb499")
+		(uuid "9884feab-e2e1-4c36-9069-7e648c1cb401")
 	)
 	(symbol
 		(lib_id "Sensor_Touch:MPR121QR2")
@@ -14028,7 +14028,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "89cf20d2-bec4-446d-a5e1-5a51b5275e2c")
+		(uuid "f4952665-7f60-4315-aee8-4da3b4ebd065")
 		(property "Reference" "U_TOUCH"
 			(at 927.10 274.32 0)
 			(effects
@@ -14075,68 +14075,68 @@
 			)
 		)
 		(pin "1"
-			(uuid "a457d8b7-222b-472b-b519-21066aa1d7e8")
+			(uuid "4bf5985b-499b-435e-a2cb-5d12bfc5d2d3")
 		)
 		(pin "2"
-			(uuid "7730242a-9ce3-45e0-b0fd-934d6a440df4")
+			(uuid "1653812b-0afc-4531-8782-d473fb6871cf")
 		)
 		(pin "3"
-			(uuid "5efc8345-3092-430f-b386-036d2ba2f3aa")
+			(uuid "0509eeb4-ca9f-47b5-a7b3-cf0672e384b3")
 		)
 		(pin "4"
-			(uuid "2c0a3a30-643c-4e2b-9cbf-418e77da7c24")
+			(uuid "c2790f7b-d94e-4030-b08b-b2de4ba83e7a")
 		)
 		(pin "5"
-			(uuid "2ec16eea-c9b5-4f25-9487-239c66084be0")
+			(uuid "218975ac-81c8-473d-aaa7-a59e88ea102e")
 		)
 		(pin "6"
-			(uuid "940aa1ba-1597-4298-84ba-8e195ef78ece")
+			(uuid "c8174bab-4758-45b1-87f9-9ff230b69968")
 		)
 		(pin "7"
-			(uuid "08699a9f-9f56-4db2-a74d-1e58277c36f7")
+			(uuid "f4189172-2afc-4082-b5c8-a637460a62f4")
 		)
 		(pin "8"
-			(uuid "184c2230-0cd5-4d13-a5ca-f10064319055")
+			(uuid "f902f228-87cb-4e49-a85c-1cf8cefa7a9a")
 		)
 		(pin "9"
-			(uuid "ed8692d3-21b2-43a2-b026-c163129840f6")
+			(uuid "3ea4c279-a9ea-4036-997e-283269461ad7")
 		)
 		(pin "10"
-			(uuid "a9ca9ac3-f392-44cf-aae2-77bcde826150")
+			(uuid "5b88b343-c7a5-4ae7-942a-be5c43efe33b")
 		)
 		(pin "11"
-			(uuid "8e97d1e3-3d47-4670-aa05-4491164c133d")
+			(uuid "ec01743f-a5e8-4a15-a0d4-cabaca598f18")
 		)
 		(pin "12"
-			(uuid "7db67dd1-8cbf-4c96-9941-7bd3b9321172")
+			(uuid "80b61b90-cb1d-4da8-8c47-24b35b14d19f")
 		)
 		(pin "13"
-			(uuid "5c38938f-4b7d-4f7a-b33a-5664da466dfa")
+			(uuid "89db8a0d-5b7e-4461-98a6-912e85fdc181")
 		)
 		(pin "14"
-			(uuid "708e098e-77a2-4b2b-b932-7b25c470d4db")
+			(uuid "2b4acae9-bab6-4bec-be3a-686306346836")
 		)
 		(pin "15"
-			(uuid "82917e82-5a17-439b-8879-a7818b16beb5")
+			(uuid "5fc240fd-8bf3-4301-a951-c0b03fa63e5e")
 		)
 		(pin "16"
-			(uuid "4cd18673-2676-4031-bab6-0820b6a89ea8")
+			(uuid "ac0231ee-4628-4ac4-a249-9ecaa67b6d82")
 		)
 		(pin "17"
-			(uuid "6f74397f-7dd0-42d1-a80c-fe33a6e68ddc")
+			(uuid "28b614da-6e98-4fc6-8088-30f507617e7b")
 		)
 		(pin "18"
-			(uuid "66d8c4c3-70eb-4cff-9160-529fc35638cf")
+			(uuid "9a4256db-2dd2-471e-a0d5-98574d23d73e")
 		)
 		(pin "19"
-			(uuid "accf232a-6a6f-4d0b-ae45-2b43bf8b712a")
+			(uuid "be4a2436-5135-4073-91bb-fb10ce1c7608")
 		)
 		(pin "20"
-			(uuid "90965a3e-8251-49d1-af31-7e6831b3427e")
+			(uuid "a0a37997-f140-46ec-af05-83ca632cc76a")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "U_TOUCH")
 					(unit 1)
 				)
@@ -14145,7 +14145,7 @@
 	)
 	(no_connect
 		(at 927.10 231.14)
-		(uuid "f532d268-8cd5-4993-987e-76b273fdf211")
+		(uuid "be5daed7-e0a9-43ca-b355-a90e97940aa7")
 	)
 	(label "I2C_SCL"
 		(at 927.10 226.06 0)
@@ -14155,7 +14155,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "2f6693cf-2a1c-421b-8d59-6ceecc88f831")
+		(uuid "1dbf5266-0820-4738-abb2-b3e912cdc9c5")
 	)
 	(label "I2C_SDA"
 		(at 927.10 223.52 0)
@@ -14165,7 +14165,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "28e4a779-8605-4438-a8de-65d5c1972c2d")
+		(uuid "a7d7f174-1412-4de4-a692-05e9a6bf5e2c")
 	)
 	(label "GND"
 		(at 927.10 236.22 0)
@@ -14175,7 +14175,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "00210511-dba7-467d-b2d9-03d737548ffb")
+		(uuid "115e428f-f877-47d1-9c5e-61e314bc24b6")
 	)
 	(label "TOUCH_VREG"
 		(at 927.10 246.38 0)
@@ -14185,7 +14185,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "4d0436be-f859-4f7d-a1ce-2659a8b499f8")
+		(uuid "e63a5af9-c511-4af2-b726-cbd25414413a")
 	)
 	(label "GND"
 		(at 939.80 256.54 90)
@@ -14195,7 +14195,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "bffee31f-d5a0-4f4b-a926-aee4c23f3752")
+		(uuid "bdded609-9f02-404a-ad70-16c753c12882")
 	)
 	(label "TOUCH_REXT"
 		(at 927.10 241.30 0)
@@ -14205,7 +14205,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "b4d6acf1-5b96-4944-ada4-742382db1a69")
+		(uuid "7e140f0e-dace-4db8-9a4e-63561a7e219b")
 	)
 	(label "TOUCH_E0"
 		(at 952.50 220.98 0)
@@ -14215,7 +14215,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "5dedf9d8-4bb5-4fc3-a239-46971ec72266")
+		(uuid "6ab9b730-a3cc-4b13-9c2e-a7a646be6a8f")
 	)
 	(label "TOUCH_E1"
 		(at 952.50 223.52 0)
@@ -14225,7 +14225,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "fcd6da94-10e2-4898-be74-af6b977481f0")
+		(uuid "aa356710-11e0-456f-9396-bf11b7fbb746")
 	)
 	(label "TOUCH_E2"
 		(at 952.50 226.06 0)
@@ -14235,7 +14235,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "d1576ce6-6f8b-4412-92fe-db43a70529e5")
+		(uuid "f41077ff-19fd-4c6c-a83f-6a685ab971b3")
 	)
 	(label "TOUCH_E3"
 		(at 952.50 228.60 0)
@@ -14245,7 +14245,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "9bb0ec30-6b38-4352-a419-21cf23f82640")
+		(uuid "7c84b774-ba70-410e-8695-0310e418464f")
 	)
 	(label "TOUCH_E4"
 		(at 952.50 231.14 0)
@@ -14255,7 +14255,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "d1f2e6f7-1567-4ae5-954a-3113620e361d")
+		(uuid "3804f628-858b-408e-a489-a1efbf36c6a9")
 	)
 	(label "TOUCH_E5"
 		(at 952.50 233.68 0)
@@ -14265,7 +14265,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "747bd87b-f83d-4f65-9581-ff4e008cc984")
+		(uuid "ecf9c7ed-990c-4095-b46d-55afc1e5f66f")
 	)
 	(label "TOUCH_E6"
 		(at 952.50 236.22 0)
@@ -14275,7 +14275,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "209b76e7-7536-445a-9d3d-ac874650cc64")
+		(uuid "ab2bb98a-d39b-4ad9-bc34-f6faf512eb72")
 	)
 	(label "TOUCH_E7"
 		(at 952.50 238.76 0)
@@ -14285,7 +14285,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "eef8b031-831c-459a-b5b0-5524b1738bff")
+		(uuid "46560216-3a63-4969-8bf5-b8b06a466db4")
 	)
 	(label "TOUCH_E8"
 		(at 952.50 241.30 0)
@@ -14295,7 +14295,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "28d072c2-49f0-4add-ad35-7520ae18fd38")
+		(uuid "c2485fbb-918e-465b-afcc-dfaa8cdfc147")
 	)
 	(label "TOUCH_E9"
 		(at 952.50 243.84 0)
@@ -14305,7 +14305,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "2481f806-d99b-40b4-978f-135689aaa73c")
+		(uuid "35c14a5e-6d95-4283-9d63-fc604f67d232")
 	)
 	(label "TOUCH_E10"
 		(at 952.50 246.38 0)
@@ -14315,7 +14315,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "571b9f0f-ab5b-4575-9399-40c94dc5f843")
+		(uuid "69b36e16-4ad5-4edc-95b3-e71c2e1b1cbf")
 	)
 	(label "TOUCH_E11"
 		(at 952.50 248.92 0)
@@ -14325,7 +14325,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "e3a9fefa-b2db-4b5c-b0f1-d1041b596b4c")
+		(uuid "d0a4f4b2-563c-4240-beba-d9b22f01ea8f")
 	)
 	(label "+3V3"
 		(at 939.80 215.90 90)
@@ -14335,7 +14335,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "43a2af44-4dd7-4c60-a7c3-acf543999e9b")
+		(uuid "aac508d3-ce90-43cd-a3ce-1a1b73f9a01c")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -14345,7 +14345,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "4337f23b-7453-4da7-8e77-a932754cd9ae")
+		(uuid "fb014a26-e411-4bb4-8c07-6366db13a0ae")
 		(property "Reference" "C_TOUCH"
 			(at 1005.84 217.17 0)
 			(effects
@@ -14392,14 +14392,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "0d6a12f3-099a-495b-8833-5050c0063a15")
+			(uuid "b35ac317-e81f-4581-8113-439e476daede")
 		)
 		(pin "2"
-			(uuid "266eb7a5-8bfa-429e-b977-88cbb86c1a6a")
+			(uuid "cae4a749-767d-4beb-ad5d-18f845bb91ab")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_TOUCH")
 					(unit 1)
 				)
@@ -14414,7 +14414,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "14217125-defd-48e8-bf63-04c214e08eac")
+		(uuid "6b85071b-4125-4486-9320-3537bd298537")
 	)
 	(label "GND"
 		(at 1003.30 222.25 90)
@@ -14424,7 +14424,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "3f146b0e-94ec-4707-815f-2e23989c6f51")
+		(uuid "6c6d8894-62a5-401c-bf2c-d4d05224ad88")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -14434,7 +14434,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "56a1043d-2617-4e8f-ac66-df9db18b6d83")
+		(uuid "68a23b46-dda5-4b50-a66b-8fe5b23eec44")
 		(property "Reference" "C_TOUCH_VREG"
 			(at 1056.64 217.17 0)
 			(effects
@@ -14481,14 +14481,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "a84651f4-720d-4b88-8b63-6c6367960792")
+			(uuid "401d2fa7-abee-4adf-a9df-654fa4d2a118")
 		)
 		(pin "2"
-			(uuid "e5c902ee-5974-4f64-8fee-799a1d43623c")
+			(uuid "105c67ae-e677-4e7b-9cbc-e0be36247a02")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_TOUCH_VREG")
 					(unit 1)
 				)
@@ -14503,7 +14503,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "0016ed6a-820d-4481-808c-dc3596d41954")
+		(uuid "042937b7-3844-4c10-87e5-f77d517935fc")
 	)
 	(label "GND"
 		(at 1054.10 222.25 90)
@@ -14513,7 +14513,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "5d0c6c37-0de1-4336-8bd0-511bc293e384")
+		(uuid "e7b81a72-9066-46eb-bea8-fedd406d23d7")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -14523,7 +14523,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "98950958-8485-4126-9769-edc585cd1844")
+		(uuid "2ede5aa4-d49c-44fb-af93-8cc724705f1d")
 		(property "Reference" "R_TOUCH_REXT"
 			(at 1107.44 217.17 0)
 			(effects
@@ -14570,14 +14570,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "735fe156-eec1-46ae-bdaf-6756913ae2d1")
+			(uuid "04ac7d21-9419-41d9-8573-a8a8e4d3d706")
 		)
 		(pin "2"
-			(uuid "e07b305d-1296-4d67-90dc-5580535938fe")
+			(uuid "ed4665d9-080b-4a9a-9c75-2028d3ca58e4")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_TOUCH_REXT")
 					(unit 1)
 				)
@@ -14592,7 +14592,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "2fd5efb3-cf80-4cbd-9246-259e5984d611")
+		(uuid "3bc970b4-4ed3-4822-856d-b80c15c86882")
 	)
 	(label "GND"
 		(at 1104.90 222.25 90)
@@ -14602,7 +14602,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "12063553-e072-488d-965f-e673d4819a1e")
+		(uuid "19e0050c-2173-4fd9-b62a-97fd1050c5af")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -14612,7 +14612,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "47c984c9-a08e-4a07-bb19-ca415bd141bb")
+		(uuid "ee1522e2-0633-4fca-b8f8-fa0cdd35d03f")
 		(property "Reference" "TP_E0"
 			(at 53.34 321.31 0)
 			(effects
@@ -14650,11 +14650,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "8236f68d-0b12-4afc-ab96-0e727ff95c87")
+			(uuid "5685e350-8a61-4fd4-b007-87c6c065af44")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_E0")
 					(unit 1)
 				)
@@ -14669,7 +14669,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "7d7ca671-6156-4e50-82ef-dea52ee6fd64")
+		(uuid "6c91a8ae-1e5f-4fe9-bfe3-b622c385bfb1")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -14679,7 +14679,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "c2d3d116-951b-4e3f-a201-27af1eab8ae6")
+		(uuid "469ec809-5758-429f-b214-33805a6fd611")
 		(property "Reference" "TP_E1"
 			(at 104.14 321.31 0)
 			(effects
@@ -14717,11 +14717,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "cf35b0df-b99b-4c86-8fd5-1828475a4ba6")
+			(uuid "c135c5d6-bc5a-4753-9bb3-0d7edfa3c2cb")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_E1")
 					(unit 1)
 				)
@@ -14736,7 +14736,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "6c35839c-75db-4f0e-8050-3bb6c0495c62")
+		(uuid "2aecaa91-0d1e-4693-8619-6d01f2f04b8a")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -14746,7 +14746,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "1e3ecc72-7e3a-4eef-8ef3-63ed91b90e84")
+		(uuid "b434f0bb-f045-41fa-adcc-2a28cfcc409c")
 		(property "Reference" "TP_E2"
 			(at 154.94 321.31 0)
 			(effects
@@ -14784,11 +14784,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "31e03f8b-5821-4ae3-ae3b-bacc6960238d")
+			(uuid "b815124d-5089-463a-8cd9-7792ae565a14")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_E2")
 					(unit 1)
 				)
@@ -14803,7 +14803,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "c27985de-27c9-44ba-9adc-08ee86fb6c5a")
+		(uuid "50a09416-9bf6-400b-8199-3d29fca22e8f")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -14813,7 +14813,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e9578831-2b7e-438c-9e01-58a31fc31d94")
+		(uuid "4724a015-e0fa-4c1b-a78f-31d3252abaac")
 		(property "Reference" "TP_E3"
 			(at 205.74 321.31 0)
 			(effects
@@ -14851,11 +14851,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "1f13a2dc-a733-4998-be7d-15aa0e3f638e")
+			(uuid "77559c6a-6f13-4535-a96c-32a3254d4bef")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_E3")
 					(unit 1)
 				)
@@ -14870,7 +14870,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "ce2dc2d6-9eef-4476-b9c5-cc734cff10b0")
+		(uuid "ec1e6372-30bb-4a4c-9462-1d4b32db66d7")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -14880,7 +14880,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "edc61ff9-2eee-4236-bf49-40b5329e23e8")
+		(uuid "c7a1b611-b246-4d75-be38-078c135fd9d8")
 		(property "Reference" "TP_E4"
 			(at 256.54 321.31 0)
 			(effects
@@ -14918,11 +14918,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "84554d02-82c3-4685-8040-30b255f29dc1")
+			(uuid "4ea78eb5-3f32-47d8-8a83-e53f5c32d494")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_E4")
 					(unit 1)
 				)
@@ -14937,7 +14937,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "a7f32938-d750-4491-8a8c-adac3d596b5c")
+		(uuid "2afc18c4-31c7-49b7-8d52-26557ac2afb2")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -14947,7 +14947,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "547e2ac1-27bd-4088-bff9-3d4926d4e87f")
+		(uuid "2548fb38-e456-499c-bb84-b4d7f84f3edd")
 		(property "Reference" "TP_E5"
 			(at 307.34 321.31 0)
 			(effects
@@ -14985,11 +14985,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "d2157f9a-1f50-429c-980f-bf1b61ae9ea9")
+			(uuid "8fc1072d-51bb-43ca-b203-baa703c72063")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_E5")
 					(unit 1)
 				)
@@ -15004,7 +15004,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "9904c73e-9233-41ff-af08-95f3cdc3e426")
+		(uuid "acfae0c4-358e-4f7b-878b-2353ee5e9fcb")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -15014,7 +15014,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "b276b295-7207-405c-be25-b2364e1c3d6a")
+		(uuid "7a9db21b-8639-4a38-b0a0-2d2207653e36")
 		(property "Reference" "TP_E6"
 			(at 358.14 321.31 0)
 			(effects
@@ -15052,11 +15052,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "5499753b-7d79-415d-a976-c241f5156107")
+			(uuid "249f21a8-5dc6-4d41-84d2-5fb470485e95")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_E6")
 					(unit 1)
 				)
@@ -15071,7 +15071,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "3138781a-e81c-4dd8-9dcc-9e67a738805a")
+		(uuid "f29e1402-a2d9-4b53-9676-012a229a47c5")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -15081,7 +15081,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d12cbd80-b046-41bd-a71d-1b2267299313")
+		(uuid "059ee4d3-84ed-4ddf-ba2c-cdc51974d2e7")
 		(property "Reference" "TP_E7"
 			(at 408.94 321.31 0)
 			(effects
@@ -15119,11 +15119,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "235a6526-4e0e-43fa-af4d-f3cf4d3a9c96")
+			(uuid "2be3a4da-6e94-4644-a2bc-03b1cd3f85bf")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_E7")
 					(unit 1)
 				)
@@ -15138,7 +15138,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "256818cb-36c6-4792-b862-133097113ca7")
+		(uuid "a0700ddd-fad3-4319-8955-d2e2f55a2bfe")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -15148,7 +15148,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "50b27011-74ad-48f3-b659-869065495340")
+		(uuid "1286b95a-bac4-4dad-8390-5c2ef348ddf3")
 		(property "Reference" "TP_E8"
 			(at 459.74 321.31 0)
 			(effects
@@ -15186,11 +15186,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "71b88728-931b-4e4d-bb03-0c47b6d4880a")
+			(uuid "b87d672d-8071-467c-afb6-d851f545d75a")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_E8")
 					(unit 1)
 				)
@@ -15205,7 +15205,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "928dec3c-4726-4e10-88b6-0ba068b72649")
+		(uuid "bb56d397-2c11-45c8-8beb-8b84585da00e")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -15215,7 +15215,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "11890331-7ba0-497f-b26b-f523cc0030bb")
+		(uuid "adadf6c3-67db-4a90-a1ef-46e83051d0d7")
 		(property "Reference" "TP_E9"
 			(at 510.54 321.31 0)
 			(effects
@@ -15253,11 +15253,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "5fcc8e31-1f11-4ada-b55c-8e23761a289d")
+			(uuid "2962c135-88d2-4fd5-b671-cc9c9f3880d5")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_E9")
 					(unit 1)
 				)
@@ -15272,7 +15272,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "23d6fb5a-e679-4cff-b632-f37f8ae3433d")
+		(uuid "24efe212-ddfd-4926-8db5-3854e4ff3d60")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -15282,7 +15282,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "c9bbb918-a2c7-45cb-b8fa-a3e5e51cd810")
+		(uuid "52f3a10c-cf84-4eec-a7f3-79a8519f0c9c")
 		(property "Reference" "TP_E10"
 			(at 561.34 321.31 0)
 			(effects
@@ -15320,11 +15320,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "0e28396b-a823-41da-ac52-85f0bd09bce3")
+			(uuid "bdca692a-685e-437d-972c-8962fb72b388")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_E10")
 					(unit 1)
 				)
@@ -15339,7 +15339,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "0d062798-97ac-4f17-a388-0ccef47c7ab1")
+		(uuid "d03d05ae-eda2-4bb4-b6a0-806dd72fa87d")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -15349,7 +15349,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d4519584-bc14-4d2a-99e1-a240a30655e8")
+		(uuid "845bd8db-f6d5-46c2-9a52-c2878baf5789")
 		(property "Reference" "TP_E11"
 			(at 612.14 321.31 0)
 			(effects
@@ -15387,11 +15387,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "57e1ac9c-5fe8-409a-850f-384d4201ac6f")
+			(uuid "3f8614bf-ea52-497f-bbc3-c0584b10e9c8")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_E11")
 					(unit 1)
 				)
@@ -15406,7 +15406,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "12030c4b-691f-4eee-a186-db94d0522333")
+		(uuid "c849aa83-72e6-495e-8cfe-fd7b4b0b9bc5")
 	)
 	(symbol
 		(lib_id "Sensor_Motion:MPU-6050")
@@ -15416,7 +15416,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "daf7d5f2-7074-4a25-aac8-3ddd5e9ea251")
+		(uuid "8dab46f7-00d3-4537-bda6-89f7ff4adc8e")
 		(property "Reference" "U_IMU"
 			(at 660.40 375.92 0)
 			(effects
@@ -15463,80 +15463,80 @@
 			)
 		)
 		(pin "1"
-			(uuid "1e95a1c2-9874-4e32-bfcd-69cc8fe0481f")
+			(uuid "75a9ce0e-976a-49dc-824a-ff804a43b824")
 		)
 		(pin "2"
-			(uuid "0170000b-2de9-49f8-b684-fc3e9830ec84")
+			(uuid "9c9733f0-ace6-4043-8656-1b08b7805ea8")
 		)
 		(pin "3"
-			(uuid "8d1ee81b-e660-499c-abf1-41f2d462da40")
+			(uuid "baf54856-7bfa-45e8-aa7d-ef6d2f3b608c")
 		)
 		(pin "4"
-			(uuid "8ce3918d-96a1-4f2b-bff1-1e16d59a09d9")
+			(uuid "51da47c2-7149-4be3-85ac-529697398ced")
 		)
 		(pin "5"
-			(uuid "3e9ca2a6-50d8-4b09-a0b0-e1bd35cbe89b")
+			(uuid "5b8d47b4-9269-47a4-82c0-b8f8f127fcb1")
 		)
 		(pin "6"
-			(uuid "9b9c564e-2da2-47b8-96ea-fc35006f2ab2")
+			(uuid "75811ee6-5cca-4769-8064-c9381ac23b72")
 		)
 		(pin "7"
-			(uuid "5c938483-13a5-4a07-9de1-ba03edaeeadb")
+			(uuid "02d05a73-5e5f-4ec4-8035-ac8d7d8ce322")
 		)
 		(pin "8"
-			(uuid "d1c7b2e3-95be-46a9-8e96-77b329b185cd")
+			(uuid "7ff31108-2484-44ef-99ec-f9541aebd249")
 		)
 		(pin "9"
-			(uuid "c28d40ec-0037-4e13-b1ff-10543f34fc35")
+			(uuid "471548dd-d6de-47f3-8add-2a0af9ae7e58")
 		)
 		(pin "10"
-			(uuid "104b9143-9c15-48cd-8b4d-2c4c9040365c")
+			(uuid "4eb84455-17e3-43e4-b5fc-5f255be8bc09")
 		)
 		(pin "11"
-			(uuid "389c548a-4726-47f0-a378-9a182e1a8899")
+			(uuid "d0ada2e3-aac0-4c2e-b810-979eed3189d2")
 		)
 		(pin "12"
-			(uuid "c1bf9579-c21f-4291-a26d-8db2f7e09194")
+			(uuid "e0ad29b4-72bc-4b07-8624-379f56174f1a")
 		)
 		(pin "13"
-			(uuid "2314203d-7483-465f-9267-358aa90f720e")
+			(uuid "4ade4a85-6332-498b-afd1-33f0e55c50ef")
 		)
 		(pin "14"
-			(uuid "91e4a786-87f1-44d8-8cc0-e0385e64321e")
+			(uuid "69a37b5c-5751-4fa7-bcd4-368888f31d3d")
 		)
 		(pin "15"
-			(uuid "dc92742b-d2f1-4938-8f3c-f55bf891e3af")
+			(uuid "d15c89ad-651a-455c-b9a4-e8065e47f6cf")
 		)
 		(pin "16"
-			(uuid "2136f75e-8118-4907-86d2-1c08c3bc8c83")
+			(uuid "999a6e82-b2d5-4a81-870a-17ca1dafa2cb")
 		)
 		(pin "17"
-			(uuid "db98c69a-002b-44d7-ad7d-b3484f1ce832")
+			(uuid "fbe3f899-d890-49f9-b807-0e9c9454b9ae")
 		)
 		(pin "18"
-			(uuid "93546cfc-4bd2-4350-8713-e8a9358ef272")
+			(uuid "260e275f-ac2b-48b1-826b-13d55ab02e5a")
 		)
 		(pin "19"
-			(uuid "4b62660e-586f-429c-a819-404c1e237590")
+			(uuid "354c48dc-fdd5-49be-ac67-b366fcfa784f")
 		)
 		(pin "20"
-			(uuid "05b49073-9296-43ea-91e3-2f69ac20b319")
+			(uuid "7e078e52-c0a0-4797-8352-ff91a2d585ce")
 		)
 		(pin "21"
-			(uuid "ef9d86b0-4656-4de5-9052-4b1d4a62b439")
+			(uuid "8abcd20c-b06b-44ed-a7a7-1b307169e951")
 		)
 		(pin "22"
-			(uuid "3bf7df62-2d41-474c-a6b1-06811f10f7b9")
+			(uuid "9b80f4e0-79b9-4a97-b8fb-24b68e903a30")
 		)
 		(pin "23"
-			(uuid "1b43e0e2-889f-4f40-b146-edf21c2fcae3")
+			(uuid "0c2fb0bd-4e82-40c7-9080-b82cd6dbd48f")
 		)
 		(pin "24"
-			(uuid "b09e04c8-4a9b-4a27-9e83-d3645425be82")
+			(uuid "2cdd285a-e190-45db-8f86-156c290ab317")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "U_IMU")
 					(unit 1)
 				)
@@ -15551,59 +15551,59 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "ca9b4d2c-cb93-42b1-a476-2aff732f0aba")
+		(uuid "65a7ea08-8049-49d3-86cf-a93c91d24d6e")
 	)
 	(no_connect
 		(at 665.48 327.66)
-		(uuid "0c51ab51-bf16-451c-8c02-375f32a054ab")
+		(uuid "6c37c060-56a5-4817-a81a-32c758aeb81e")
 	)
 	(no_connect
 		(at 665.48 330.20)
-		(uuid "8f683baf-1b12-40b4-9960-85ff2fcb45e0")
+		(uuid "b62c8668-57ae-4574-84ba-4e49a546bf16")
 	)
 	(no_connect
 		(at 665.48 340.36)
-		(uuid "884e5c23-0b86-4624-90fe-a9079e853291")
+		(uuid "eeb1a3f3-7cde-40d4-a5a3-50254dedfe03")
 	)
 	(no_connect
 		(at 665.48 342.90)
-		(uuid "229defb0-3a95-47a6-a3cc-51ccf368c9c2")
+		(uuid "e4f051b4-31c4-4c5e-977f-447087ebd0dd")
 	)
 	(no_connect
 		(at 665.48 350.52)
-		(uuid "7d30a98c-d330-430d-8a2f-8547edb22082")
+		(uuid "df1af1a3-000d-4205-9b6c-52fb940818df")
 	)
 	(no_connect
 		(at 690.88 327.66)
-		(uuid "0e5221e5-150e-4193-ad04-9dbdf16b61d9")
+		(uuid "e805af8c-ffb7-4e30-8a19-7c182f2f854b")
 	)
 	(no_connect
 		(at 690.88 330.20)
-		(uuid "62a32fef-1557-440f-854d-69a9979a3f28")
+		(uuid "c6772513-3e9c-4b85-a12a-593523c2e5ed")
 	)
 	(no_connect
 		(at 690.88 335.28)
-		(uuid "26f1fb64-daf1-46e0-8c7d-804b31d5173c")
+		(uuid "17e48ec6-035f-41d8-8934-c1ed80fb2ad8")
 	)
 	(no_connect
 		(at 690.88 350.52)
-		(uuid "24427401-ff86-4454-8917-5c6bd7d57094")
+		(uuid "6433eb23-6177-45a1-9bd3-6a3479b73ccb")
 	)
 	(no_connect
 		(at 690.88 342.90)
-		(uuid "3b661c00-2a78-4677-9871-53e0e903d906")
+		(uuid "71c14970-8cd5-46b1-94f2-cfcc2d2074c1")
 	)
 	(no_connect
 		(at 690.88 353.06)
-		(uuid "1c1bb52b-2964-4abb-bd40-1b381f3f64c4")
+		(uuid "b6d9095c-fc7b-43aa-82cb-71f0e9e00a9d")
 	)
 	(no_connect
 		(at 695.96 337.82)
-		(uuid "bd17e155-452c-46fc-8afd-2a6c26f52948")
+		(uuid "91a40524-98ea-4e73-b553-b1f8b7d3a845")
 	)
 	(no_connect
 		(at 695.96 340.36)
-		(uuid "2a2d41f2-5900-46a8-abc4-334e1dea3adb")
+		(uuid "f41d6d63-db08-49a0-b39b-d7c9720f1e0e")
 	)
 	(label "+3V3"
 		(at 675.64 322.58 90)
@@ -15613,7 +15613,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "8af15f87-fa6d-4bfc-8ed6-6282e8133024")
+		(uuid "fef4d07b-bbf9-408b-bfc1-05f49b3c4476")
 	)
 	(label "GND"
 		(at 660.40 337.82 0)
@@ -15623,7 +15623,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "336d9596-3369-48b0-963a-2441ab0de2c9")
+		(uuid "bfd635ff-9b9f-4184-88d0-9904d14e236b")
 	)
 	(label "IMU_REGOUT"
 		(at 695.96 347.98 0)
@@ -15633,7 +15633,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "3dc87d4f-6866-4d14-8f72-76c1c36a83a3")
+		(uuid "dc8ff80e-520f-4f5a-b918-0ffa76c5417c")
 	)
 	(label "GND"
 		(at 660.40 345.44 0)
@@ -15643,11 +15643,11 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "7fca5a8b-8ed4-4ba3-9839-88a99ce3afec")
+		(uuid "57b42b6e-91fe-467a-88f8-ed5cbec85803")
 	)
 	(no_connect
 		(at 695.96 332.74)
-		(uuid "246fdbbb-aacf-40d3-84cc-521dc5ee70dc")
+		(uuid "e63a31e3-6aef-45a4-a0b4-b32d75cd8964")
 	)
 	(label "+3V3"
 		(at 680.72 322.58 90)
@@ -15657,7 +15657,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "4da0b1e1-abfe-4e30-814b-23ba7758e4e3")
+		(uuid "ead23b35-d008-44f6-9cf9-46a0a6f28e3e")
 	)
 	(label "GND"
 		(at 678.18 358.14 90)
@@ -15667,7 +15667,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "9f67bef4-1979-4256-a5c6-af6b5f11972e")
+		(uuid "18083dd4-20ec-4ed1-853f-1e8341a965c6")
 	)
 	(label "IMU_CPOUT"
 		(at 695.96 345.44 0)
@@ -15677,7 +15677,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "a7ae7952-ef2d-47bd-b4ab-0cae8c96af07")
+		(uuid "61b91f2b-67c9-4e2a-b284-4a88cb991d8b")
 	)
 	(label "I2C_SCL"
 		(at 660.40 335.28 0)
@@ -15687,7 +15687,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "b477b4d4-76b8-45f4-bdc0-243487aabb4f")
+		(uuid "89ee541f-9d1a-4d42-9d84-34c1f199b74d")
 	)
 	(label "I2C_SDA"
 		(at 660.40 332.74 0)
@@ -15697,7 +15697,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "9ab4325f-34c6-48d8-b1e4-c8736251804e")
+		(uuid "5e69f54d-795f-4304-b645-71e1575ce655")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -15707,7 +15707,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "72092ec4-d3b2-443a-a424-5bef7a6fb050")
+		(uuid "3d5d1811-26ce-47c0-a102-5fa189acec5e")
 		(property "Reference" "C_IMU"
 			(at 749.30 323.85 0)
 			(effects
@@ -15754,14 +15754,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "ec627589-1b0f-4d6a-b952-0ab808362c29")
+			(uuid "e3a6da10-f138-4e03-95f3-c9a59aee1f86")
 		)
 		(pin "2"
-			(uuid "5c47f50e-f0c8-40b3-8556-c0f33242b8b4")
+			(uuid "1e53b55a-36e8-48b9-8bb0-ac958a5dcd70")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_IMU")
 					(unit 1)
 				)
@@ -15776,7 +15776,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "899f8971-de51-4f6f-9fa9-06e9fefb06a6")
+		(uuid "32666b91-b05a-46c9-aaa6-98bd87eaadfc")
 	)
 	(label "GND"
 		(at 746.76 328.93 90)
@@ -15786,7 +15786,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "b0d4ad9e-9e43-414b-99d6-46861edc13dd")
+		(uuid "a8905fb5-91fc-4050-baf4-bb5960fe93a6")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -15796,7 +15796,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "68e9e7da-d710-4106-8f31-a219114af494")
+		(uuid "fffa3316-3a14-49dd-a886-3867c858fa7a")
 		(property "Reference" "C_IMU_VLOGIC"
 			(at 800.10 323.85 0)
 			(effects
@@ -15843,14 +15843,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "488a3914-5767-4b7a-9f45-1cc827d52d35")
+			(uuid "0a245e42-9e67-4102-8f4d-e6ee6bb694f5")
 		)
 		(pin "2"
-			(uuid "bf09bb5a-0ec2-44a7-99fa-cd40eaf2aa0b")
+			(uuid "6eead718-ae87-487b-8dfc-0179a588e296")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_IMU_VLOGIC")
 					(unit 1)
 				)
@@ -15865,7 +15865,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "b7f077ba-bb1d-4559-b336-d81be470f72d")
+		(uuid "4f47672a-d717-4734-984c-652de3a8c26e")
 	)
 	(label "GND"
 		(at 797.56 328.93 90)
@@ -15875,7 +15875,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "ee8beacf-cdca-4c25-9c3f-8e50fdb0e40c")
+		(uuid "00b56ea2-5c66-4670-85e1-602c7a476005")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -15885,7 +15885,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "1c1f9f34-2e1c-4ec4-bfb1-915ebdf367fe")
+		(uuid "53aaed56-23c4-4ff3-91f9-a011661599ce")
 		(property "Reference" "C_IMU_REG"
 			(at 850.90 323.85 0)
 			(effects
@@ -15932,14 +15932,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "5b8cd6bf-5cc8-43b5-b2aa-983b16984a43")
+			(uuid "a0b79a5e-e508-4533-ac51-ba41db041038")
 		)
 		(pin "2"
-			(uuid "1489816e-e2d2-4390-a8e0-fe04dabdcd57")
+			(uuid "a453893c-9aab-4509-80ea-ce780b9575df")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_IMU_REG")
 					(unit 1)
 				)
@@ -15954,7 +15954,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "00c5ebab-caef-4060-b17b-389753af1cbc")
+		(uuid "c058b342-3f48-44b1-9adc-708ea573e6b8")
 	)
 	(label "GND"
 		(at 848.36 328.93 90)
@@ -15964,7 +15964,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "1965b65b-e801-4904-9085-e33a1a7f5e5e")
+		(uuid "c5c3b1aa-38b0-4306-8e99-a965d7c2a96c")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -15974,7 +15974,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "b3064412-c7d2-41ce-81c5-3453a64f4b2f")
+		(uuid "5362fd8d-01ce-4f1f-a462-bbadc1c02ff7")
 		(property "Reference" "C_IMU_CP"
 			(at 901.70 323.85 0)
 			(effects
@@ -16021,14 +16021,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "e148d60b-b5c5-4827-9524-e87f7cac9eb1")
+			(uuid "300e44d9-22a6-43a2-b71e-82f875532756")
 		)
 		(pin "2"
-			(uuid "6218a7d4-c0d8-4123-8ce0-7734e05afde5")
+			(uuid "ab7ea383-e2e8-41e2-adbb-25de9e393873")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_IMU_CP")
 					(unit 1)
 				)
@@ -16043,7 +16043,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "cd166d1f-ca91-4633-b8eb-8433f302eeee")
+		(uuid "dba4303d-a1a2-4217-bdc2-3a3c785f1fc0")
 	)
 	(label "GND"
 		(at 899.16 328.93 90)
@@ -16053,7 +16053,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "c4792758-c604-4f82-8bea-292b59428929")
+		(uuid "13d98a31-6800-4ed9-ae51-146f8c6639d9")
 	)
 	(symbol
 		(lib_id "lcsc:AFC01-S24FCA-00")
@@ -16063,7 +16063,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "2d8a23b4-a131-4fca-9f73-affc831c0fb1")
+		(uuid "70ccf02f-5080-44b1-834b-155bf03fceb5")
 		(property "Reference" "J_CAM"
 			(at 948.69 412.75 0)
 			(effects
@@ -16110,86 +16110,86 @@
 			)
 		)
 		(pin "1"
-			(uuid "1e79d509-3471-41a6-929c-3ceec61659a9")
+			(uuid "8b1f6090-ff38-46ac-b0bd-b98627129299")
 		)
 		(pin "2"
-			(uuid "d874b28f-9d7b-4435-bc0b-61c7f67945a8")
+			(uuid "c642bd1a-81bf-4714-973b-29dea15c3719")
 		)
 		(pin "3"
-			(uuid "99642ff8-ae54-482c-a393-dd7c551409ee")
+			(uuid "c6272bb2-718c-41f3-966d-9c6dac880434")
 		)
 		(pin "4"
-			(uuid "98a1987a-dfe8-478e-bfbc-2440533731fe")
+			(uuid "d6bc38f0-8528-41dc-a59a-72d284e6929b")
 		)
 		(pin "5"
-			(uuid "2ffece9c-7204-42ab-92e5-c07375a233ad")
+			(uuid "cb53b879-a91b-465a-8a23-0b27a1781d1b")
 		)
 		(pin "6"
-			(uuid "5cf93bf0-0bb5-4b94-811a-3de50f370192")
+			(uuid "e39b9168-9f27-44a2-932e-2a8d7376eb0f")
 		)
 		(pin "7"
-			(uuid "93a706ad-48f1-4648-89fa-8ca6db35f303")
+			(uuid "2e0cf1f6-5543-4696-800b-2e01f0e22398")
 		)
 		(pin "8"
-			(uuid "49e8bae3-f2f7-42cd-bb34-23d036e65d30")
+			(uuid "2bf16e4c-4e1e-4607-97da-932336e5cd85")
 		)
 		(pin "9"
-			(uuid "75c4dae6-4bda-4d94-bf65-8705d8f918a8")
+			(uuid "f1c906d6-00e7-4646-9c2e-abf232ffd5bf")
 		)
 		(pin "10"
-			(uuid "5b7a093e-e219-4d1c-b86d-15c7c7de3fdc")
+			(uuid "6f444936-b6f3-4992-a480-85e17533c334")
 		)
 		(pin "11"
-			(uuid "d5a91531-6f97-40b7-a111-d606614e5205")
+			(uuid "3ee622ea-31b1-4a22-b2ed-32056adaccc2")
 		)
 		(pin "12"
-			(uuid "2ffcb38a-ce3b-4ec5-8cd0-7d1ffad6dc5e")
+			(uuid "ae930b2b-3c22-42ad-a8dd-071e0eaca07f")
 		)
 		(pin "13"
-			(uuid "3c50b837-ce8d-4296-9ea9-1567ecbf22e3")
+			(uuid "d81fc6d2-40dc-4cae-9bca-d08bbca322b9")
 		)
 		(pin "14"
-			(uuid "19f66b9f-3cce-44bc-8785-b1826dea336a")
+			(uuid "af8c35ce-7f0f-4cd6-bc9e-7ac360ebeeab")
 		)
 		(pin "15"
-			(uuid "0199fa46-d517-4f91-836f-9421f62ae64d")
+			(uuid "223f56ab-cce7-4476-9abe-ce70bf059f0d")
 		)
 		(pin "16"
-			(uuid "cbb498cd-00e3-4986-8477-036ce94d69fe")
+			(uuid "d910a198-929b-4653-ba51-493d79f2cf2f")
 		)
 		(pin "17"
-			(uuid "8d8f247c-0edc-45f9-94ee-33632001a503")
+			(uuid "7e215703-6c2c-4b6c-bf38-e21a0ea6961e")
 		)
 		(pin "18"
-			(uuid "58e0f4e0-6957-4897-94e8-a5bb4d623d1d")
+			(uuid "53a092ad-556a-4a22-95a4-02e4d8297037")
 		)
 		(pin "19"
-			(uuid "0be67d46-c670-4ac3-8020-7303d31d2e55")
+			(uuid "86751951-3bac-43b6-a071-928c22d22d8d")
 		)
 		(pin "20"
-			(uuid "43e20ef5-6bd9-4bb6-98d7-057d09b215cd")
+			(uuid "db359859-5f0f-4168-abc4-a425ab45dcc9")
 		)
 		(pin "21"
-			(uuid "3ed739df-aaf0-4a6d-8a9a-8c619873affd")
+			(uuid "31f440c5-7a6b-4e18-a6ba-7820b61dda24")
 		)
 		(pin "22"
-			(uuid "a14bc472-5e37-4e24-8f50-05dc5cb108bb")
+			(uuid "fb0df11c-e63f-44d8-892f-21e49db53102")
 		)
 		(pin "23"
-			(uuid "7dfe32bc-071f-412f-b971-ef1f7e6edb3d")
+			(uuid "24175c01-26c4-4d78-bbd2-beec3b59e8c4")
 		)
 		(pin "24"
-			(uuid "551bcf9f-407e-4ef0-b31a-30bb3e85c5e6")
+			(uuid "81c9597b-a482-44fc-b4ac-b7198ae3062c")
 		)
 		(pin "25"
-			(uuid "1bacfb61-e3ca-4cda-8e3c-f14c1a3b6101")
+			(uuid "2a22269a-f16c-423b-b29d-5ecc663dfdbc")
 		)
 		(pin "26"
-			(uuid "c1bb12d7-308d-4de4-b21a-4a5a6fbc529f")
+			(uuid "83eb4eb5-6e47-44bc-b599-b21573168f54")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "J_CAM")
 					(unit 1)
 				)
@@ -16198,7 +16198,7 @@
 	)
 	(no_connect
 		(at 948.69 328.93)
-		(uuid "8b778f00-f98a-41a4-9cda-60b34b56609f")
+		(uuid "087a1dc0-e0e9-452f-bb3d-4fc125182dc0")
 	)
 	(label "GND"
 		(at 948.69 331.47 0)
@@ -16208,7 +16208,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "b2d9d4a7-474c-4ea3-bbe7-f10cc8d73196")
+		(uuid "f62933d1-5cc5-4e6f-8dc0-c5be0f3f4f03")
 	)
 	(label "CAM_SIOD"
 		(at 948.69 334.01 0)
@@ -16218,7 +16218,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "aa2ee21e-18b5-4ff9-aa5e-9c31d0220767")
+		(uuid "db8acafe-a0ce-4c2d-8b5b-ce09c3584cd8")
 	)
 	(label "+2V8"
 		(at 948.69 336.55 0)
@@ -16228,7 +16228,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "570262b5-6a27-453e-8fcd-d06123540dc7")
+		(uuid "46a4de07-6674-4303-96c5-0b56b70ff3a9")
 	)
 	(label "CAM_SIOC"
 		(at 948.69 339.09 0)
@@ -16238,7 +16238,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "850a0823-7876-4717-9091-01519eb524db")
+		(uuid "802f8226-96e5-431b-bc29-c9ffe75e68a9")
 	)
 	(label "CAM_RESET"
 		(at 948.69 341.63 0)
@@ -16248,7 +16248,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "a0a03d74-3fa4-4549-90fe-ea6e88aec32f")
+		(uuid "30dcef12-6408-4043-a940-5faf865a7101")
 	)
 	(label "CAM_VSYNC"
 		(at 948.69 344.17 0)
@@ -16258,7 +16258,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "0805e375-0690-4fb2-8aae-f4ef268c9bb2")
+		(uuid "c9609b12-d6a2-40f4-ad00-c8bef320ca56")
 	)
 	(label "CAM_PWDN"
 		(at 948.69 346.71 0)
@@ -16268,7 +16268,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "7b62bac9-907c-41bd-8221-6cb03e056291")
+		(uuid "e4a34c17-e3a0-435d-b1b0-52174bbb397b")
 	)
 	(label "CAM_HREF"
 		(at 948.69 349.25 0)
@@ -16278,7 +16278,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "e8ba5ab6-cbbc-4cc2-abec-1d5aee197193")
+		(uuid "c8bd527e-0910-44f7-9c51-1eacb5933d9f")
 	)
 	(label "+1V5"
 		(at 948.69 351.79 0)
@@ -16288,7 +16288,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "761ed376-eea0-4339-8b56-d9d3e3b9c95f")
+		(uuid "523dcc1c-5de8-4f3d-aff5-f4d0af459260")
 	)
 	(label "+2V8"
 		(at 948.69 354.33 0)
@@ -16298,7 +16298,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "82105a62-1de5-446f-8a49-c7828345f278")
+		(uuid "3b9ae09b-a2e9-4fc2-ae9f-2f61edd5326a")
 	)
 	(label "CAM_Y9"
 		(at 948.69 356.87 0)
@@ -16308,7 +16308,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "4fd9e1a4-4c82-4b43-9165-8a5caba3212e")
+		(uuid "3eff67ea-02b9-4059-8d7c-e43312966632")
 	)
 	(label "CAM_XCLK"
 		(at 948.69 359.41 0)
@@ -16318,7 +16318,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "a2a280da-430a-4b03-af93-71d2e5709237")
+		(uuid "be82a0f7-39a4-486c-b2dd-097f9d2ca056")
 	)
 	(label "CAM_Y8"
 		(at 948.69 361.95 0)
@@ -16328,7 +16328,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "c526db1e-7aa1-4c8b-9752-9d99ee507e3c")
+		(uuid "8db9d2f0-b12a-4840-9ee1-c05b4c958911")
 	)
 	(label "GND"
 		(at 948.69 364.49 0)
@@ -16338,7 +16338,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "ba983d24-a732-47dd-b911-1fb7e2993878")
+		(uuid "49d3b75a-f0ef-4c0b-a100-b29faf609853")
 	)
 	(label "CAM_Y7"
 		(at 948.69 367.03 0)
@@ -16348,7 +16348,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "922ca933-1178-4288-95bf-e19cc22c9066")
+		(uuid "c4db6d68-34c5-43a3-b7eb-419bf0105723")
 	)
 	(label "CAM_PCLK"
 		(at 948.69 369.57 0)
@@ -16358,7 +16358,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "a7e5c96c-6b54-4c4d-a686-bf238ac32ff6")
+		(uuid "a25ce1e3-aca8-43a6-a8dd-95eb6c77c280")
 	)
 	(label "CAM_Y6"
 		(at 948.69 372.11 0)
@@ -16368,7 +16368,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "31390c99-854b-42f2-97f7-3bf7fc5dff69")
+		(uuid "c7a216d2-fb81-4d37-ae85-3e97740af76e")
 	)
 	(label "CAM_Y2"
 		(at 948.69 374.65 0)
@@ -16378,7 +16378,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "c75722f7-f91d-40f0-a264-b6ed515204cf")
+		(uuid "f2d32108-02af-44a9-a466-d2c7b2c8cc24")
 	)
 	(label "CAM_Y5"
 		(at 948.69 377.19 0)
@@ -16388,7 +16388,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "d16db954-e51b-4649-b67d-f553d9e1fe67")
+		(uuid "ce424dd0-62ff-4a53-bd2d-86855c8095da")
 	)
 	(label "CAM_Y3"
 		(at 948.69 379.73 0)
@@ -16398,7 +16398,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "ab3ce91b-c713-4939-8024-667437a1c96e")
+		(uuid "b9a066dd-982e-46cb-b8f5-ab8751816049")
 	)
 	(label "CAM_Y4"
 		(at 948.69 382.27 0)
@@ -16408,15 +16408,15 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "abeef684-eaf4-4682-8daf-06fcdde46011")
+		(uuid "a8ea3b69-0ff1-4473-8024-29acfb1aaf2a")
 	)
 	(no_connect
 		(at 948.69 384.81)
-		(uuid "b8461f61-8710-4645-8f79-08c518cb1579")
+		(uuid "b14b67c5-1d98-4682-8912-daf5b928301f")
 	)
 	(no_connect
 		(at 948.69 387.35)
-		(uuid "1a97fc8c-be9b-41e1-8d63-2851cc082bee")
+		(uuid "19a6adf5-0f16-4341-b68a-629ee48e5f0f")
 	)
 	(label "GND"
 		(at 961.39 394.97 90)
@@ -16426,7 +16426,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "189dec74-0d1b-43fb-8129-b2ecbf7a6aa4")
+		(uuid "49ef66bf-b0e7-4c2b-b407-f9bc341fbb2d")
 	)
 	(label "GND"
 		(at 961.39 321.31 90)
@@ -16436,7 +16436,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "628f4e8c-cc0d-4a38-89d5-b1cde4b8e4ed")
+		(uuid "ab641aa4-9e0f-4317-85e4-88e909f58bea")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -16446,7 +16446,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "1f015b72-265d-4ba0-b835-067dbc3fb21a")
+		(uuid "b81128fb-9275-427c-9fca-f0197da29839")
 		(property "Reference" "R_CAM_PWDN"
 			(at 1016.00 323.85 0)
 			(effects
@@ -16493,14 +16493,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "1f468a37-729f-4d95-a27b-e7b791250a89")
+			(uuid "6c2c6af1-aa78-4767-a693-c80483cffd33")
 		)
 		(pin "2"
-			(uuid "cccb5037-fadc-42a2-a29d-ad64e85f6e40")
+			(uuid "be1a16b1-2d84-48c6-ad1a-6d38a04e94cb")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_CAM_PWDN")
 					(unit 1)
 				)
@@ -16515,7 +16515,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "b5d70307-b5ed-48e2-a0d2-4af9dd4d6c91")
+		(uuid "1f0c1c9d-d92d-430b-9691-d0850d1866bf")
 	)
 	(label "GND"
 		(at 1013.46 328.93 90)
@@ -16525,7 +16525,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "1891036e-bf70-409b-83e3-aa9f758fe8ab")
+		(uuid "971cdda9-62f9-49cc-bdd0-b8707fb28776")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -16535,7 +16535,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "48a7082d-ec67-4a67-8482-ff6094da2444")
+		(uuid "905afe7c-16c9-4d84-96ba-ed854072bd1e")
 		(property "Reference" "R_CAM_RST"
 			(at 1066.80 323.85 0)
 			(effects
@@ -16582,14 +16582,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "0b15f687-a491-4a18-8902-9c21de9953f4")
+			(uuid "16b75b61-a3bb-42cc-9ecf-756c1179f606")
 		)
 		(pin "2"
-			(uuid "944f3452-3327-44bb-8a87-08f135af6f2c")
+			(uuid "4898cc4b-edde-49ab-a5c1-39d832fc3ef1")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_CAM_RST")
 					(unit 1)
 				)
@@ -16604,7 +16604,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "3bad5082-df43-4533-9b88-aa01dc65b78c")
+		(uuid "391c4c77-49a2-403f-bb35-1a1c519f2d86")
 	)
 	(label "CAM_RESET"
 		(at 1064.26 328.93 90)
@@ -16614,7 +16614,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "a6acf7ff-5933-4ca2-9603-0c9d038a6cf4")
+		(uuid "67dfbaff-27c2-44c8-b77a-cc67e0f15a60")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -16624,7 +16624,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8969eb8c-1365-4b6b-8fb5-ba914c1f43f3")
+		(uuid "f231bc49-4666-41c7-be2d-4d5d5ece32b3")
 		(property "Reference" "C_CAM_RST"
 			(at 1117.60 323.85 0)
 			(effects
@@ -16671,14 +16671,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "7accf3bd-84cb-4dcc-81c9-314e64dfd85a")
+			(uuid "0dbcfa61-aed8-48df-af24-84f549f8dd8f")
 		)
 		(pin "2"
-			(uuid "421f37d9-20d2-41b1-8daa-6e178073608c")
+			(uuid "6d5ad2a3-931b-4e9b-99e7-23ad6177ff54")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_CAM_RST")
 					(unit 1)
 				)
@@ -16693,7 +16693,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "feb120ef-ebb3-4a6e-b4f0-fc7de9bc5cee")
+		(uuid "0c843e16-fd4c-48ce-ad38-64b2a851426b")
 	)
 	(label "GND"
 		(at 1115.06 328.93 90)
@@ -16703,7 +16703,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "e97cde80-73f2-42a2-a358-080299ec0735")
+		(uuid "8c05b3e7-4c6f-4a07-94c5-46013f57c5b7")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -16713,7 +16713,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "32bb12f7-3182-49e5-8019-6142736335a0")
+		(uuid "be0fcf46-e80f-4d1e-ac49-e5aef59b818d")
 		(property "Reference" "C_CAM_AVDD"
 			(at 53.34 450.85 0)
 			(effects
@@ -16760,14 +16760,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "c2dd4e1a-ba50-4208-b150-29f89311c432")
+			(uuid "7e30471c-3219-4d18-a42c-b4403e51378e")
 		)
 		(pin "2"
-			(uuid "3693aa94-43aa-4434-8e99-624d4a567a30")
+			(uuid "0e1a3c4e-7207-48ea-ad16-46c8d7358a39")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_CAM_AVDD")
 					(unit 1)
 				)
@@ -16782,7 +16782,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "3662d437-0511-4f45-a931-34c78fb2ef92")
+		(uuid "24690f24-8be2-4670-b41e-ed3b9543c305")
 	)
 	(label "GND"
 		(at 50.80 455.93 90)
@@ -16792,7 +16792,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "aa69e5ac-5896-4491-b8e0-be1c5fe1322e")
+		(uuid "26afbaf8-105d-4d44-862e-64066dae0ec7")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -16802,7 +16802,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8c4cf649-d145-4852-ac43-8ca07d4c4381")
+		(uuid "7fa11631-a307-48b1-80ff-4dd2b5f0c5d2")
 		(property "Reference" "C_CAM_DVDD"
 			(at 104.14 450.85 0)
 			(effects
@@ -16849,14 +16849,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "ebd52d4b-05db-4e02-8d2c-67c3d8a81406")
+			(uuid "36616b2c-758c-4b76-99bf-6526901af583")
 		)
 		(pin "2"
-			(uuid "7a5ba91e-7ab6-4f19-9b1a-78894f81b2e0")
+			(uuid "a4fc9243-019a-4463-a8ef-e44bd875cfdd")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_CAM_DVDD")
 					(unit 1)
 				)
@@ -16871,7 +16871,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "673de48b-e77d-40e1-9b6f-d3f7cdee0a9a")
+		(uuid "44f96b63-76fa-4ac2-8289-5a16cfd3e6f2")
 	)
 	(label "GND"
 		(at 101.60 455.93 90)
@@ -16881,7 +16881,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "c86ff0c2-eae8-428e-b208-f894a2653919")
+		(uuid "b1c85928-e978-4fdc-a0b1-1a6bad499fd8")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -16891,7 +16891,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp yes)
-		(uuid "e7170db3-94e5-4467-b0fb-b44658465c51")
+		(uuid "85e90347-ee87-4f2f-9aae-a92ffacea571")
 		(property "Reference" "R_SIOC"
 			(at 154.94 450.85 0)
 			(effects
@@ -16938,14 +16938,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "4543b709-136d-49c5-812d-81ae52a60be3")
+			(uuid "4332ab97-f357-4515-a7ca-99dca78ba9dd")
 		)
 		(pin "2"
-			(uuid "1934513e-f9b5-43e4-a49c-0791c42efff8")
+			(uuid "d41f52fb-4974-4de4-be96-ccc17bb58bea")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_SIOC")
 					(unit 1)
 				)
@@ -16960,7 +16960,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "3dcfe3d5-0caa-4ac9-a98a-89c5966e45df")
+		(uuid "a60c440e-a5b5-42f7-9532-67692c0e5b5c")
 	)
 	(label "+2V8"
 		(at 152.40 455.93 90)
@@ -16970,7 +16970,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "535271b5-3b5e-41b8-ad3d-f7070dd18b5c")
+		(uuid "dee0e58e-0baa-48f6-b797-ca809385b4eb")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -16980,7 +16980,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp yes)
-		(uuid "29c98eb3-0149-4253-9623-6f13fe8c4a1f")
+		(uuid "df787ad2-9129-4c7c-9bb8-56a6b137b1c6")
 		(property "Reference" "R_SIOD"
 			(at 205.74 450.85 0)
 			(effects
@@ -17027,14 +17027,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "00051dac-1b9d-4954-864c-18fc5f069faa")
+			(uuid "e04e612d-c078-42aa-801a-bb6d200058a8")
 		)
 		(pin "2"
-			(uuid "052f22dc-31ef-48e2-86af-934a173d560d")
+			(uuid "708597fc-5997-4e79-a717-2c53e7745dce")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_SIOD")
 					(unit 1)
 				)
@@ -17049,7 +17049,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "2bfa5ae9-c9d2-4941-8f60-e7e1190fbc8a")
+		(uuid "5194e9fe-5891-437b-b2b8-b69720c34766")
 	)
 	(label "+2V8"
 		(at 203.20 455.93 90)
@@ -17059,7 +17059,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "0981bcfc-36e7-4732-95f9-2888a4c06e70")
+		(uuid "d476c5e6-958b-4228-bece-b78321321db2")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -17069,7 +17069,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d882d1a6-55d5-44f1-a3ba-f927cbeb0022")
+		(uuid "e5f4b2b8-82c1-4388-b60c-68bcb00aba80")
 		(property "Reference" "R_LCD_CLK"
 			(at 256.54 450.85 0)
 			(effects
@@ -17116,14 +17116,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "1e9c6dce-a603-4058-a530-53a0131b9643")
+			(uuid "f5389a58-4f2e-41cf-b46f-2ea4734de6c6")
 		)
 		(pin "2"
-			(uuid "9f31c335-61c4-47e4-a3b3-7bd47240af34")
+			(uuid "dc233cb2-4ea1-45ee-8813-10d4cef1dc79")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_LCD_CLK")
 					(unit 1)
 				)
@@ -17138,7 +17138,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "d5b1f559-a8bf-47e5-be62-32940c12599f")
+		(uuid "100e255a-5a44-4022-a46d-9483362586aa")
 	)
 	(label "LCD_CLK_S"
 		(at 254.00 455.93 90)
@@ -17148,7 +17148,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "950b4753-f842-4542-a8c1-3e8ee16a735e")
+		(uuid "ee7fa80a-f59d-473d-bda7-e97388befcb6")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -17158,7 +17158,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "53f7ab8e-0072-4535-9ca3-d3fb61fad6c7")
+		(uuid "89eaa801-5b08-4486-a111-7a85fadd5d03")
 		(property "Reference" "R_LCD_MOSI"
 			(at 307.34 450.85 0)
 			(effects
@@ -17205,14 +17205,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "3870d123-9f80-423b-8880-1d43426f5a72")
+			(uuid "b46f0284-51fb-412f-9121-0763ed680090")
 		)
 		(pin "2"
-			(uuid "1e372968-c7ac-4079-b3cc-76748e4dadf4")
+			(uuid "79fabf31-4936-4f12-82ba-df1cc0cd203b")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_LCD_MOSI")
 					(unit 1)
 				)
@@ -17227,7 +17227,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "10754d11-7053-41ce-a23a-624dca2a0987")
+		(uuid "a7069c70-0c60-4f5f-aabe-4e26d6e878ea")
 	)
 	(label "LCD_MOSI_S"
 		(at 304.80 455.93 90)
@@ -17237,7 +17237,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "444479c9-d81f-4f58-93c0-4cdf402e1b09")
+		(uuid "070c1ed2-237e-4603-8d62-01dd8dac6bdf")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x07")
@@ -17247,7 +17247,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "de0f67c3-921d-4298-b624-09bfcf938179")
+		(uuid "a62d0d74-2702-44a6-bf2f-da99c11f1e75")
 		(property "Reference" "J_LCD_L"
 			(at 355.60 482.60 0)
 			(effects
@@ -17285,29 +17285,29 @@
 			)
 		)
 		(pin "1"
-			(uuid "e666489c-383b-4837-bd6e-0c627c1405cf")
+			(uuid "de3d1da8-c5c4-4516-b8cc-978181bab618")
 		)
 		(pin "2"
-			(uuid "68d44963-5aa7-470d-931d-1438db25dc5e")
+			(uuid "63e5fe6d-ccd6-4d1b-a9f6-945a81ad0cbf")
 		)
 		(pin "3"
-			(uuid "e7f98ff2-42be-48b3-9145-f5a464963c8a")
+			(uuid "f8be8d9b-87a6-42e1-9375-476b70ca96ff")
 		)
 		(pin "4"
-			(uuid "a5bdc2b4-e15c-4376-84ed-389a2679f40e")
+			(uuid "8ef18dbb-cd48-4a33-a72a-67b79886be79")
 		)
 		(pin "5"
-			(uuid "2b4e1f55-1578-4e40-9367-692e9f470a72")
+			(uuid "1976deb5-01e8-478d-b51c-7d865193d8b4")
 		)
 		(pin "6"
-			(uuid "443acb31-a868-43b2-a0f7-a76a4eadaedd")
+			(uuid "60af929d-72f2-46cb-8a44-a5de0e212c41")
 		)
 		(pin "7"
-			(uuid "16cf2dca-4670-49e8-8b6f-f8ea8b073497")
+			(uuid "4353f5e4-4107-4746-9ddc-d3919d477858")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "J_LCD_L")
 					(unit 1)
 				)
@@ -17322,7 +17322,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "00dc65f5-3bcf-4b66-b64a-6f339396bd38")
+		(uuid "cd75ad26-779b-441d-a3ca-20f97d5d6d2d")
 	)
 	(label "LCD_CS_L"
 		(at 355.60 452.12 0)
@@ -17332,7 +17332,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "b3087544-f24b-4e43-8a93-e9d04f48a484")
+		(uuid "25824af7-b05a-4fc7-8784-a1d192fcc745")
 	)
 	(label "LCD_DC"
 		(at 355.60 454.66 0)
@@ -17342,7 +17342,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "6d037bb7-28d0-45d7-8868-644247bb2ba6")
+		(uuid "c2a99603-7275-4f44-8c37-9d6decfdeb0d")
 	)
 	(label "LCD_MOSI_S"
 		(at 355.60 457.20 0)
@@ -17352,7 +17352,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "eca8cbdb-987c-42c2-90e3-cb0b11d7e1c1")
+		(uuid "f924691b-36da-466b-9437-5c54642abf52")
 	)
 	(label "LCD_CLK_S"
 		(at 355.60 459.74 0)
@@ -17362,7 +17362,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "bce1b8fc-fdf0-420a-9dcf-be588d79cd4d")
+		(uuid "6900b69d-0388-4527-973c-cb8e8b1021a1")
 	)
 	(label "GND"
 		(at 355.60 462.28 0)
@@ -17372,7 +17372,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "acf42278-0a33-4fee-ba8b-b9b90cb07102")
+		(uuid "330605b5-d771-439f-abd4-5acfc0e3cbe6")
 	)
 	(label "+3V3"
 		(at 355.60 464.82 0)
@@ -17382,7 +17382,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "f0596262-0ebf-4e6e-9b94-b7212cb489b1")
+		(uuid "ebf79bb5-1b09-4510-8180-03265fd2601b")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x07")
@@ -17392,7 +17392,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "5ffa8a39-7603-4f6d-9cfe-a6320ab452c3")
+		(uuid "04d339fe-b12c-4090-b030-3f3a538e16e6")
 		(property "Reference" "J_LCD_R"
 			(at 406.40 482.60 0)
 			(effects
@@ -17430,29 +17430,29 @@
 			)
 		)
 		(pin "1"
-			(uuid "57666571-d957-4689-bad0-4c1bb6d20ef3")
+			(uuid "bf3c7352-11ae-4f6d-afa3-9243b57f9df5")
 		)
 		(pin "2"
-			(uuid "1fdb912a-b085-4fb4-a401-85a1495ea7eb")
+			(uuid "4048ee24-750a-46a4-a4cb-ae5e67b81e27")
 		)
 		(pin "3"
-			(uuid "6e2560e9-2929-4784-835e-22448b0cd1f7")
+			(uuid "32537496-97cf-4f2c-8f42-aef4aaaecaf5")
 		)
 		(pin "4"
-			(uuid "ce76eef5-c302-4908-9d9b-7d8529c15129")
+			(uuid "085cd4a2-e0c8-407c-baee-b6e7c944525f")
 		)
 		(pin "5"
-			(uuid "a25cbbfb-bf34-4cb4-a05c-5512800712c2")
+			(uuid "c2cdffd7-ef31-4521-9e01-546f1b36cb79")
 		)
 		(pin "6"
-			(uuid "f2f86ff1-3961-4765-8211-4005e1236aea")
+			(uuid "d1d914d3-c1ca-4d37-abb3-9241527cf37e")
 		)
 		(pin "7"
-			(uuid "f141c905-c11e-49eb-90c1-aac885b9b42c")
+			(uuid "649bb8c0-fd46-4b06-a4d8-8c3beca12e26")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "J_LCD_R")
 					(unit 1)
 				)
@@ -17467,7 +17467,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "33f31321-49ab-4e68-b33c-f4fa07dc5b23")
+		(uuid "8ec164a9-7126-4077-b722-e26ec44fafcb")
 	)
 	(label "LCD_CS_R"
 		(at 406.40 452.12 0)
@@ -17477,7 +17477,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "359c4fa9-4c36-458c-bd5b-d62a5e8afcc8")
+		(uuid "c90f6212-aaad-40a3-82e0-374777371f45")
 	)
 	(label "LCD_DC"
 		(at 406.40 454.66 0)
@@ -17487,7 +17487,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "f8ec2053-48dc-449b-882d-e39583ddb571")
+		(uuid "685a1aca-c5d2-49d0-815b-0244b5057af9")
 	)
 	(label "LCD_MOSI_S"
 		(at 406.40 457.20 0)
@@ -17497,7 +17497,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "99ac11c6-7473-41b9-9841-874c496d4d13")
+		(uuid "851ddc8f-7c4e-4b0c-b949-8f5995d0fc32")
 	)
 	(label "LCD_CLK_S"
 		(at 406.40 459.74 0)
@@ -17507,7 +17507,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "0f688e47-fedb-415a-8186-db1de002f51d")
+		(uuid "6fe302eb-92f8-45c8-8947-ab48fb49237c")
 	)
 	(label "GND"
 		(at 406.40 462.28 0)
@@ -17517,7 +17517,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "b41b31c3-0ad9-407d-a9c5-3cf6202b87a4")
+		(uuid "12f96ba9-6bc6-4fea-91f1-a7bbe1e7b4dc")
 	)
 	(label "+3V3"
 		(at 406.40 464.82 0)
@@ -17527,7 +17527,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "f27bf6eb-959d-4c6b-8395-a6cf98f8e174")
+		(uuid "c7d0c820-9278-45c4-8f12-d31c1811c0fd")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -17537,7 +17537,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "4dfdff2d-bd08-41ba-8b95-d71e3f54bfa5")
+		(uuid "6f7a4b8b-60fa-438b-8504-58bb953cb77d")
 		(property "Reference" "C_LCD"
 			(at 459.74 450.85 0)
 			(effects
@@ -17584,14 +17584,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "b1ec620f-2d27-4a73-af52-7f55b5144e0e")
+			(uuid "29dc3942-3c3b-4246-9bee-9aa99b87e0d8")
 		)
 		(pin "2"
-			(uuid "b8376879-c164-461e-8522-81ae6a60f776")
+			(uuid "07c5fa8b-211c-4c90-99f6-20402e2ee60f")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_LCD")
 					(unit 1)
 				)
@@ -17606,7 +17606,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "a7ac8eb7-9c26-4836-bcb9-456a77c138a4")
+		(uuid "5d0c0120-71b5-41f4-a12c-49d698b60d28")
 	)
 	(label "GND"
 		(at 457.20 455.93 90)
@@ -17616,7 +17616,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "5f740100-8b8e-4bf8-ba1a-1573405145f8")
+		(uuid "b73c7d39-b48d-40e0-9047-ad6b10241fab")
 	)
 	(symbol
 		(lib_id "plush:INMP441")
@@ -17626,7 +17626,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "7a03dc13-7050-48fa-909d-9a2f82d971a2")
+		(uuid "662fa060-27fc-4c22-b445-b87ba5093561")
 		(property "Reference" "U_MIC"
 			(at 508.00 487.68 0)
 			(effects
@@ -17673,35 +17673,35 @@
 			)
 		)
 		(pin "1"
-			(uuid "6474eca8-6c37-4186-8f29-1f6892d6ce1a")
+			(uuid "2e05b9ca-2af0-423e-84e0-25d5b366530d")
 		)
 		(pin "2"
-			(uuid "d1ed0963-e713-4c2f-975a-949667eb7d61")
+			(uuid "691c3434-05f7-4e7b-9310-54e96524076c")
 		)
 		(pin "3"
-			(uuid "74a27322-73b7-4052-a291-6b4be13c18df")
+			(uuid "fb3094c6-cdf5-4740-ac64-9b3a0d6f6169")
 		)
 		(pin "4"
-			(uuid "12ad8b03-4933-46f9-a1ef-3199b9c8a38f")
+			(uuid "ca7b1259-82ce-4ce2-beba-735cba7c1729")
 		)
 		(pin "5"
-			(uuid "1ba0d36a-f012-45e3-ab90-449e8252a3c2")
+			(uuid "c225f144-3c20-4e9b-9fb0-4234a930e007")
 		)
 		(pin "6"
-			(uuid "8752ee8e-df80-44a6-afe1-bf06d2f447c6")
+			(uuid "a445dd11-9f52-4e9f-8279-241ba65647c9")
 		)
 		(pin "7"
-			(uuid "4ce96cc9-9704-4940-9af2-f0d7af13841b")
+			(uuid "c46e1203-5eab-4a45-8403-8384d1d5544d")
 		)
 		(pin "8"
-			(uuid "7ee81520-3cd7-414a-a995-8a670a9ed327")
+			(uuid "7de77039-4df9-433c-88d4-e756b9c763ef")
 		)
 		(pin "9"
-			(uuid "3b72e447-c1f4-4213-b994-f7d9c6a05cca")
+			(uuid "7dccc762-3d04-4b0a-969c-ad4c73550f63")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "U_MIC")
 					(unit 1)
 				)
@@ -17716,7 +17716,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "a58d1c14-2bf5-4055-8528-e8d78fd45efe")
+		(uuid "933d1109-d496-4f8b-bd23-eee350ff5777")
 	)
 	(label "MIC_SD"
 		(at 528.32 462.28 0)
@@ -17726,7 +17726,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "744d5d12-c8ac-4ab0-b902-d443896a7c80")
+		(uuid "a0ff5474-b5cd-49d0-8d70-8f3ef3788cf5")
 	)
 	(label "MIC_WS"
 		(at 528.32 457.20 0)
@@ -17736,7 +17736,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "04ae499e-7382-43cd-b22e-02df26e73daf")
+		(uuid "7959d32a-c547-4ccd-8836-ad2dbbb90578")
 	)
 	(label "GND"
 		(at 508.00 457.20 0)
@@ -17746,7 +17746,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "8a9057fc-0022-41ed-841d-602a096056c2")
+		(uuid "b3207876-908a-47e5-9833-58636a444e6c")
 	)
 	(label "GND"
 		(at 515.62 469.90 90)
@@ -17756,7 +17756,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "478a15eb-1810-4206-9fb6-a0d41ec65755")
+		(uuid "90763baa-7d5f-422d-bec9-06ae32831974")
 	)
 	(label "GND"
 		(at 518.16 469.90 90)
@@ -17766,7 +17766,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "fa0dc518-55d1-45b1-9a70-9141faac6d01")
+		(uuid "33555012-e94b-46c9-a91a-cb6749de9ab7")
 	)
 	(label "+3V3"
 		(at 518.16 449.58 90)
@@ -17776,7 +17776,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "5c3522a0-ca1d-4935-bcc0-7b2cd4391842")
+		(uuid "d81defc6-cd51-4f58-8fa0-b07e9d2187e1")
 	)
 	(label "+3V3"
 		(at 508.00 462.28 0)
@@ -17786,7 +17786,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "4dbfa8f4-85c8-4426-95ec-379866ce3092")
+		(uuid "97c5fdaf-ab42-48c4-a6e3-99bc2c2770a0")
 	)
 	(label "GND"
 		(at 520.70 469.90 90)
@@ -17796,7 +17796,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "4b5c3aff-103f-45a9-ba83-b150c7a8e551")
+		(uuid "cc4a4ac0-4cf1-4ca5-902a-238326f77c9f")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -17806,7 +17806,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "52e6bc11-7eb5-461f-af63-4969283190ab")
+		(uuid "1efb8b2f-88ae-4ee7-8fd0-7cea1f69f9f5")
 		(property "Reference" "R_MIC_SD"
 			(at 581.66 450.85 0)
 			(effects
@@ -17853,14 +17853,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "0b64c2ac-7060-49e6-9305-9ac00d09e5d1")
+			(uuid "9ab53efe-5a07-4029-94ca-08bfa4785802")
 		)
 		(pin "2"
-			(uuid "bdf804aa-1b04-44b8-bc3a-abcb76a6116a")
+			(uuid "d392ce6a-1e10-4f39-98e5-940dfd6b5e7f")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_MIC_SD")
 					(unit 1)
 				)
@@ -17875,7 +17875,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "4888eef4-a284-421e-81bb-e04d3fff29b5")
+		(uuid "fba8361b-dd3c-4e98-9ad3-ceb333960178")
 	)
 	(label "GND"
 		(at 579.12 455.93 90)
@@ -17885,7 +17885,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "32af3aa0-3ad7-4d91-a3d5-20656dec7917")
+		(uuid "bc1a3aef-1ead-42bc-a171-44239ea514fb")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -17895,7 +17895,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "2c207eb3-430d-44fc-bf67-714b792536b6")
+		(uuid "339202fa-36d2-4046-854c-cd0df384720c")
 		(property "Reference" "C_MIC"
 			(at 632.46 450.85 0)
 			(effects
@@ -17942,14 +17942,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "8232a45d-35a2-4b36-9070-aafbeb47f5c9")
+			(uuid "71bd038b-837c-4271-ac25-bcff889a43ac")
 		)
 		(pin "2"
-			(uuid "40d609ae-287a-4c8f-bba6-96813bfe43dc")
+			(uuid "39a346bc-fa57-4185-b325-bc20c5907574")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_MIC")
 					(unit 1)
 				)
@@ -17964,7 +17964,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "6989b512-7c4b-41d0-aa44-61f88b088e0a")
+		(uuid "40bd5ea1-80ac-427e-951c-ece7f79c6260")
 	)
 	(label "GND"
 		(at 629.92 455.93 90)
@@ -17974,7 +17974,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "4784f271-1b72-439b-a391-419c50551f77")
+		(uuid "36090e2a-f41b-4886-9ac2-2ac77b775a66")
 	)
 	(symbol
 		(lib_id "Audio:MAX98357A")
@@ -17984,7 +17984,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "36e2240f-7890-4b00-843b-704cdcd78680")
+		(uuid "03d4ea67-362e-4079-a824-e965f6dac47f")
 		(property "Reference" "U_AMP"
 			(at 680.72 492.76 0)
 			(effects
@@ -18031,59 +18031,59 @@
 			)
 		)
 		(pin "1"
-			(uuid "a7fb4345-07f8-467a-9f35-2dac8fe9b782")
+			(uuid "fe621af4-41e4-4f48-acf4-82ad1bd0a412")
 		)
 		(pin "2"
-			(uuid "a62de004-538d-43dd-917d-2273d83572e4")
+			(uuid "ff61990e-661e-4a5f-a5bf-f409d907c5fe")
 		)
 		(pin "3"
-			(uuid "f2241683-15cb-4de6-888a-730b4e8397de")
+			(uuid "1e2fd189-4d3e-4ebb-864b-db8fa2c2aca3")
 		)
 		(pin "4"
-			(uuid "8b08a6c7-f028-4838-8b15-c18a95d1e95b")
+			(uuid "fee6804a-a90b-4092-b650-88f267c5b41f")
 		)
 		(pin "5"
-			(uuid "d9c1a7b4-00b4-4dc7-92ba-74782c7c0bc8")
+			(uuid "33fb7a81-f6a6-483c-a433-e78cbb9a89ad")
 		)
 		(pin "6"
-			(uuid "60ea340b-7ac2-4c3d-9fe8-d325366e431d")
+			(uuid "a784ca1a-58f0-41ea-a6da-fc7ef9511c40")
 		)
 		(pin "7"
-			(uuid "e7f0d879-b176-4260-ad2c-86c1e31a69f2")
+			(uuid "53f070f9-bd05-451a-bddd-512043117766")
 		)
 		(pin "8"
-			(uuid "197a2647-42a9-4ee5-b419-31997d7b8e57")
+			(uuid "ac490905-63ac-4871-9e85-4cf921dd4148")
 		)
 		(pin "9"
-			(uuid "fb335ad6-1a1a-4355-bd81-aa9535f2e995")
+			(uuid "947049df-110c-4800-98e4-f4257ddb3a04")
 		)
 		(pin "10"
-			(uuid "594586d7-d419-49e6-9a11-9d8701e5b57e")
+			(uuid "a7aa9940-e3a9-4e28-9273-36560978892a")
 		)
 		(pin "11"
-			(uuid "b65066fa-443e-41e7-9d2a-2fde22e1e01a")
+			(uuid "3b25588e-3f1e-4043-9f4f-7c3ad41d1f5e")
 		)
 		(pin "12"
-			(uuid "b42dd8cb-ee37-4e73-85cd-1892ae8cc828")
+			(uuid "6e9c1cbb-7619-438d-ae39-14a67fa229cb")
 		)
 		(pin "13"
-			(uuid "49bb0f9d-4c25-420f-a24b-22f446a7b480")
+			(uuid "67d5082f-ea2d-49f0-9293-4b827b418f7f")
 		)
 		(pin "14"
-			(uuid "bec1ce5e-5315-4f0f-8cc5-05e4da7e8cf6")
+			(uuid "0444d3d6-7537-429b-81d7-8e6134488f10")
 		)
 		(pin "15"
-			(uuid "b6fd9975-e46c-4972-b3d3-9142d3858c73")
+			(uuid "0450bea8-b4e3-4bae-87d3-a1697d6dddd3")
 		)
 		(pin "16"
-			(uuid "f49a2385-1f3e-4c1a-b8aa-d32e4d86357d")
+			(uuid "9eb9309b-d06b-44b6-a355-3957032d2ba4")
 		)
 		(pin "17"
-			(uuid "43677ea3-dbde-4c23-a909-1358e9c8288b")
+			(uuid "ad683c34-6654-4946-969c-665d4ee77540")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "U_AMP")
 					(unit 1)
 				)
@@ -18098,11 +18098,11 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "6b91add1-9ecb-4ec8-ae44-b79ecd629790")
+		(uuid "68d1bed5-f6f3-4021-bd6e-1250f6b27e01")
 	)
 	(no_connect
 		(at 680.72 467.36)
-		(uuid "dc0e673b-2791-4f1e-a838-21e596a1b712")
+		(uuid "6162646d-1028-4d4d-a794-ca1fef9cf957")
 	)
 	(label "GND"
 		(at 690.88 474.98 90)
@@ -18112,7 +18112,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "5a4ec02b-4740-4860-af58-460c4a2b0c6d")
+		(uuid "eb8b9dfc-c774-4f82-83d7-69d19ecf8951")
 	)
 	(label "AMP_SD"
 		(at 680.72 464.82 0)
@@ -18122,15 +18122,15 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "f1aca251-bb88-471c-bbb6-380cf9438471")
+		(uuid "b70d1a65-0d01-4dd0-8eaf-4f731630057d")
 	)
 	(no_connect
 		(at 703.58 459.74)
-		(uuid "5282c980-ca92-4054-b0f4-c2268f68de8f")
+		(uuid "52503e71-3f5c-440b-af09-c0424b1200bf")
 	)
 	(no_connect
 		(at 703.58 462.28)
-		(uuid "df685934-b490-4554-b99a-09fff32d1264")
+		(uuid "32f40538-b862-4dc2-9a53-e86ac0ccbc74")
 	)
 	(label "VBUS"
 		(at 693.42 449.58 90)
@@ -18140,7 +18140,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "b3c6c6fb-13b4-477a-9ffb-715ea207ae21")
+		(uuid "38e9ef87-012c-42c9-b335-06bd32545af6")
 	)
 	(label "VBUS"
 		(at 693.42 449.58 90)
@@ -18150,7 +18150,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "1bae1655-5bbc-4890-9ce7-309affda786c")
+		(uuid "b9b08061-234b-4897-bfaf-7558da96291f")
 	)
 	(label "SPK_P"
 		(at 706.12 454.66 0)
@@ -18160,7 +18160,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "56636c37-c0a7-469e-a8b6-5868a3f653af")
+		(uuid "2e6247ee-16e1-4b8b-9b8b-5905ce0c1139")
 	)
 	(label "SPK_N"
 		(at 706.12 457.20 0)
@@ -18170,7 +18170,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "3198c859-1831-4dbb-9955-95ed419b0094")
+		(uuid "e7aa147f-cf54-45d1-90b8-64e9f3badd7d")
 	)
 	(label "GND"
 		(at 690.88 474.98 90)
@@ -18180,15 +18180,15 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "bb3c7346-c323-4377-9f08-301af54b2571")
+		(uuid "adc0286a-fc8f-4aee-b79f-d329867884e8")
 	)
 	(no_connect
 		(at 703.58 467.36)
-		(uuid "56283bf8-e7a0-4752-8633-c9b0ead45716")
+		(uuid "dfe33d31-2c76-4d16-8a55-422154895be5")
 	)
 	(no_connect
 		(at 703.58 469.90)
-		(uuid "b3fee78a-eddc-418f-9bc4-60715317a56c")
+		(uuid "34d0bb68-9cc2-406f-b78d-048321c0a988")
 	)
 	(label "AMP_LRCLK"
 		(at 680.72 459.74 0)
@@ -18198,7 +18198,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "799a3f79-508b-47b5-8cd4-cd05c12d707b")
+		(uuid "ba57c48c-dae3-4ce1-9516-29c41bbec9c5")
 	)
 	(label "GND"
 		(at 690.88 474.98 90)
@@ -18208,7 +18208,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "4e5cd332-52d6-430d-b584-2cff1ac2a5fd")
+		(uuid "a26f93cb-9557-4d9e-936f-13abe1162385")
 	)
 	(label "AMP_BCLK"
 		(at 680.72 457.20 0)
@@ -18218,7 +18218,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "30345ec7-787f-48c3-92db-03c2e89f9939")
+		(uuid "786bf2aa-e485-4280-b01a-53121378cfc7")
 	)
 	(label "GND"
 		(at 695.96 474.98 90)
@@ -18228,7 +18228,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "bd087a58-4246-4431-8c3f-cff7c524129d")
+		(uuid "dc25d8f1-afbe-45d0-bcd3-a990bbb0f216")
 	)
 	(symbol
 		(lib_id "Device:R")
@@ -18238,7 +18238,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f468ee58-7244-4269-91f8-e45504056bd3")
+		(uuid "4cc798cd-5e38-4570-8517-d3a11682eed1")
 		(property "Reference" "R_AMP_SD"
 			(at 759.46 450.85 0)
 			(effects
@@ -18285,14 +18285,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "560023d0-dc84-4d75-bb55-85b4157f2e25")
+			(uuid "ed52b869-6374-4077-99e7-d3e5d395668a")
 		)
 		(pin "2"
-			(uuid "1a3377b7-ba83-4c0a-9c2a-e2666c3d7e78")
+			(uuid "8ba413bd-f8b8-4f27-b655-1c94081dac38")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "R_AMP_SD")
 					(unit 1)
 				)
@@ -18307,7 +18307,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "0e22adc5-0247-4075-8e3b-7b8ea6005692")
+		(uuid "9c13e99c-c576-4083-9d13-650f81b64891")
 	)
 	(label "AMP_SD"
 		(at 756.92 455.93 90)
@@ -18317,7 +18317,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "0f2f9799-cd10-4fa0-896a-79b8bac569d2")
+		(uuid "a63befef-2296-400d-9c36-36db3992a227")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -18327,7 +18327,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "b3e70ddf-58e2-49a9-bdbf-097325f21b5e")
+		(uuid "a5024189-2dc5-4ee3-b269-0dcb80b7100e")
 		(property "Reference" "C_AMP_BULK"
 			(at 810.26 450.85 0)
 			(effects
@@ -18374,14 +18374,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "714959f6-8b4b-4cef-ac07-18b6e4eb5b85")
+			(uuid "d06dcc1e-1cc5-42fe-b450-c9ddc6f1a884")
 		)
 		(pin "2"
-			(uuid "d8def950-5658-414b-bda7-c645abe19d0b")
+			(uuid "5059d6d1-465b-46cf-b15e-d67b38a2cfff")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_AMP_BULK")
 					(unit 1)
 				)
@@ -18396,7 +18396,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "4f2ea62c-db67-4b8a-8831-d8aa1700f779")
+		(uuid "1b344fa6-b7c0-4d4a-831b-f54d433d42a9")
 	)
 	(label "GND"
 		(at 807.72 455.93 90)
@@ -18406,7 +18406,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "57901b43-29ed-4764-87f2-a4f03d80ec5b")
+		(uuid "ecdafe5d-d9fe-4e35-bfb0-80e8ab76f18d")
 	)
 	(symbol
 		(lib_id "Device:C")
@@ -18416,7 +18416,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "20d931d9-0960-4985-ae68-b2c1247c00b6")
+		(uuid "34f85244-205e-45e2-add3-817d9b33fb2f")
 		(property "Reference" "C_AMP"
 			(at 861.06 450.85 0)
 			(effects
@@ -18463,14 +18463,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "1c3b92b7-9708-462f-a8a1-5b512cb3045c")
+			(uuid "628fdb4a-297a-4bfe-ad23-de06ec9f27d5")
 		)
 		(pin "2"
-			(uuid "a03afe1d-14dd-410d-8526-835af12a3a63")
+			(uuid "a3349410-f701-44e6-9919-672ba149cfe7")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "C_AMP")
 					(unit 1)
 				)
@@ -18485,7 +18485,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "e66ddfad-62e0-4685-90ab-bba5a2f31323")
+		(uuid "e3241054-b685-458d-99c6-615beb57e3e6")
 	)
 	(label "GND"
 		(at 858.52 455.93 90)
@@ -18495,7 +18495,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "b2a44579-457c-4295-83f2-5e07e91fc1de")
+		(uuid "82bfc393-685a-48bf-8a85-c6fb90e4fe18")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
@@ -18505,7 +18505,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "2573c812-d4b3-43ef-87f9-3fca35715a5c")
+		(uuid "7609738d-4bcd-4b5b-978e-f03d280b118b")
 		(property "Reference" "J_SPK"
 			(at 916.94 448.31 0)
 			(effects
@@ -18543,14 +18543,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "84abe977-23e2-4158-9e89-79dbe2e2a1d1")
+			(uuid "38a17eb8-a6f8-4ef1-85a7-cf72d6b6693d")
 		)
 		(pin "2"
-			(uuid "0c4e7475-1f1f-457b-8c44-52dfa78e39d7")
+			(uuid "c9953f79-718e-4439-bb68-e9d35fe09d65")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "J_SPK")
 					(unit 1)
 				)
@@ -18565,7 +18565,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "707d4286-6b70-4859-bd86-1c4e70ec94c6")
+		(uuid "3815efb2-d490-4fd6-9bb8-591657304bef")
 	)
 	(label "SPK_N"
 		(at 909.32 452.12 0)
@@ -18575,7 +18575,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "3b43b172-e063-4c8b-a24d-150e96c8f282")
+		(uuid "d3b8bdfb-ac17-4234-8563-3aee73ca4a4d")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -18585,7 +18585,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "0429234f-57ef-41da-bde4-c3920b7b5137")
+		(uuid "83de6918-e932-493d-85e6-01980e6475c8")
 		(property "Reference" "TP_3V3"
 			(at 962.66 448.31 0)
 			(effects
@@ -18623,11 +18623,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "0a45f406-591b-4eaa-9bb3-b9951840be08")
+			(uuid "6acbd928-04e8-4c94-bfa5-26fe41138488")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_3V3")
 					(unit 1)
 				)
@@ -18642,7 +18642,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "dbe3cbba-8eb5-400d-ad4a-dc5ca0bda959")
+		(uuid "4c74d398-d6fe-4ae5-8792-7aef5bfea5c5")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -18652,7 +18652,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "67d9a3e9-5605-413a-9e6c-79a2c332c785")
+		(uuid "973db67e-8559-41b3-800c-afea9fd05440")
 		(property "Reference" "TP_VBUS"
 			(at 1013.46 448.31 0)
 			(effects
@@ -18690,11 +18690,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "5affef62-432a-4d6d-a79c-bdc7d154beaa")
+			(uuid "53053810-77c7-4be2-b271-c4a881a0537d")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_VBUS")
 					(unit 1)
 				)
@@ -18709,7 +18709,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "9a7ffc17-b8b9-4859-a56c-396523e356b5")
+		(uuid "c461b4fb-c957-4b40-9bb5-694cb2244b50")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -18719,7 +18719,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "6e35c314-7591-496b-9a77-a3baeda648dc")
+		(uuid "bedfcf52-c963-4b36-a24a-2d6331f87333")
 		(property "Reference" "TP_VMOT"
 			(at 1064.26 448.31 0)
 			(effects
@@ -18757,11 +18757,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "fea22a60-4173-426c-bff4-dc4bec003a29")
+			(uuid "38487097-fca3-470d-a921-981a0d60e00b")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_VMOT")
 					(unit 1)
 				)
@@ -18776,7 +18776,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "b07cd967-9caa-49c5-988b-b651288112aa")
+		(uuid "ab792502-5fa5-4b48-a34a-d5f09cc7a596")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -18786,7 +18786,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "3e8bcc57-3172-46f5-a4b4-f51f02a172ca")
+		(uuid "18b3c847-0d53-4c6c-9be9-64092549795c")
 		(property "Reference" "TP_GND"
 			(at 1115.06 448.31 0)
 			(effects
@@ -18824,11 +18824,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "a49145c1-1b50-4826-bf33-9fd312738068")
+			(uuid "5f09cbaa-b7c3-41d6-9743-7c0d33d04b99")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_GND")
 					(unit 1)
 				)
@@ -18843,7 +18843,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "5eb06a0b-c439-4b04-a18e-3de1f39cef30")
+		(uuid "ec90bcd4-b1d9-4c9b-a4bb-995c66a9b588")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -18853,7 +18853,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "580c6dfd-c242-478d-9b70-436409ed5c5a")
+		(uuid "87f2a0b1-719f-4b22-a62f-4cbe4ae9cca1")
 		(property "Reference" "TP_PGND"
 			(at 53.34 527.05 0)
 			(effects
@@ -18891,11 +18891,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "8c2d067f-8bce-4d86-9e5d-b097453dcccd")
+			(uuid "5ca28780-0e78-4108-9cf0-6d8c74fda014")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_PGND")
 					(unit 1)
 				)
@@ -18910,7 +18910,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "b673c0a6-f083-4f4d-8344-907cd462e731")
+		(uuid "37424a70-c06d-44d6-8cfb-c9e00d7836aa")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -18920,7 +18920,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "0d0ea09a-48a6-4ea5-98e3-4f1214cc223e")
+		(uuid "4f6d31c2-2ef5-4681-b47d-4c34191cf974")
 		(property "Reference" "TP_SDA"
 			(at 104.14 527.05 0)
 			(effects
@@ -18958,11 +18958,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "0bd5536d-5fbc-442f-b553-46196d36252d")
+			(uuid "782e2859-1afc-4ff6-905b-00cd7615ae8e")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_SDA")
 					(unit 1)
 				)
@@ -18977,7 +18977,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "037e7a5b-e757-409b-b6f2-3b78ec4d372e")
+		(uuid "b86c93c7-c417-41a6-89ab-6764170c41bc")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -18987,7 +18987,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "dbe6486a-1323-4c09-9562-564109a55956")
+		(uuid "ce5dbbc1-90a0-4b08-83ed-433910625cda")
 		(property "Reference" "TP_SCL"
 			(at 154.94 527.05 0)
 			(effects
@@ -19025,11 +19025,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "a8b0c5a1-27bf-4d8b-ac15-b72660db6ed1")
+			(uuid "bffd1894-d441-4e72-947d-0a36ba67a8ed")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_SCL")
 					(unit 1)
 				)
@@ -19044,7 +19044,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "925c69ba-2295-4e73-92d9-0486dddd0047")
+		(uuid "8316f681-2b03-4a8f-9d3f-667f8305bc1d")
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
@@ -19054,7 +19054,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "958daf53-cab5-4259-b992-f0aa838cf814")
+		(uuid "5c6bbe98-e095-424c-853b-6dff7079362b")
 		(property "Reference" "TP_TX"
 			(at 205.74 527.05 0)
 			(effects
@@ -19092,11 +19092,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "d82b66bc-3b0c-4a5a-a866-cdad61795fd2")
+			(uuid "8ced0ed3-10d1-415a-a44b-4bbcce2ec3b8")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "TP_TX")
 					(unit 1)
 				)
@@ -19111,7 +19111,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "49feffe6-c412-4ebf-a984-9d01ebabcfd4")
+		(uuid "4637634e-864b-46ce-8eb0-735b1612c112")
 	)
 	(symbol
 		(lib_id "Mechanical:MountingHole")
@@ -19121,7 +19121,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "6bc38327-2163-4e76-a0eb-c06980e960a3")
+		(uuid "1dcac0a1-a443-4273-b775-6f0946782b86")
 		(property "Reference" "H1"
 			(at 256.54 527.05 0)
 			(effects
@@ -19160,7 +19160,7 @@
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "H1")
 					(unit 1)
 				)
@@ -19175,7 +19175,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "fc9a4087-639c-4311-a846-027b944a83ea")
+		(uuid "72f4f78d-a897-4900-99c1-ce5cae665320")
 		(property "Reference" "H2"
 			(at 307.34 527.05 0)
 			(effects
@@ -19214,7 +19214,7 @@
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "H2")
 					(unit 1)
 				)
@@ -19229,7 +19229,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ba388baf-ffd4-45b5-8f9c-5adbd733ff98")
+		(uuid "7aaaa296-212a-4ab6-b2a0-b45abe389ea5")
 		(property "Reference" "H3"
 			(at 358.14 527.05 0)
 			(effects
@@ -19268,7 +19268,7 @@
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "H3")
 					(unit 1)
 				)
@@ -19283,7 +19283,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "6892e095-4fb3-4c38-a3d6-1fbf75532111")
+		(uuid "6e43f93b-0740-49af-9cbf-d92844dda74d")
 		(property "Reference" "H4"
 			(at 408.94 527.05 0)
 			(effects
@@ -19322,7 +19322,7 @@
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "H4")
 					(unit 1)
 				)
@@ -19337,7 +19337,7 @@
 		(in_bom no)
 		(on_board no)
 		(dnp no)
-		(uuid "81491bbd-2b81-4ed5-b348-1a7b2a979112")
+		(uuid "fb378692-bfb7-42e3-bb66-b1f81eaf300d")
 		(property "Reference" "#FLG01"
 			(at 459.74 527.05 0)
 			(effects
@@ -19375,11 +19375,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "6c896af2-b264-49ed-b6b2-7dce889728ac")
+			(uuid "7133a5dd-91bc-4481-b28b-f92b44dcf449")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "#FLG01")
 					(unit 1)
 				)
@@ -19394,7 +19394,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "5dd15cfb-ea7b-452f-8e39-3ddc8c523ced")
+		(uuid "012eef76-22c8-4d4a-8548-5ceca81189d2")
 	)
 	(symbol
 		(lib_id "power:PWR_FLAG")
@@ -19404,7 +19404,7 @@
 		(in_bom no)
 		(on_board no)
 		(dnp no)
-		(uuid "4c2b49fb-050a-4b9e-8627-9cd028d16e0e")
+		(uuid "ba6a7314-c33a-4062-83ca-0620f9bd0aac")
 		(property "Reference" "#FLG02"
 			(at 510.54 527.05 0)
 			(effects
@@ -19442,11 +19442,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "5063ffef-3b4e-4c97-b52d-2f0408034f43")
+			(uuid "c9899c39-eb24-4e86-a542-813310720a77")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "#FLG02")
 					(unit 1)
 				)
@@ -19461,7 +19461,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "1faa1da1-38d0-4284-8277-f19b888d8eb5")
+		(uuid "890e0a1e-c384-4784-885c-974410dfe956")
 	)
 	(symbol
 		(lib_id "power:PWR_FLAG")
@@ -19471,7 +19471,7 @@
 		(in_bom no)
 		(on_board no)
 		(dnp no)
-		(uuid "6b86a10f-3352-41d2-bfb3-596bf78483e9")
+		(uuid "e4a552f3-7868-4cd3-91b5-a670d4b8396c")
 		(property "Reference" "#FLG03"
 			(at 561.34 527.05 0)
 			(effects
@@ -19509,11 +19509,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "d4959a9d-9664-414c-ac3a-b9371a6510b5")
+			(uuid "c0a9db4d-e1e2-44b7-99e2-8ab313120a04")
 		)
 		(instances
 			(project "plush-toy-mainboard"
-				(path "/20c4a71e-8b66-42cb-8330-d5b6f9f0dd08"
+				(path "/6a11e91c-bc49-401f-a4f5-f4ea92f187fb"
 					(reference "#FLG03")
 					(unit 1)
 				)
@@ -19528,7 +19528,7 @@
 			)
 			(justify right bottom)
 		)
-		(uuid "2111c0bc-bc3e-4af8-93f1-fabcc3e20eb1")
+		(uuid "6aec5a64-0d8b-4acc-a7b0-341cdf4767f5")
 	)
 	(sheet_instances
 		(path "/"
