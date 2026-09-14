@@ -904,6 +904,12 @@ git commit -m "feat(pcb): 外框、4 层叠层、器件放置与分区铺铜"
 
 ### Task 6: 布线与 DRC
 
+> **实施修正（2026-09-14）**：实际实现见 `scripts/route.py`、`scripts/project_rules.py`、`scripts/test_drc.py`。首次自动布线暴露两个问题，已固化进脚本与测试：
+> - **规则被冲掉**：独立 Python 脚本里 `board.Save()` 会把内存中的 KiCad 默认规则写回 `.kicad_pro`，冲掉网络类与最小规则，DRC 随之按默认 0.2mm 间距、0.3mm 最小孔报出 370 处违规，全是假错误。`gen_pcb.py` 与 `route.py` 每次保存后都调用 `project_rules.apply()` 重写规则；按正确规则复查，首次布线结果为 0 违规、23 条未连接。
+> - **信号线走进内层平面**：内层默认是 signal 类型，导出的 DSN 里 Freerouting 把 MIC、I2S 等线走在 GND / 3V3 平面上。DRC 不报，但会切断回流参考。`gen_pcb.py` 把 In1、In2 设为 `LT_POWER`，并新增 `test_inner_planes_carry_no_tracks` 与 `test_inner_layers_typed_as_power_planes`。
+> - Freerouting 在 macOS 上无显式无头参数，通过 `JAVA_TOOL_OPTIONS=-Djava.awt.headless=true` 运行。
+> - 下方 Step 3「手工先布关键线」本期未做，改为布线完成后在渲染图上核查 USB、XCLK 与功率线，不满足再手工修正。
+
 **Files:**
 - Create: `hardware/plush-toy-mainboard/scripts/route.sh`
 - Create: `hardware/plush-toy-mainboard/scripts/test_drc.py`

@@ -15,6 +15,7 @@ import pcbnew
 import board_spec
 import kicad_env
 import placement as pl
+import project_rules
 
 ROOT = Path(__file__).resolve().parents[1]
 PCB = ROOT / "plush-toy-mainboard.kicad_pcb"
@@ -206,6 +207,11 @@ def main() -> Path:
     tmp = PCB.with_name(PCB.stem + ".tmp.kicad_pcb")
     board = pcbnew.NewBoard(str(tmp))
     board.SetCopperLayerCount(4)
+    # 内层是整层平面（设计方案 6.1 节：L2 GND、L3 电源）。标成 power 类型后，导出的 DSN 里
+    # 这两层是平面层，Freerouting 只会打过孔接平面，不会在上面走信号线。
+    # 2026-09-14 首次布线时两层都是 signal，MIC、I2S 等信号线被走在 GND/3V3 平面上
+    board.SetLayerType(pcbnew.In1_Cu, pcbnew.LT_POWER)
+    board.SetLayerType(pcbnew.In2_Cu, pcbnew.LT_POWER)
     add_outline(board)
     for name in board_spec.nets():
         if not name.startswith("NC_"):
@@ -327,6 +333,9 @@ def main() -> Path:
     board = pcbnew.LoadBoard(str(PCB))
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     board.Save(str(PCB))
+    # board.Save 会把内存里的工程设置写回 .kicad_pro，独立脚本加载时那是 KiCad 默认规则，
+    # 会冲掉 project_rules.py 写入的网络类与最小规则（2026-09-14 布线后 DRC 按默认 0.2mm 间距报 298 处）
+    project_rules.apply()
     return PCB
 
 

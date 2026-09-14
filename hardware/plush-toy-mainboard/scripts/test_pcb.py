@@ -163,6 +163,41 @@ class PcbTest(unittest.TestCase):
                         if ref.startswith(("J_", "U")) and not fp.Reference().IsVisible())
         self.assertEqual(hidden, [])
 
+    def test_inner_planes_carry_no_tracks(self):
+        # 设计方案 6.1 节：L2 整层 GND、L3 电源平面，禁止走线。DRC 不会报这个——线走在平面层上
+        # 电气上合法，但会切断高速信号的回流参考。2026-09-14 首次自动布线把 MIC、I2S 线走在了内层
+        tracks = sorted({t.GetNetname() for t in self.board.GetTracks()
+                         if t.GetClass() == "PCB_TRACK" and t.GetLayer() in (pcbnew.In1_Cu, pcbnew.In2_Cu)})
+        self.assertEqual(tracks, [])
+
+    def test_inner_layers_typed_as_power_planes(self):
+        # 布线器依据层类型判断能否走线：只有 power 类型的内层才会被当作平面
+        for layer in (pcbnew.In1_Cu, pcbnew.In2_Cu):
+            with self.subTest(layer=pcbnew.LayerName(layer)):
+                self.assertEqual(self.board.GetLayerType(layer), pcbnew.LT_POWER)
+
+    def test_plane_nets_fanned_out_to_vias(self):
+        # 顶层 GND / +3V3 贴片焊盘必须就近有同网络过孔下平面（+3V3 平面只覆盖 x < 62）。
+        # 2026-09-14 第二次布线后这两个网络仍有 41 条未连接：Freerouting 不会主动打过孔接平面
+        # 同网络过孔或通孔焊盘都算：U1.41 用模组封装自带的散热过孔下平面；
+        # 细间距引脚的过孔要打到引脚排外侧，或经走线连到散热焊盘的焊盘内过孔，放宽到 3.5mm
+        vias = [(t.GetNetname(), t.GetPosition().x / MM, t.GetPosition().y / MM)
+                for t in self.board.GetTracks() if t.GetClass() == "PCB_VIA"]
+        vias += [(p.GetNetname(), p.GetPosition().x / MM, p.GetPosition().y / MM)
+                 for fp in self.fps.values() for p in fp.Pads() if p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH]
+        lonely = []
+        for ref, fp in self.fps.items():
+            for pad in fp.Pads():
+                net = pad.GetNetname()
+                if pad.GetAttribute() != pcbnew.PAD_ATTRIB_SMD or net not in ("GND", "+3V3"):
+                    continue
+                px, py = pad.GetPosition().x / MM, pad.GetPosition().y / MM
+                if net == "+3V3" and px > 61.5:
+                    continue
+                if not any(n == net and ((vx - px) ** 2 + (vy - py) ** 2) ** 0.5 <= 3.5 for n, vx, vy in vias):
+                    lonely.append(f"{ref}.{pad.GetNumber()}[{net}]")
+        self.assertEqual(lonely, [])
+
     def test_single_sided_assembly(self):
         flipped = sorted(ref for ref, fp in self.fps.items() if fp.IsFlipped())
         self.assertEqual(flipped, [])

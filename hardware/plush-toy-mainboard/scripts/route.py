@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pcbnew
 
+import project_rules
+
 ROOT = Path(__file__).resolve().parents[1]
 PCB = ROOT / "plush-toy-mainboard.kicad_pcb"
 BUILD = ROOT / "build"
@@ -34,6 +36,8 @@ def main(passes: int = 30) -> None:
         raise RuntimeError("导入 SES 失败")
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     board.Save(str(PCB))
+    # board.Save 会用默认规则覆盖 .kicad_pro，重新写回工程规则（见 gen_pcb.py 同处注释）
+    project_rules.apply()
     print("布线完成：", PCB)
 
 
