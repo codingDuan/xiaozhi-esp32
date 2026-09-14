@@ -21,6 +21,15 @@ REQUIRED_FOOTPRINTS = [
 REQUIRED_PROJECT = [
     ("symbol", "plush", "INMP441"),
     ("footprint", "plush", "InvenSense_INMP441_LGA-9_4.72x3.76mm"),
+    # lcsc：easyeda2kicad 从 LCSC 转出的器件，官方库没有对应封装
+    ("symbol", "lcsc", "AFC01-S24FCA-00"),
+    ("footprint", "lcsc", "FPC-SMD_24P-P0.50_AFC01-S24FCA-00"),
+    ("symbol", "lcsc", "YHNR4020-2R2M"),
+    ("footprint", "lcsc", "IND-SMD_L4.0-W4.0_YHNR4020"),
+    ("symbol", "lcsc", "TS-1187A-B-A-B"),
+    ("footprint", "lcsc", "SW-SMD_4P-L5.1-W5.1-P3.70-LS6.5-TL_H1.5"),
+    ("symbol", "lcsc", "RVT1A102M1010_C970713"),
+    ("footprint", "lcsc", "CAP-SMD_BD10.0-L10.3-W10.3-LS11.3-FD"),
 ]
 
 

@@ -1,4 +1,5 @@
 (sym_lib_table
   (version 7)
-  (lib (name "plush")(type "KiCad")(uri "${KIPRJMOD}/lib/plush.kicad_sym")(options "")(descr "plush-toy 主板工程专用符号，官方库没有的器件"))
+  (lib (name "plush")(type "KiCad")(uri "${KIPRJMOD}/lib/plush.kicad_sym")(options "")(descr "plush-toy 主板工程专用符号，按原厂数据手册手工绘制"))
+  (lib (name "lcsc")(type "KiCad")(uri "${KIPRJMOD}/lib/lcsc.kicad_sym")(options "")(descr "easyeda2kicad 从 LCSC 转出的第三方符号"))
 )

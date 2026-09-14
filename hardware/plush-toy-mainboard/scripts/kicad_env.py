@@ -9,10 +9,12 @@ SHARED = APP / "Contents/SharedSupport"
 SYMBOL_DIR = SHARED / "symbols"
 FOOTPRINT_DIR = SHARED / "footprints"
 
-# 工程自带库：官方库没有的器件放在 hardware/plush-toy-mainboard/lib/，库名 plush。
-# 与工程目录下的 sym-lib-table / fp-lib-table 保持一致。
+# 工程自带库，放在 hardware/plush-toy-mainboard/lib/，与工程目录下的
+# sym-lib-table / fp-lib-table 保持一致：
+#   plush  按原厂数据手册手工绘制（INMP441）
+#   lcsc   easyeda2kicad 从 LCSC 转出的第三方封装，布局阶段须逐颗人工复核
 PROJECT_DIR = Path(__file__).resolve().parents[1]
-PROJECT_LIBS = {"plush"}
+PROJECT_LIBS = {"plush", "lcsc"}
 
 
 def symbol_file(lib: str) -> Path:
