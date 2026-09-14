@@ -35,6 +35,19 @@ class DrcTest(unittest.TestCase):
         unconnected = self.report.get("unconnected_items", [])
         self.assertEqual(len(unconnected), 0, self._brief(unconnected))
 
+    def test_post_route_target_pads_have_no_open_connection(self):
+        targets = {
+            "Pad 4 [GND] of U_TOUCH on F.Cu", "Pad 8 [+3V3] of U_IMU on F.Cu",
+            "Pad 9 [GND] of U_IMU on F.Cu", "Pad 11 [GND] of U_IMU on F.Cu",
+            "Pad 28 [+3V3] of U_PWM on F.Cu", "Pad 8 [+3V3] of U_ADC on F.Cu",
+            "Pad 4 [+2V8] of J_CAM on F.Cu", "Pad 10 [+1V5] of J_CAM on F.Cu",
+            "Pad 1 [TOUCH_E0] of TP_E0 on F.Cu", "Pad 20 [CAM_Y6] of U1 on F.Cu",
+        }
+        opens = [item for finding in self.report.get("unconnected_items", [])
+                 for item in finding.get("items", [])
+                 if item.get("description") in targets]
+        self.assertEqual(opens, [], self._brief(self.report.get("unconnected_items", [])))
+
     def test_schematic_parity(self):
         self.assertEqual(self._brief(self.report.get("schematic_parity", [])), [])
 

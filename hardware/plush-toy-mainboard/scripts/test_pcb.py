@@ -198,6 +198,18 @@ class PcbTest(unittest.TestCase):
                     lonely.append(f"{ref}.{pad.GetNumber()}[{net}]")
         self.assertEqual(lonely, [])
 
+    def test_microphone_acoustic_hole_clear_of_vias(self):
+        # INMP441 声孔为直径 0.4mm 的 NPTH；0.6mm 过孔必须离孔边至少 0.25mm。
+        # 2026-09-14 Freerouting 曾把 GND 过孔放在 (15.92, 50.00)，实际净距只有 0.13mm。
+        hole_x, hole_y = 15.29, 50.00
+        exclusion = 0.20 + 0.25 + 0.30
+        offenders = [(round(t.GetPosition().x / MM, 3), round(t.GetPosition().y / MM, 3))
+                     for t in self.board.GetTracks()
+                     if t.GetClass() == "PCB_VIA"
+                     and ((t.GetPosition().x / MM - hole_x) ** 2 +
+                          (t.GetPosition().y / MM - hole_y) ** 2) ** 0.5 < exclusion]
+        self.assertEqual(offenders, [])
+
     def test_single_sided_assembly(self):
         flipped = sorted(ref for ref, fp in self.fps.items() if fp.IsFlipped())
         self.assertEqual(flipped, [])
