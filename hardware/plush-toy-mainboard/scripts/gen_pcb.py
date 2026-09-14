@@ -34,6 +34,9 @@ def load(part: board_spec.Part) -> pcbnew.FOOTPRINT:
     fp.SetFPIDAsString(part.footprint)
     fp.SetReference(part.ref)
     fp.SetValue(part.value)
+    if part.lcsc:
+        fp.SetField("LCSC", part.lcsc)
+        fp.GetField("LCSC").SetVisible(False)
     return fp
 
 
@@ -122,6 +125,8 @@ def tidy_silkscreen(fitted, fps, reserved) -> int:
                 box = p.GetBoundingBox()
                 box.Inflate(pcbnew.FromMM(SILK_PAD_CLEARANCE))
                 blocked.append(box)
+        blocked += [item.GetBoundingBox() for item in fp.GraphicalItems()
+                    if item.GetLayer() == pcbnew.F_SilkS]
     board_box = pcbnew.BOX2I(v(0.3, 0.3), v(pl.W - 0.6, pl.H - 0.6))
 
     labelled = [p for p in fitted
@@ -137,6 +142,7 @@ def tidy_silkscreen(fitted, fps, reserved) -> int:
     for part in order:
         fp = fps[part.ref]
         ref = fp.Reference()
+        ref.SetVisible(True)
         ref.SetLayer(pcbnew.F_SilkS)
         ref.SetTextSize(v(SILK_HEIGHT, SILK_HEIGHT))
         ref.SetTextThickness(pcbnew.FromMM(SILK_STROKE))

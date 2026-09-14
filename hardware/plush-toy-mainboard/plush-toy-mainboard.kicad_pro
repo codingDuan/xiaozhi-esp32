@@ -546,6 +546,24 @@
         "via_diameter": 0.6,
         "via_drill": 0.3,
         "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.15,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "CameraSupply",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 2,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.3,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
       }
     ],
     "meta": {
@@ -603,7 +621,7 @@
         "pattern": "+2V8"
       },
       {
-        "netclass": "Supply",
+        "netclass": "CameraSupply",
         "pattern": "+1V5"
       }
     ]
@@ -742,13 +760,7 @@
     "reuse_designators": true,
     "subpart_first_id": 65,
     "subpart_id_separator": 0,
-    "top_level_sheets": [
-      {
-        "filename": "plush-toy-mainboard.kicad_sch",
-        "name": "plush-toy-mainboard",
-        "uuid": "00000000-0000-0000-0000-000000000000"
-      }
-    ],
+    "top_level_sheets": [],
     "used_designators": "",
     "variants": []
   },

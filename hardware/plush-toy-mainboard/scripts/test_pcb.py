@@ -210,6 +210,105 @@ class PcbTest(unittest.TestCase):
                           (t.GetPosition().y / MM - hole_y) ** 2) ** 0.5 < exclusion]
         self.assertEqual(offenders, [])
 
+    def test_camera_fpc_has_bottom_fanout_corridor(self):
+        # 0.5mm FPC 的密集焊盘需要在排线插入侧留出走线/过孔空间；原布局仅余 1.27mm，
+        # +1V5 等引脚被板边和内侧相机线共同封死。要求信号焊盘到板边至少 3.5mm。
+        signal_pads = [pad for pad in self.fps["J_CAM"].Pads() if pad.GetNumber().isdigit()
+                       and int(pad.GetNumber()) <= 24]
+        bottommost = max(mm(pad.GetBoundingBox().GetBottom()) for pad in signal_pads)
+        self.assertGreaterEqual(H - bottommost, 3.5)
+
+    def test_camera_fpc_bottom_fanout_corridor_is_unobstructed(self):
+        pads = [pad for pad in self.fps["J_CAM"].Pads() if pad.GetNumber().isdigit()
+                and int(pad.GetNumber()) <= 24]
+        x1 = min(mm(pad.GetBoundingBox().GetX()) for pad in pads) - 0.2
+        x2 = max(mm(pad.GetBoundingBox().GetRight()) for pad in pads) + 0.2
+        y1 = max(mm(pad.GetBoundingBox().GetBottom()) for pad in pads)
+        offenders = []
+        for ref, fp in self.fps.items():
+            if ref == "J_CAM":
+                continue
+            box = fp.GetCourtyard(pcbnew.F_CrtYd).BBox()
+            bx1, by1 = mm(box.GetX()), mm(box.GetY())
+            bx2, by2 = mm(box.GetRight()), mm(box.GetBottom())
+            if bx2 > x1 and bx1 < x2 and by2 > y1 and by1 < H - 0.5:
+                offenders.append(ref)
+        self.assertEqual(sorted(offenders), [])
+
+    def test_imu_plane_pads_escape_away_from_center_keepout(self):
+        tracks = list(self.board.GetTracks())
+        missing = []
+        for number in ("8", "9", "11"):
+            pad = self.fps["U_IMU"].FindPadByNumber(number)
+            center = pad.GetPosition()
+            if not any(track.GetClass() == "PCB_TRACK" and track.GetNetname() == pad.GetNetname() and
+                       (track.GetStart() == center or track.GetEnd() == center) and
+                       max(mm(track.GetStart().y), mm(track.GetEnd().y)) >
+                       mm(pad.GetBoundingBox().GetBottom()) + 0.2 for track in tracks):
+                missing.append(f"U_IMU.{number}[{pad.GetNetname()}]")
+        self.assertEqual(missing, [])
+
+    def test_touch_ground_pad_has_outward_via(self):
+        pad = self.fps["U_TOUCH"].FindPadByNumber("4")
+        pos = pad.GetPosition()
+        tracks = [item for item in self.board.GetTracks()
+                  if item.GetClass() == "PCB_TRACK" and item.GetNetname() == "GND" and
+                  (item.GetStart() == pos or item.GetEnd() == pos)]
+        vias = [item.GetPosition() for item in self.board.GetTracks()
+                if item.GetClass() == "PCB_VIA" and item.GetNetname() == "GND"]
+        self.assertTrue(any(track.GetStart() in vias or track.GetEnd() in vias for track in tracks))
+
+    def test_amp_speaker_pad_has_outward_escape(self):
+        fp = self.fps["U_AMP"]
+        pad = fp.FindPadByNumber("10")
+        center = pad.GetPosition()
+        right = mm(pad.GetBoundingBox().GetRight())
+        escaped = any(track.GetClass() == "PCB_TRACK" and track.GetNetname() == "SPK_N" and
+                      (track.GetStart() == center or track.GetEnd() == center) and
+                      max(mm(track.GetStart().x), mm(track.GetEnd().x)) >= right + 0.8
+                      for track in self.board.GetTracks())
+        self.assertTrue(escaped)
+
+    def test_camera_dvdd_has_deterministic_bottom_layer_escape(self):
+        vias = [item for item in self.board.GetTracks()
+                if item.GetClass() == "PCB_VIA" and item.GetNetname() == "+1V5"]
+        bottom_tracks = [item for item in self.board.GetTracks()
+                         if item.GetClass() == "PCB_TRACK" and item.GetNetname() == "+1V5" and
+                         item.GetLayer() == pcbnew.B_Cu]
+        self.assertGreaterEqual(len(vias), 2)
+        self.assertTrue(bottom_tracks)
+
+    def test_servo_left_pgnd_pad_has_bottom_layer_anchor(self):
+        pad = self.fps["J_SERVO_L"].FindPadByNumber("3")
+        pos = pad.GetPosition()
+        anchored = any(item.GetClass() == "PCB_TRACK" and item.GetNetname() == "PGND" and
+                       item.GetLayer() == pcbnew.B_Cu and
+                       (item.GetStart() == pos or item.GetEnd() == pos) for item in self.board.GetTracks())
+        self.assertTrue(anchored)
+
+    def test_power_tracks_only_use_short_neckdowns_below_netclass_width(self):
+        # 细间距焊盘附近允许最多 2mm 的窄颈；长距离供电/扬声器走线必须达到网络类线宽。
+        required = {
+            "VMOT": 1.0, "VMOT_IN": 1.0, "PGND": 1.0, "HEAT_LOW": 1.0,
+            "VBUS": 0.5, "VBUS_IN": 0.5, "+3V3": 0.5, "GND": 0.5,
+            "BUCK_SW": 0.5, "SPK_P": 0.5, "SPK_N": 0.5, "+2V8": 0.5, "+1V5": 0.3,
+        }
+        vias = {(item.GetNetname(), item.GetPosition().x, item.GetPosition().y)
+                for item in self.board.GetTracks() if item.GetClass() == "PCB_VIA"}
+        offenders = []
+        for item in self.board.GetTracks():
+            if item.GetClass() != "PCB_TRACK" or item.GetNetname() not in required:
+                continue
+            width, length = mm(item.GetWidth()), mm(item.GetLength())
+            # 平面地的细间距焊盘允许用短线直接扇出到过孔；电流随后由整层 GND 承担。
+            endpoints = ((item.GetNetname(), item.GetStart().x, item.GetStart().y),
+                         (item.GetNetname(), item.GetEnd().x, item.GetEnd().y))
+            if item.GetNetname() == "GND" and length <= 3.0 and any(p in vias for p in endpoints):
+                continue
+            if width < required[item.GetNetname()] - 1e-6 and length > 2.0 + 1e-6:
+                offenders.append((item.GetNetname(), round(width, 4), round(length, 3)))
+        self.assertEqual(offenders, [])
+
     def test_single_sided_assembly(self):
         flipped = sorted(ref for ref, fp in self.fps.items() if fp.IsFlipped())
         self.assertEqual(flipped, [])

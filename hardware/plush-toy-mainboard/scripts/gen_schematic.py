@@ -94,10 +94,10 @@ def _property(key: str, value: str, x: float, y: float, hide: bool, justify: str
 
 
 def _placed(lib_id: str, ref: str, value: str, footprint: str, lcsc: str, fitted: bool,
-            on_board: bool, x: float, y: float, pin_numbers, root_uuid: str,
+            on_board: bool, in_bom: bool, x: float, y: float, pin_numbers, root_uuid: str,
             ref_xy: tuple[float, float], value_xy: tuple[float, float]) -> str:
     out = [f'\t(symbol\n\t\t(lib_id "{lib_id}")\n\t\t(at {x:.2f} {y:.2f} 0)\n\t\t(unit 1)\n'
-           f'\t\t(exclude_from_sim no)\n\t\t(in_bom {"yes" if on_board else "no"})\n'
+           f'\t\t(exclude_from_sim no)\n\t\t(in_bom {"yes" if in_bom else "no"})\n'
            f'\t\t(on_board {"yes" if on_board else "no"})\n\t\t(dnp {"no" if fitted else "yes"})\n'
            f'\t\t(uuid "{_uid()}")\n']
     out.append(_property("Reference", ref, *ref_xy, False, "left"))
@@ -119,7 +119,7 @@ def _label(net: str, x: float, y: float, pin_angle: int) -> str:
     angle = (pin_angle + 180) % 360
     justify = "left bottom" if angle in (0, 90) else "right bottom"
     shown = angle if angle in (0, 90) else angle - 180
-    return (f'\t(label "{net}"\n\t\t(at {x:.2f} {y:.2f} {shown})\n\t\t(effects\n\t\t\t(font\n'
+    return (f'\t(global_label "{net}"\n\t\t(shape input)\n\t\t(at {x:.2f} {y:.2f} {shown})\n\t\t(effects\n\t\t\t(font\n'
             f'\t\t\t\t(size 1.27 1.27)\n\t\t\t)\n\t\t\t(justify {justify})\n\t\t)\n\t\t(uuid "{_uid()}")\n\t)\n')
 
 
@@ -152,7 +152,7 @@ def main() -> Path:
     body: list[str] = []
     cursor_x, cursor_y, row_h = 25.4, 25.4, 0.0
 
-    def place(lib_id, ref, value, footprint, lcsc, fitted, on_board, pin_nets):
+    def place(lib_id, ref, value, footprint, lcsc, fitted, on_board, in_bom, pin_nets):
         nonlocal cursor_x, cursor_y, row_h
         pins = pins_of(blocks[lib_id])
         xs = [p[0] for p in pins.values()] or [0.0]
@@ -171,7 +171,8 @@ def main() -> Path:
             # 大器件：原点在本体中央，放右侧会压住引脚名，改放本体下方、底部竖排标签之外
             below = y - min(ys) + VLABEL_ROOM
             ref_xy, value_xy = (x + min(xs), below), (x + min(xs), below + 2.54)
-        body.append(_placed(lib_id, ref, value, footprint, lcsc, fitted, on_board, x, y, pins.keys(), root_uuid,
+        body.append(_placed(lib_id, ref, value, footprint, lcsc, fitted, on_board, in_bom,
+                            x, y, pins.keys(), root_uuid,
                             ref_xy, value_xy))
         for number, net in pin_nets.items():
             px, py, _, pin_angle = pins[number]
@@ -181,9 +182,11 @@ def main() -> Path:
         row_h = max(row_h, height)
 
     for part in board_spec.PARTS:
-        place(part.symbol, part.ref, part.value, part.footprint, part.lcsc, part.fitted, True, part.pins)
+        assembly_item = not part.ref.startswith(("H", "TP_"))
+        place(part.symbol, part.ref, part.value, part.footprint, part.lcsc, part.fitted,
+              part.fitted, part.fitted and assembly_item, part.pins)
     for index, net in enumerate(_flag_nets(blocks), start=1):
-        place(flag_id, f"#FLG{index:02d}", "PWR_FLAG", "", "", True, False, {"1": net})
+        place(flag_id, f"#FLG{index:02d}", "PWR_FLAG", "", "", True, False, False, {"1": net})
 
     head = [f'(kicad_sch\n\t(version {kicad_env.SCH_FILE_VERSION})\n\t(generator "plush_gen")\n'
             f'\t(generator_version "10.0")\n\t(uuid "{root_uuid}")\n\t(paper "A0")\n\t(lib_symbols\n']

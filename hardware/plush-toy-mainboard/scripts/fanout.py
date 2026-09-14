@@ -70,24 +70,34 @@ class Fanout:
         return not any(n != net and check(ob, HOLE_CLEARANCE if npth else CLEARANCE)
                        for n, ob, npth in self.obstacles)
 
-    def add_track(self, net_item, start, end, width) -> None:
+    def add_layer_track(self, net_item, start, end, width, layer) -> None:
         t = pcbnew.PCB_TRACK(self.board)
         t.SetStart(start)
         t.SetEnd(end)
         t.SetWidth(pcbnew.FromMM(width))
-        t.SetLayer(pcbnew.F_Cu)
+        t.SetLayer(layer)
         t.SetNet(net_item)
         self.board.Add(t)
+        if layer == pcbnew.F_Cu:
+            x1, x2 = sorted((start.x * TO_MM, end.x * TO_MM))
+            y1, y2 = sorted((start.y * TO_MM, end.y * TO_MM))
+            self.obstacles.append((net_item.GetNetname(),
+                                   (x1 - width / 2, y1 - width / 2,
+                                    x2 + width / 2, y2 + width / 2), False))
 
-    def add_via(self, net_item, net, x, y) -> None:
+    def add_track(self, net_item, start, end, width) -> None:
+        self.add_layer_track(net_item, start, end, width, pcbnew.F_Cu)
+
+    def add_via(self, net_item, net, x, y, diameter=VIA_D, drill=VIA_DRILL) -> None:
         via = pcbnew.PCB_VIA(self.board)
         via.SetPosition(v(x, y))
-        via.SetWidth(pcbnew.FromMM(VIA_D))
-        via.SetDrill(pcbnew.FromMM(VIA_DRILL))
+        via.SetWidth(pcbnew.FromMM(diameter))
+        via.SetDrill(pcbnew.FromMM(drill))
         via.SetNet(net_item)
         self.board.Add(via)
         self.vias.append((net, x, y))
-        self.obstacles.append((net, (x - VIA_D / 2, y - VIA_D / 2, x + VIA_D / 2, y + VIA_D / 2), False))
+        self.obstacles.append((net, (x - diameter / 2, y - diameter / 2,
+                                     x + diameter / 2, y + diameter / 2), False))
 
     def via_ok(self, net, x, y, plane) -> bool:
         if not (EDGE <= x <= pl.W - EDGE and EDGE <= y <= pl.H - EDGE and plane[0] <= x <= plane[1]):
@@ -96,8 +106,142 @@ class Fanout:
             return False
         return self.clear(net, lambda ob, c: circle_hits_box(x, y, VIA_D / 2 + c, ob))
 
+    def escape_camera_fpc(self) -> int:
+        """先把 0.5mm 间距相机焊盘引到连接器外，避免自动布线封住出口。"""
+        fp = self.board.FindFootprintByReference("J_CAM")
+        if fp is None:
+            return 0
+        added = 0
+        for pad in fp.Pads():
+            number = pad.GetNumber()
+            net = pad.GetNetname()
+            if not number.isdigit() or int(number) > 24 or not net or net.startswith("unconnected-"):
+                continue
+            start = pad.GetPosition()
+            x, y = start.x * TO_MM, start.y * TO_MM
+            number_value = int(number)
+            end_y = box_mm(pad.GetBoundingBox())[3] + (1.1 if number_value % 2 == 0 else 2.2)
+            end = v(x, end_y)
+            if any(t.GetClass() == "PCB_TRACK" and t.GetNetname() == net and
+                   (t.GetStart() == start or t.GetEnd() == start) for t in self.board.GetTracks()):
+                continue
+            self.add_track(pad.GetNet(), start, end, 0.2)
+            self.add_via(pad.GetNet(), net, x, end_y, diameter=0.45, drill=0.2)
+            self.obstacles.append((net, (x - 0.1, y, x + 0.1, end_y), False))
+            added += 1
+        return added
+
+    def escape_imu_plane_pads(self) -> int:
+        """在自动布线前绕开 IMU 中央禁布区，固定三个底边电源脚的出口。"""
+        fp = self.board.FindFootprintByReference("U_IMU")
+        p8, p9, p11 = (fp.FindPadByNumber(number) for number in ("8", "9", "11"))
+        bottom = max(box_mm(p.GetBoundingBox())[3] for p in (p8, p9, p11))
+        escape_y, via_y = bottom + 0.35, bottom + 1.125
+        x8, x9, x11 = (p.GetPosition().x * TO_MM for p in (p8, p9, p11))
+
+        self.add_track(p9.GetNet(), p9.GetPosition(), v(x9, escape_y), 0.2)
+        gnd_via_x = x9 - 0.75
+        self.add_track(p9.GetNet(), v(x9, escape_y), v(gnd_via_x, via_y), 0.2)
+        self.add_via(p9.GetNet(), "GND", gnd_via_x, via_y)
+
+        gnd_cap = self.board.FindFootprintByReference("C_IMU_VLOGIC").FindPadByNumber("2")
+        cap_x, cap_y = gnd_cap.GetPosition().x * TO_MM, gnd_cap.GetPosition().y * TO_MM
+        self.add_track(p11.GetNet(), p11.GetPosition(), v(x11, escape_y), 0.2)
+        self.add_track(p11.GetNet(), v(x11, escape_y), v(cap_x, escape_y), 0.2)
+        self.add_track(p11.GetNet(), v(cap_x, escape_y), v(cap_x, cap_y), 0.2)
+
+        v3_via_x = x8 - 1.45
+        self.add_track(p8.GetNet(), p8.GetPosition(), v(x8, escape_y), 0.2)
+        self.add_track(p8.GetNet(), v(x8, escape_y), v(v3_via_x, via_y), 0.2)
+        self.add_via(p8.GetNet(), "+3V3", v3_via_x, via_y)
+        return 2
+
+    def escape_dense_sensor_signals(self) -> int:
+        """给 IMU/触摸芯片外围信号脚加径向短线，保留细间距引脚出口。"""
+        added = 0
+        for ref in ("U_IMU", "U_TOUCH"):
+            fp = self.board.FindFootprintByReference(ref)
+            center = fp.GetPosition()
+            for pad in fp.Pads():
+                net = pad.GetNetname()
+                if not net or net in PLANES or net.startswith("unconnected-"):
+                    continue
+                pos = pad.GetPosition()
+                dx, dy = (pos.x - center.x) * TO_MM, (pos.y - center.y) * TO_MM
+                if math.hypot(dx, dy) < 1.0:
+                    continue
+                box = box_mm(pad.GetBoundingBox())
+                x, y = pos.x * TO_MM, pos.y * TO_MM
+                if abs(dx) > abs(dy):
+                    end = v((box[2] + 0.9) if dx > 0 else (box[0] - 0.9), y)
+                else:
+                    end = v(x, (box[3] + 0.9) if dy > 0 else (box[1] - 0.9))
+                self.add_track(pad.GetNet(), pos, end, 0.2)
+                added += 1
+
+        fp = self.board.FindFootprintByReference("U_AMP")
+        pad = fp.FindPadByNumber("10")
+        pos = pad.GetPosition()
+        box = box_mm(pad.GetBoundingBox())
+        self.add_track(pad.GetNet(), pos, v(box[2] + 0.9, pos.y * TO_MM), 0.2)
+        added += 1
+        return added
+
+    def route_imu_regout(self) -> int:
+        pad = self.board.FindFootprintByReference("U_IMU").FindPadByNumber("10")
+        cap = self.board.FindFootprintByReference("C_IMU_REG").FindPadByNumber("1")
+        px, py = pad.GetPosition().x * TO_MM, pad.GetPosition().y * TO_MM
+        cx, cy = cap.GetPosition().x * TO_MM, cap.GetPosition().y * TO_MM
+        escape_y = box_mm(pad.GetBoundingBox())[3] + 0.9
+        self.add_track(pad.GetNet(), pad.GetPosition(), v(px, escape_y), 0.2)
+        self.add_track(pad.GetNet(), v(px, escape_y), v(cx, escape_y), 0.2)
+        self.add_track(pad.GetNet(), v(cx, escape_y), v(cx, cy), 0.2)
+        return 0
+
+    def escape_touch_ground(self) -> int:
+        pad = self.board.FindFootprintByReference("U_TOUCH").FindPadByNumber("4")
+        pos = pad.GetPosition()
+        via_x, via_y = box_mm(pad.GetBoundingBox())[0] - 1.65, pos.y * TO_MM
+        self.add_track(pad.GetNet(), pos, v(via_x, via_y), 0.2)
+        self.add_via(pad.GetNet(), "GND", via_x, via_y)
+        return 1
+
+    def route_camera_dvdd(self) -> int:
+        """用底层固定连接 J_CAM.10 与去耦端，避免密脚距区被后续走线封闭。"""
+        jcam = self.board.FindFootprintByReference("J_CAM").FindPadByNumber("10")
+        cap = self.board.FindFootprintByReference("C_CAM_DVDD").FindPadByNumber("1")
+        jx = jcam.GetPosition().x * TO_MM
+        jy = box_mm(jcam.GetBoundingBox())[3] + 1.1
+        cx, cy = cap.GetPosition().x * TO_MM, cap.GetPosition().y * TO_MM - 1.0
+        net_item = jcam.GetNet()
+
+        # J_CAM 侧复用 escape_camera_fpc 已放置的交错过孔。
+        self.add_track(net_item, cap.GetPosition(), v(cx, cy), 0.2)
+        self.add_via(net_item, "+1V5", cx, cy)
+        detour_x, inner_y = 33.8, 56.2
+        self.add_layer_track(net_item, v(jx, jy), v(jx, inner_y), 0.2, pcbnew.B_Cu)
+        self.add_layer_track(net_item, v(jx, inner_y), v(detour_x, inner_y), 0.2, pcbnew.B_Cu)
+        self.add_layer_track(net_item, v(detour_x, inner_y), v(detour_x, cy), 0.2, pcbnew.B_Cu)
+        self.add_layer_track(net_item, v(detour_x, cy), v(cx, cy), 0.2, pcbnew.B_Cu)
+        return 2
+
+    def anchor_servo_pgnd(self) -> int:
+        """把热焊盘被孤立的舵机 PGND 脚直接伸入 B.Cu 的 PGND 实心区。"""
+        pad = self.board.FindFootprintByReference("J_SERVO_L").FindPadByNumber("3")
+        pos = pad.GetPosition()
+        self.add_layer_track(pad.GetNet(), pos,
+                             v(pos.x * TO_MM - 3.0, pos.y * TO_MM), 0.8, pcbnew.B_Cu)
+        return 0
+
     def run(self) -> tuple[int, list[str]]:
-        added, skipped = 0, []
+        added = self.escape_camera_fpc()
+        added += self.escape_dense_sensor_signals()
+        added += self.route_imu_regout()
+        added += self.escape_imu_plane_pads()
+        added += self.escape_touch_ground()
+        added += self.route_camera_dvdd()
+        added += self.anchor_servo_pgnd()
+        skipped = []
         pth = [(p.GetNetname(), p.GetPosition().x * TO_MM, p.GetPosition().y * TO_MM) for p in self.pads
                if p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH]
         # 大焊盘先处理：小引脚要连到它们的过孔上
@@ -118,10 +262,13 @@ class Fanout:
                 continue
             if any(n == net and math.hypot(x - px, y - py) <= VIA_D for n, x, y in self.vias):
                 continue
+            if (ref == "U_IMU" and pad.GetNumber() in ("8", "9", "11")) or \
+                    (ref == "U_TOUCH" and pad.GetNumber() == "4"):
+                continue
             b = box_mm(pad.GetBoundingBox())
             w, h = b[2] - b[0], b[3] - b[1]
 
-            if w * h >= BIG_PAD_AREA:
+            if w * h >= BIG_PAD_AREA and self.via_ok(net, px, py, plane):
                 self.add_via(pad.GetNet(), net, px, py)          # 散热焊盘内打过孔
                 ep_vias[(ref, net)] = (px, py)
                 added += 1

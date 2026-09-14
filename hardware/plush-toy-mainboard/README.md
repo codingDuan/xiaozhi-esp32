@@ -9,9 +9,9 @@
 | 工具链 | 完成 | KiCad 10.0.6、OpenJDK 26（Freerouting 2.4.1 需 Java 25+） |
 | 器件与连接数据 | 完成 | `scripts/board_spec.py`，config.h、硬约束、库引脚核对全绿 |
 | 原理图 | **生成完成，待委托方评审** | `plush-toy-mainboard.kicad_sch`，网表与 board_spec 逐网络一致，ERC 零错误；`renders/schematic.pdf` |
-| 布局 | **完成，待委托方过目** | `plush-toy-mainboard.kicad_pcb`：90×60mm 四层、单面贴片，108 个器件，test_pcb 8 项全绿；`renders/place_top.png` |
-| 走线 | **进行中** | 扇出 101 个平面过孔 + Freerouting 自动布线；2026-09-14 存档为 10 条未连接，最近一次完整重跑为 **12 条未连接、4 处孔间距违规**，说明自动布线结果不稳定；与原理图一致 |
-| 制造文件 | 未开始 | `fab/` 下 Gerber、钻孔、BOM、坐标文件 |
+| 布局 | **完成，待委托方过目** | `plush-toy-mainboard.kicad_pcb`：90×60mm 四层、单面贴片，108 个板上器件；`renders/place_top.png` |
+| 走线 | **静态检查完成** | 确定性扇出 + Freerouting + DRC 驱动收尾；全量 KiCad DRC **0 个错误、2 个已审阅 U1 丝印板边告警、0 条未连接、0 条原理图一致性问题** |
+| 制造文件 | **已导出并完成静态检查** | `fab/`：14 个非空 Gerber/钻孔文件、74 个有 LCSC 料号的自动贴装位号；8 个板外接线座明确为手焊，不进入 BOM/CPL；双面最终渲染在 `renders/` |
 | 首板验收 | 清单完成，待打样 | [`TESTING.md`](TESTING.md)：制造文件、电源隔离、接口、外设、热与压力测试 |
 
 ## 已定的物理约束
@@ -26,7 +26,7 @@
 2. **两块圆屏的 7 针顺序**：拍屏幕模块排针丝印，确认是 RST / CS / DC / SDA / SCL / GND / VCC。
 3. **舵机插头顺序**：本板按 PWM / V+ / GND，与原 PCA9685 模块一致；若舵机线序不同需调换。
 
-## 布线流水线与剩余问题
+## 布线流水线
 
 重新布线按顺序执行（均用 KiCad 自带 Python，记作 `KP`）：
 
@@ -34,35 +34,43 @@
 cd hardware/plush-toy-mainboard/scripts
 KP=/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
 $KP gen_pcb.py                                                     # 外框、放置、铺铜、丝印
-$KP fanout.py                                                      # GND / +3V3 焊盘打过孔下平面
+$KP fanout.py                                                      # 电源平面、密脚距器件与相机 FPC 的确定性扇出
 JAVA_TOOL_OPTIONS=-Djava.awt.headless=true $KP route.py 30          # Freerouting 自动布线，约 5 分钟
-$KP -m unittest test_pcb && python3 -m unittest test_drc            # 布局核对与 DRC
+$KP post_route.py --apply                                          # 候选板完整 DRC/一致性通过后才覆盖正式 PCB
+$KP -m unittest test_pcb test_drc -v                               # 布局、DRC、未连接与原理图一致性
 ```
 
 **已知坑**（都已写进脚本与测试）：
 - 独立脚本里 `board.Save()` 会把 KiCad 默认规则写回 `.kicad_pro`，冲掉网络类。每次保存后必须 `project_rules.apply()`，否则 DRC 按默认 0.2mm 间距报几百处假错误
 - 内层 In1 / In2 必须设为 power 类型，否则 Freerouting 会把信号线走在 GND / 3V3 平面上
 - Freerouting 不会主动打过孔接平面，所以先跑 `fanout.py`
+- Freerouting 的收尾结果不稳定；`post_route.py` 默认只写 `build/post-route-candidate.kicad_pcb`，候选板会复制到完整临时工程执行 DRC 与原理图一致性检查，仅保留精确匹配的两条 U1 标准封装丝印板边告警后才允许 `--apply`
+- 相机 0.5mm FPC、IMU、触摸与功放先做确定性逃逸；最终收尾会删除已被正式路径替代的悬空 stub/过孔，并按网络类宽度重走超过 2mm 的窄电源线
+- U1 标准库封装的天线边界丝印距板边约 0.54mm，不涉及铜、阻焊或铣刀路径；工程规则明确忽略这一项丝印板边提示，避免裁改标准封装
+- 描述性位号（如 `C_ADC`）不符合 KiCad 自动注释的字母+数字格式，制造 BOM 必须由 `board_spec.py` 经 `export_bom.py` 导出，不能直接使用 KiCad BOM 导出器
 - 生成过程中请勿在 KiCad 图形界面里保存 PCB，会覆盖脚本结果
 
-**2026-09-14 存档时的剩余问题**（Freerouting 每次结果可能不同，以下是存档基线，不是固定数量）：
+**2026-09-14 静态验收结果**：
 
-| 问题 | 数量 | 处理方向 |
+| 检查 | 结果 | 处理 |
 |---|---|---|
-| 未连接：U_IMU 的 GND/+3V3 引脚（8/9/11）、U_TOUCH.4、J_CAM +2V8/+1V5、U_PWM/U_ADC 的 +3V3（位于 +3V3 平面覆盖范围 x<62 之外）、TOUCH_E0、CAM_Y6 | 10 | IMU 与 TOUCH 细间距引脚手工扇出；U_PWM、U_ADC 的 +3V3 需要走线或扩大 In2 平面；两条信号线手工补 |
-| 孔间距：Freerouting 打的 GND 过孔离 U_MIC 声孔 0.13mm（规则 0.25mm） | 4 | 在声孔周围加禁布区，或布线后挪过孔 |
-| 扇出找不到位置：J_CAM.2、D_USB_DP/DN.2、U_IMU.8/9/11、U_TOUCH.4 | 7 | 同上，手工处理 |
-| 关键线未专门处理：USB 差分 90Ω、摄像头 XCLK、功率线宽 | — | 布通后在渲染图上逐条核查 |
+| KiCad DRC | 0 错误、2 个已审阅告警 | U1 标准封装天线端两条丝印线距板边约 0.54mm；告警按对象精确白名单，未全局屏蔽；其余声孔/孔间距、铜间距、板边与禁布区规则均通过 |
+| 未连接项 | 0 | DRC 驱动的候选补线通过后应用 |
+| 原理图一致性 | 通过 | `--schematic-parity` 与逐网络测试均通过 |
+| 板级结构与 DRC | 通过 | 包含电源线宽/过孔、连接器/IC 丝印、PGND 锚线、声孔净距、完整 DRC 与原理图一致性 |
+| 制造文件 | 通过 | BOM 与坐标各 74 个唯一自动贴装位号，均有 LCSC 料号且无 `?`；8 个接线座手焊；Gerber zip 14 个文件、无空文件 |
+| 实物电气与信号质量 | 待首板 | 按 [`TESTING.md`](TESTING.md) 验证 USB、DVP、SPI、音频、供电与热测试 |
 
 ## 运行测试
 
 ```sh
 cd hardware/plush-toy-mainboard/scripts
-python3 -m unittest test_kicad_env test_config_pins test_board_spec test_part_pins test_netlist_roundtrip -v
+python3 -m unittest test_kicad_env test_config_pins test_board_spec test_part_pins test_netlist_roundtrip test_export_bom -v
 /Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3 -m unittest test_project_lib -v
+/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3 -m unittest test_pcb test_drc test_post_route -v
 ```
 
-DRC 全绿后，按 [`TESTING.md`](TESTING.md) 完成下单前检查；收到首板后继续填写分域上电、接口、外设、热和压力测试的实测记录。
+静态检查通过后，按 [`TESTING.md`](TESTING.md) 完成下单前检查；收到首板后继续填写分域上电、接口、外设、热和压力测试的实测记录。
 
 ## 已知风险
 

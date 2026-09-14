@@ -29,12 +29,14 @@ NETCLASSES = [
     _netclass("Default", 0.2, 0.15, 0.6, 0.3, 2147483647),
     _netclass("Power", 1.0, 0.2, 0.8, 0.4, 0),
     _netclass("Supply", 0.5, 0.15, 0.6, 0.3, 1),
+    _netclass("CameraSupply", 0.3, 0.15, 0.6, 0.3, 2),
 ]
 
 PATTERNS = (
     [{"netclass": "Power", "pattern": n} for n in ("VMOT", "VMOT_IN", "PGND", "HEAT_LOW")]
     + [{"netclass": "Supply", "pattern": n}
-       for n in ("VBUS", "VBUS_IN", "+3V3", "GND", "BUCK_SW", "SPK_P", "SPK_N", "+2V8", "+1V5")]
+       for n in ("VBUS", "VBUS_IN", "+3V3", "GND", "BUCK_SW", "SPK_P", "SPK_N", "+2V8")]
+    + [{"netclass": "CameraSupply", "pattern": "+1V5"}]
 )
 
 RULES = {
@@ -50,6 +52,10 @@ RULES = {
     "min_text_thickness": 0.15,
 }
 
+# 不全局屏蔽丝印板边告警。U1 标准封装的两条已审阅告警由 test_drc.py 精确白名单，
+# 这样新增的任何同类问题仍会使验证失败。
+RULE_SEVERITIES = {"silk_edge_clearance": "warning"}
+
 
 def apply(path: Path = PRO) -> Path:
     data = json.loads(path.read_text(encoding="utf-8")) if path.exists() and path.read_text().strip() else {}
@@ -61,6 +67,8 @@ def apply(path: Path = PRO) -> Path:
     ns.setdefault("netclass_assignments", None)
     rules = data.setdefault("board", {}).setdefault("design_settings", {}).setdefault("rules", {})
     rules.update(RULES)
+    severities = data["board"]["design_settings"].setdefault("rule_severities", {})
+    severities.update(RULE_SEVERITIES)
     data.setdefault("meta", {"filename": path.name, "version": 3})
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return path
