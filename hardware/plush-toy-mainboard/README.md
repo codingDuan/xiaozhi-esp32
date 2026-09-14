@@ -9,11 +9,17 @@
 | 工具链 | 完成 | KiCad 10.0.6、OpenJDK 26（Freerouting 2.4.1 需 Java 25+） |
 | 器件与连接数据 | 完成 | `scripts/board_spec.py`，config.h、硬约束、库引脚核对全绿 |
 | 原理图 | **生成完成，待委托方评审** | `plush-toy-mainboard.kicad_sch`，网表与 board_spec 逐网络一致，ERC 零错误；`renders/schematic.pdf` |
-| 布局 | 未开始 | `*.kicad_pcb`、四层渲染图 |
+| 布局 | **完成，待委托方过目** | `plush-toy-mainboard.kicad_pcb`：90×60mm 四层、单面贴片，108 个器件，test_pcb 8 项全绿；`renders/place_top.png` |
 | 走线 | 未开始 | DRC 报告 |
 | 制造文件 | 未开始 | `fab/` 下 Gerber、钻孔、BOM、坐标文件 |
 
-## 原理图评审需要委托方确认的三件事
+## 已定的物理约束
+
+- 板子 **90×60mm，单面贴片**（原定 70×50mm 按实际封装量放不下）
+- 摄像头为 **OV3660**（排线丝印 TY-OV3660-21MM-V3.0），金手指朝下插入，用下接触 FPC 座
+- 圆屏 7 针顺序、舵机线序均已对照实物确认
+
+## 原理图评审需要委托方确认的三件事（已全部确认，2026-09-14）
 
 1. **摄像头排线金手指朝向**：拍一张 OV2640 排线末端的照片。本板按下接触 FPC 座（AFC01-S24FCA-00）绘制，若金手指朝上需换上接触座（设计方案 12.5 节）。
 2. **两块圆屏的 7 针顺序**：拍屏幕模块排针丝印，确认是 RST / CS / DC / SDA / SCL / GND / VCC。
