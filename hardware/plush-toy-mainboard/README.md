@@ -10,8 +10,9 @@
 | 器件与连接数据 | 完成 | `scripts/board_spec.py`，config.h、硬约束、库引脚核对全绿 |
 | 原理图 | **生成完成，待委托方评审** | `plush-toy-mainboard.kicad_sch`，网表与 board_spec 逐网络一致，ERC 零错误；`renders/schematic.pdf` |
 | 布局 | **完成，待委托方过目** | `plush-toy-mainboard.kicad_pcb`：90×60mm 四层、单面贴片，108 个器件，test_pcb 8 项全绿；`renders/place_top.png` |
-| 走线 | **进行中（2026-09-14 存档）** | 扇出 101 个平面过孔 + Freerouting 自动布线；DRC 剩 **10 条未连接、4 处孔间距违规**，与原理图一致，test_pcb 16 项全绿 |
+| 走线 | **进行中** | 扇出 101 个平面过孔 + Freerouting 自动布线；2026-09-14 存档为 10 条未连接，最近一次完整重跑为 **12 条未连接、4 处孔间距违规**，说明自动布线结果不稳定；与原理图一致 |
 | 制造文件 | 未开始 | `fab/` 下 Gerber、钻孔、BOM、坐标文件 |
+| 首板验收 | 清单完成，待打样 | [`TESTING.md`](TESTING.md)：制造文件、电源隔离、接口、外设、热与压力测试 |
 
 ## 已定的物理约束
 
@@ -44,7 +45,7 @@ $KP -m unittest test_pcb && python3 -m unittest test_drc            # 布局核�
 - Freerouting 不会主动打过孔接平面，所以先跑 `fanout.py`
 - 生成过程中请勿在 KiCad 图形界面里保存 PCB，会覆盖脚本结果
 
-**2026-09-14 存档时的剩余问题**（下次从这里继续）：
+**2026-09-14 存档时的剩余问题**（Freerouting 每次结果可能不同，以下是存档基线，不是固定数量）：
 
 | 问题 | 数量 | 处理方向 |
 |---|---|---|
@@ -60,6 +61,8 @@ cd hardware/plush-toy-mainboard/scripts
 python3 -m unittest test_kicad_env test_config_pins test_board_spec test_part_pins test_netlist_roundtrip -v
 /Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3 -m unittest test_project_lib -v
 ```
+
+DRC 全绿后，按 [`TESTING.md`](TESTING.md) 完成下单前检查；收到首板后继续填写分域上电、接口、外设、热和压力测试的实测记录。
 
 ## 已知风险
 
