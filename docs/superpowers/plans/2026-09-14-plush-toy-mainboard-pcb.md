@@ -554,6 +554,15 @@ Expected: `ModuleNotFoundError: No module named 'gen_schematic'`
 
 - [ ] **Step 3: 实现生成器**
 
+> **实施修正（2026-09-14）**：下方代码是计划稿，实际实现以 `scripts/gen_schematic.py` 为准。与计划稿的差异：
+> - 用本地 `label` 而非 `global_label`：单页原理图同名本地标签即相连，且语法照 KiCad 10 template 实际写法。
+> - `lib_symbols` 中的符号必须展平：派生符号（`extends`，如 ADS1115IDGS、ME6211C28M5、TLV62569DBV、AO3400A）从父符号展开。
+> - 每个放置的符号带 `instances` 块，否则网表里位号退化为 U?、R?。
+> - 有电源输入引脚、但无电源输出引脚驱动的网络补 `PWR_FLAG`（#FLG），否则 ERC 报错。
+> - 标签按引脚方向朝外伸出，不压住引脚名；锚点仍在引脚末端。
+> - 网表比对忽略 # 开头的虚拟符号与不贴件（原理图保留不贴件以便改版补焊）。
+> - 新增反向核对 `test_no_extra_connections` 与位号保持核对 `test_every_part_keeps_its_reference`。
+
 生成策略：每个器件实例放在网格上，**每个引脚末端放一个同名全局网络标签**，不画导线。这样连接关系完全由标签名决定，与 `board_spec` 一一对应，人看原理图时按标签名跟网络。
 
 ```python
