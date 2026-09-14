@@ -204,6 +204,42 @@
 // 若接入后触摸、运动或舵机变得更不稳，先拆掉 ADS1115 模块上的两颗上拉。
 #define ADS1115_ADDR          0x48   // ADDR 接 GND
 #define THERMAL_NTC_CHANNEL   0      // ADS1115 A0
+// 实测 2026-09-13：室温码值约 12100（≈29℃），手捏约 9700（≈37.7℃），
+// 连读 5 次跨度约 60 码（≈0.3℃）。尚未做冰水标定。
+
+// 加热：OPEN-SMART MOS 模块的 SIG 接 PCA9685 CH15，不占引脚。
+// PCA9685 输出寄存器自持，ESP32 死机时会保持最后写入的值 —— 软件保护全部失效，
+// 所以加热膜上必须串 KSD9700 65℃ 常闭温控开关。
+#define THERMAL_HEATER_CHANNEL    15
+#define THERMAL_POLL_INTERVAL_MS  500
+
+// 合理性闸门：-10℃ 到 90℃ 对应的码值区间之外整帧丢弃。
+// 探头断线时节点被 10k 拉到 3V3（≈26400），短路时为 0，两种都越界 ——
+// 断线若读成「很冷」会让控制器全功率加热，这层就是为它存在的。
+#define THERMAL_CODE_MIN          2200
+#define THERMAL_CODE_MAX          22600
+#define THERMAL_BAD_SAMPLE_LIMIT  5
+
+// 安全门限，温度单位 0.1℃
+#define THERMAL_TARGET_DEFAULT_DC 380        // 38.0℃
+#define THERMAL_TARGET_MAX_DC     400        // 请求值上限 40.0℃
+#define THERMAL_OVERTEMP_DC       480        // 48.0℃ 闭锁。皮肤痛阈约 43-44℃，这是膜面温度
+#define THERMAL_RISE_LIMIT_DC     100        // 任意 60 秒内升温超过 10.0℃ 即故障
+#define THERMAL_RISE_WINDOW_MS    (60 * 1000)
+// 硬上限，与温度读数无关。包在毛绒里满功率估算能到 80℃ 以上，20% 对应约 41℃。
+#define THERMAL_DUTY_MAX_PCT      20
+#define THERMAL_SESSION_MAX_MS    (30 * 60 * 1000)
+
+// 探头失联：占空比持续顶在上限 2 分钟而升温不足 1℃，说明探头没贴在膜上、
+// 膜坏了或 MOS 没导通。静默地什么都不发生比报错更糟。标定时按实测修正。
+#define THERMAL_DETACH_DUTY_PCT   20
+#define THERMAL_DETACH_WINDOW_MS  (2 * 60 * 1000)
+#define THERMAL_DETACH_RISE_DC    10
+
+// 10 秒窗口的时间比例控制：不在舵机共用的 5V 轨上叠加 1A 的 50Hz 方波。
+#define THERMAL_WINDOW_MS         10000
+// 比例系数，千分之一。500 → 比例带 4℃：差 4℃ 以上顶到上限。标定后回填。
+#define THERMAL_KP_PERMILLE       500
 
 // GPIO43(丝印TX) 保留给控制台 TX，勿占用 —— 否则日志变乱码（实测）
 // 现已无空闲脚：3=舵机SCL 14/38=屏SPI 44=舵机SDA 45/46=两屏CS

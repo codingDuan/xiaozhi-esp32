@@ -15,3 +15,4 @@ test_mpu6050
 test_motion_controller
 test_gesture_policy
 test_ads1115
+test_thermal_controller

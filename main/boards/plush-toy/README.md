@@ -160,7 +160,14 @@ python3 tools/plush_toy_test.py status
 | `shake_hits` | 当前窗口内的摇晃命中次数 |
 | `motion_rejected` | 累计被合理性闸门丢弃的坏样本数 |
 | `thermal_available` | ADS1115 是否探测到并初始化成功 |
-| `thermal_code` | A0 原始码值（PGA ±4.096V）。25℃ 约 13200，越热越小；断线约 26400，短路约 0。读失败时不出现 |
+| `thermal_state` | `off` / `heating` / `fault` |
+| `thermal_fault` | `none` / `sensor_out_of_range` / `over_temp` / `rise_too_fast` / `probe_detached` / `session_expired` |
+| `thermal_code` | 最近一个有效样本的 A0 码值（PGA ±4.096V）。25℃ 约 13200，越热越小。尚无有效样本时不出现 |
+| `thermal_temp_dc` | 温度，单位 0.1℃ |
+| `thermal_target_dc` / `thermal_duty` | 目标温度与当前占空比（%，硬上限 20） |
+| `thermal_heater_on` | 此刻 CH15 是否导通 |
+| `thermal_rejected` | 累计坏样本与读失败数，反映总线坏读率 |
+| `thermal_session_ms` | 本次加热会话已持续时长 |
 
 触摸与运动的原始读数只在各自掩码的诊断位打开时才出现，默认是打开的。
 
@@ -232,6 +239,20 @@ seen = [orient() for _ in range(10)]   # 期望序列形如 [2,2,2,...,1,1]
 手动测真实传感器：把板子整个拿起来慢慢翻过来，盯着 `status` 的 `orientation` 从 1 变 2 再变 3，眼睛应跟着变 `sleepy` 再变 `surprised`；用力晃几下，眼睛应变 `confused` 并摆一次手。
 
 **`orientation` 需要连续三帧一致才切换**，也就是翻过去后要停住约 0.3 秒才变。这是防坏样本加的迟滞，不是卡顿。
+
+### 体温
+
+```sh
+python3 tools/plush_toy_test.py thermal-warm 38          # 请求加热，目标截断到 40℃
+python3 tools/plush_toy_test.py thermal-stop
+python3 tools/plush_toy_test.py thermal-clear-fault      # 故障闭锁，只能这样清或重启
+python3 tools/plush_toy_test.py thermal-force-duty 15    # 标定专用，0-20
+python3 tools/plush_toy_test.py thermal-sim over_temp    # over_temp / open / short / rise / detach / session
+```
+
+**`thermal-sim` 是验收保护的唯一手段**，实机上没法安全地真的触发过温或升温过快。它合成时间戳往后连喂样本，几分钟到半小时的序列几毫秒跑完，发完立刻读 `status` 就能看到 `thermal_fault`。`rise`、`detach`、`session` 会先开一次加热会话，**加热回路接通后 CH15 会真的短暂导通若干毫秒**。每跑一条闭锁类预设后要 `thermal-clear-fault` 才能跑下一条。
+
+加热默认关闭，回归（`run-regression`）不包含任何加热动作。设计与标定流程见[体温方案](../../../docs/superpowers/specs/2026-09-10-plush-toy-thermal-design.md)，**保护验证通过、KSD9700 装好之前不接加热膜**。
 
 ### 传感器响应掩码
 

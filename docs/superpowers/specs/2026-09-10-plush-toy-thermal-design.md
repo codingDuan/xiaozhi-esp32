@@ -301,7 +301,9 @@ void SetFullOn(int ch);     // 写 LEDn_ON_H 的 bit4
 void SetFullOff(int ch);    // 写 LEDn_OFF_H 的 bit4
 ```
 
-芯片原生支持全开全关位，不需要用 `SetPulseUs` 逼近。现有的 `AllOff()` 会同时关掉加热，这是期望行为。
+芯片原生支持全开全关位，不需要用 `SetPulseUs` 逼近。
+
+> **实施修正（2026-09-13）**：原稿写「现有的 `AllOff()` 会同时关掉加热」，与代码不符 —— `AllOff()` 只关 CH0/CH1。且它是每个手势结束时的泄力，若顺带关 CH15，加热会被每次摆手打断，故保持只关舵机通道，并有主机测试钉住。两个方法返回 `bool`：写失败时控制器下个周期重发，不假设已经关断。
 
 ### 4.4 PlushBehavior 接入
 
@@ -431,6 +433,12 @@ duty     = clamp(error × Kp / 1000, 0, 20)   (单位 %)
 | `thermal_force_duty <pct>` | 标定专用：绕过控制器直接设占空比，仍受过温与时间预算约束 |
 
 `thermal_sim` 是验收过温闭锁、升温过快、探头失联这三条的唯一可行手段，实机上没法安全地真的触发它们。
+
+> **实施修正（2026-09-13）**：`thermal_sim` 改为预设 `over_temp / open / short / rise / detach / session`，不接受裸码值。真实 500ms 轮询在并发喂样本，裸码值序列会被插队打断，失联、会话超时这类长序列无法稳定触发。长序列预设从固定 25℃ 码值起喂 —— 最初用 `last_code()`，实测在 `rise` 之后跑 `detach` 时读到上一条模拟残留的 44℃，占空比为 0，失联计时根本不启动。
+>
+> 实机验收（加热回路未接）：六条预设按两种顺序各跑一轮，12/12 触发预期故障且 CH15 断开；过温闭锁在温度回落到 28.6℃ 后仍保持，期间 `thermal_warm` 被拒绝。
+>
+> 另两处接口调整：`RequestHeating` / `ForceDuty` 带 `now_ms` 参数以便主机侧确定性测试；新增 `ApplyReadFailure`，I2C 读失败与坏样本同等计入闸门 —— 否则读不到时加热会停在上一次输出上。`thermal_modes` 掩码与 MCP 工具随第 7 步实施。
 
 ### 7.3 `tools/plush_toy_test.py`
 

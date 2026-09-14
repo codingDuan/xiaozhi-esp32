@@ -8,7 +8,7 @@ CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -I.. -Istubs
 
 .PHONY: test clean preview-png
 
-test: test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel test_mpr121 test_touch_controller test_mpu6050 test_motion_controller test_gesture_policy test_ads1115
+test: test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel test_mpr121 test_touch_controller test_mpu6050 test_motion_controller test_gesture_policy test_ads1115 test_thermal_controller
 	./test_eye_renderer
 	./test_eye_theme
 	./test_overlay_qr
@@ -21,6 +21,7 @@ test: test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer tes
 	./test_motion_controller
 	./test_gesture_policy
 	./test_ads1115
+	./test_thermal_controller
 
 test_eye_renderer: test_eye_renderer.cc ../eye_renderer.cc ../eye_renderer.h ../eye_theme.cc ../eye_theme.h ../eye_iris_tex.cc ../eye_iris_tex.h
 	$(CXX) $(CXXFLAGS) -o $@ test_eye_renderer.cc ../eye_renderer.cc ../eye_theme.cc ../eye_iris_tex.cc -lm
@@ -56,6 +57,9 @@ test_gesture_policy: test_gesture_policy.cc ../gesture_policy.h ../gesture.h ../
 test_ads1115: test_ads1115.cc ../ads1115.cc ../ads1115.h
 	$(CXX) $(CXXFLAGS) -o $@ test_ads1115.cc ../ads1115.cc
 
+test_thermal_controller: test_thermal_controller.cc ../thermal_controller.cc ../thermal_controller.h ../ads1115.cc ../ads1115.h ../config.h
+	$(CXX) $(CXXFLAGS) -o $@ test_thermal_controller.cc ../thermal_controller.cc ../ads1115.cc
+
 test_mpr121: test_mpr121.cc ../mpr121.cc ../mpr121.h ../config.h
 	$(CXX) $(CXXFLAGS) -o $@ test_mpr121.cc ../mpr121.cc
 
@@ -69,4 +73,4 @@ preview-png: preview
 	python3 to_png.py
 
 clean:
-	rm -f test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel test_mpr121 test_touch_controller test_mpu6050 test_motion_controller test_gesture_policy test_ads1115 preview *.ppm
+	rm -f test_eye_renderer test_eye_theme test_overlay_qr test_overlay_renderer test_pca9685 test_http_channel test_mpr121 test_touch_controller test_mpu6050 test_motion_controller test_gesture_policy test_ads1115 test_thermal_controller preview *.ppm

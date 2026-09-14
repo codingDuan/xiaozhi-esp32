@@ -24,6 +24,7 @@
 #include "plush_behavior.h"
 #include "plush_toy_test_server.h"
 #include "settings.h"
+#include "thermal_controller.h"
 #include "touch_controller.h"
 #include "wifi_board.h"
 
@@ -68,6 +69,7 @@ private:
     Mpu6050* mpu6050_ = nullptr;
     MotionController* motion_ = nullptr;
     Ads1115* ads1115_ = nullptr;
+    ThermalController* thermal_ = nullptr;
     // MPR121 要挂在同一条总线上，因此句柄必须活过 InitializeServoBus()
     i2c_master_bus_handle_t servo_bus_ = nullptr;
 
@@ -155,12 +157,70 @@ private:
                              now += MOTION_POLL_INTERVAL_MS)
                         motion_->ApplySample(ax, ay, az, now);
                 }
+            } else if (action == "thermal_warm" && thermal_ != nullptr) {
+                const auto* target = cJSON_GetObjectItem(arguments, "target_c");
+                const int target_c = cJSON_IsNumber(target) ? target->valueint
+                                                            : THERMAL_TARGET_DEFAULT_DC / 10;
+                thermal_->RequestHeating(target_c * 10, esp_timer_get_time() / 1000);
+            } else if (action == "thermal_stop" && thermal_ != nullptr) {
+                thermal_->Stop();
+            } else if (action == "thermal_clear_fault" && thermal_ != nullptr) {
+                thermal_->ClearFault();
+            } else if (action == "thermal_force_duty" && thermal_ != nullptr) {
+                const auto* percent = cJSON_GetObjectItem(arguments, "percent");
+                thermal_->ForceDuty(cJSON_IsNumber(percent) ? percent->valueint : 0,
+                                    esp_timer_get_time() / 1000);
+            } else if (action == "thermal_sim" && thermal_ != nullptr) {
+                const auto* kind = cJSON_GetObjectItem(arguments, "kind");
+                SimulateThermal(cJSON_IsString(kind) ? kind->valuestring : "");
             } else if (action == "diagnostics" && pca_ != nullptr) {
                 ESP_LOGI(TAG, "test diagnostics: %s", pca_->Diagnostics().c_str());
             }
             if (arguments != nullptr)
                 cJSON_Delete(arguments);
         });
+    }
+
+    // 实机上无法安全地真的触发过温、升温过快、探头失联，这是验收它们的唯一手段。
+    // 每个预设都走 ApplySample，与真实轮询同一条路径。
+    //
+    // 真实 500ms 轮询在并发喂当前温度。长序列预设从固定的 25℃ 起喂，不用 last_code()：
+    // 缓存码值可能是上一条模拟留下的假高温（实测 rise 之后 detach 因此没触发 ——
+    // 44℃ 高于 40℃ 目标，占空比为 0，失联计时根本不启动）。真实室温样本偶尔插队
+    // 只差几度，不改变任何一条的判定结论。
+    // 时间戳从当前时刻往后合成，模拟几分钟到半小时只花几毫秒。
+    void SimulateThermal(const std::string& kind) {
+        int64_t t = esp_timer_get_time() / 1000;
+        const int16_t real = 13200;   // 25℃
+        auto feed = [&](int16_t code, int count) {
+            for (int i = 0; i < count; ++i, t += THERMAL_POLL_INTERVAL_MS)
+                thermal_->ApplySample(code, t);
+        };
+        if (kind == "over_temp") {
+            feed(7369, 1);   // 48.0℃
+        } else if (kind == "open") {
+            feed(26400, THERMAL_BAD_SAMPLE_LIMIT);   // 断线，节点被拉到 3V3
+        } else if (kind == "short") {
+            feed(0, THERMAL_BAD_SAMPLE_LIMIT);
+        } else if (kind == "rise") {
+            // 30 秒内从当前温度升 15℃（约 -2800 码/15℃ 在 25-40℃ 段），不越过 48℃ 线
+            if (!thermal_->RequestHeating(THERMAL_TARGET_MAX_DC, t))
+                return;
+            const int steps = 30000 / THERMAL_POLL_INTERVAL_MS;
+            const int16_t hot = (int16_t)std::max(real - 4000, 7600);
+            for (int i = 1; i <= steps && thermal_->state() == ThermalState::kHeating; ++i)
+                feed((int16_t)(real + (hot - real) * i / steps), 1);
+        } else if (kind == "detach") {
+            // 目标拉满，占空比顶到上限；温度纹丝不动
+            if (!thermal_->RequestHeating(THERMAL_TARGET_MAX_DC, t))
+                return;
+            feed(real, THERMAL_DETACH_WINDOW_MS / THERMAL_POLL_INTERVAL_MS + 2);
+        } else if (kind == "session") {
+            // 占空比压在失联门槛之下，只让时间预算生效
+            if (!thermal_->ForceDuty(THERMAL_DETACH_DUTY_PCT - 5, t))
+                return;
+            feed(real, THERMAL_SESSION_MAX_MS / THERMAL_POLL_INTERVAL_MS + 2);
+        }
     }
 
     // 控制台静默，原始计数只能从 HTTP 拿。DIAG 位关掉时省掉这段读 I2C 的开销。
@@ -218,15 +278,27 @@ private:
             json += ",\"motion_rejected\":" + std::to_string(motion_->rejected_samples());
         }
 
-        // 本期只有驱动，直接读一次 A0。ThermalController 接入后改为读它缓存的码值，
-        // 并受 THERMAL_MODE_DIAG 控制 —— 届时它独占 ADS1115，这里不能再直接读。
+        // 只读 ThermalController 的缓存值。ADS1115 一次读取是多个事务，由轮询任务独占，
+        // 这里再直接读会与它互相覆盖 MUX。
         json += ",\"thermal_available\":";
-        json += (ads1115_ != nullptr ? "true" : "false");
-        if (ads1115_ != nullptr) {
-            int16_t code = 0;
-            // 读失败就不报，而不是报 0 —— 0 是合法码值（节点短路）。
-            if (ads1115_->ReadSingleEnded(THERMAL_NTC_CHANNEL, &code))
-                json += ",\"thermal_code\":" + std::to_string(code);
+        json += (thermal_ != nullptr && thermal_->available() ? "true" : "false");
+        if (thermal_ != nullptr && thermal_->available()) {
+            const int64_t now = esp_timer_get_time() / 1000;
+            json += ",\"thermal_state\":\"" +
+                    std::string(ThermalController::StateName(thermal_->state())) + "\"";
+            json += ",\"thermal_fault\":\"" +
+                    std::string(ThermalController::FaultName(thermal_->fault())) + "\"";
+            // 尚无有效样本时不报温度，而不是报 0
+            if (thermal_->has_temperature()) {
+                json += ",\"thermal_code\":" + std::to_string(thermal_->last_code());
+                json += ",\"thermal_temp_dc\":" + std::to_string(thermal_->temperature_dc());
+            }
+            json += ",\"thermal_target_dc\":" + std::to_string(thermal_->target_dc());
+            json += ",\"thermal_duty\":" + std::to_string(thermal_->duty_percent());
+            json += ",\"thermal_heater_on\":";
+            json += (thermal_->heater_on() ? "true" : "false");
+            json += ",\"thermal_rejected\":" + std::to_string(thermal_->rejected_samples());
+            json += ",\"thermal_session_ms\":" + std::to_string(thermal_->session_ms(now));
         }
         return json;
     }
@@ -551,6 +623,20 @@ public:
         motion_->Start();
 
         InitializeThermalSensor();
+        thermal_ = new ThermalController(ads1115_);
+        // 加热走 PCA9685 CH15。PCA9685 构造时的软件复位已把全部输出置为 FULL_OFF，
+        // 所以 ESP32 重启（而 PCA9685 未掉电）后加热也是断开的。
+        auto* pca = pca_;
+        thermal_->SetHeaterSink([pca](bool on) {
+            if (pca == nullptr)
+                return false;
+            return on ? pca->SetFullOn(THERMAL_HEATER_CHANNEL)
+                      : pca->SetFullOff(THERMAL_HEATER_CHANNEL);
+        });
+        // 舵机动作时断开加热：两者共用 5V/2A，堵转叠加 1A 加热会逼近电源上限。
+        thermal_->SetSuppressor([limbs]() { return limbs != nullptr && limbs->busy(); });
+        thermal_->Start();
+
         if (display_ != nullptr) {
             display_->SetBehavior(behavior_);
             display_->StartIdleAnimation();

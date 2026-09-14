@@ -89,6 +89,18 @@ def build_parser() -> argparse.ArgumentParser:
     simulate_motion.add_argument("kind", choices=("shake", "upright", "lying", "inverted"),
                                  default="shake", nargs="?")
     subparsers.add_parser("diagnostics", help="read arm driver diagnostics")
+    thermal_warm = subparsers.add_parser("thermal-warm", help="request heating to a target")
+    thermal_warm.add_argument("target_c", type=int, nargs="?", default=38,
+                              help="target in ℃, clamped on the board to 40")
+    subparsers.add_parser("thermal-stop", help="stop heating")
+    subparsers.add_parser("thermal-clear-fault", help="clear the latched thermal fault")
+    thermal_force = subparsers.add_parser(
+        "thermal-force-duty", help="calibration only: fixed duty, still capped and protected")
+    thermal_force.add_argument("percent", type=int, choices=range(0, 21))
+    thermal_sim = subparsers.add_parser(
+        "thermal-sim", help="inject fake samples to trip one protection, no real heat")
+    thermal_sim.add_argument(
+        "kind", choices=("over_temp", "open", "short", "rise", "detach", "session"))
     subparsers.add_parser("run-regression", help="run the standard direct-MCP regression")
     return parser
 
@@ -117,6 +129,16 @@ def command_to_call(argv: list[str]) -> tuple[str, dict]:
         return "simulate_motion", {"kind": args.kind}
     if args.command == "diagnostics":
         return "diagnostics", {}
+    if args.command == "thermal-warm":
+        return "thermal_warm", {"target_c": args.target_c}
+    if args.command == "thermal-stop":
+        return "thermal_stop", {}
+    if args.command == "thermal-clear-fault":
+        return "thermal_clear_fault", {}
+    if args.command == "thermal-force-duty":
+        return "thermal_force_duty", {"percent": args.percent}
+    if args.command == "thermal-sim":
+        return "thermal_sim", {"kind": args.kind}
     raise ValueError(f"{args.command} does not map to one MCP tool")
 
 

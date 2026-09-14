@@ -58,6 +58,14 @@ int main() {
     CHECK(scheduled_action == "gesture_modes", "gesture_modes must reach the scheduler");
     CHECK(channel.StatusJson().find("\"gesture_modes\"") != std::string::npos,
           "status must list gesture_modes");
+    for (const char* action : {"thermal_warm", "thermal_stop", "thermal_clear_fault",
+                               "thermal_force_duty", "thermal_sim"}) {
+        scheduled_action.clear();
+        CHECK(channel.Dispatch(action, "{}"), "whitelisted thermal action must dispatch");
+        CHECK(scheduled_action == action, "thermal action must reach the scheduler");
+        CHECK(channel.StatusJson().find(std::string("\"") + action + "\"") != std::string::npos,
+              "status must list every thermal action");
+    }
     CHECK(!channel.Dispatch("self.reboot", "{}"), "non-test action must be rejected");
     CHECK(channel.StatusJson().find("\"wave\"") != std::string::npos, "status must list wave");
     CHECK(channel.StatusJson().find("\"emotion\"") != std::string::npos,
