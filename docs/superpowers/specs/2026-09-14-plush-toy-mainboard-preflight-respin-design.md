@@ -78,12 +78,13 @@ C_NTC 保持现有 100nF 0402 X7R C1525。旧设计文档中“C0G”改为“X7
 
 ### 4.1 降压热环路
 
-U_BUCK、L_BUCK、C_BUCK_IN、C_BUCK_OUT1/2 和反馈网络作为一个不可拆分的布局单元重新放置。必须满足：
+U_BUCK、L_BUCK、C_BUCK_HF、C_BUCK_IN、C_BUCK_OUT1/2 和反馈网络作为一个不可拆分的布局单元重新放置。C_BUCK_HF 是新增的 100nF 0402 高频输入电容；C_BUCK_IN 继续作为 22uF 0805 储能电容。必须满足：
 
 - U_BUCK.3 到 L_BUCK.1 的 BUCK_SW 全程 F.Cu、无过孔、总铜长不超过 3.0mm；
-- U_BUCK.4 到 C_BUCK_IN.1 的焊盘中心距离不超过 2.5mm；
-- U_BUCK.2 到 C_BUCK_IN.2 的焊盘中心距离不超过 2.5mm；
-- C_BUCK_IN.2 和 U_BUCK.2 各自 1.0mm 内有 GND 过孔接 L2；
+- U_BUCK.4 到 C_BUCK_HF.1 的焊盘中心距离不超过 2.5mm；
+- U_BUCK.2 到 C_BUCK_HF.2 的焊盘中心距离不超过 2.5mm；
+- C_BUCK_IN 中心到 U_BUCK 中心的距离不超过 3.0mm；
+- C_BUCK_HF.2 和 U_BUCK.2 各自 1.0mm 内有 GND 过孔接 L2；
 - 反馈分压靠近 U_BUCK.5，BUCK_FB 不与 BUCK_SW 平行；
 - BUCK_SW 只位于顶层，并由完整 L2 GND 与 In2 的 +3V3 平面隔开；不得为了开关节点切割 L2。
 

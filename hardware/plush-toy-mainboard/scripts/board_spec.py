@@ -138,6 +138,7 @@ PARTS: list[Part] = [
     res("R_BUCK_EN", "100k", "VBUS", "BUCK_EN"),
     Part("L_BUCK", "2.2uH", "lcsc:YHNR4020-2R2M", "lcsc:IND-SMD_L4.0-W4.0_YHNR4020", "C2926400",
          pins={"1": "BUCK_SW", "2": "+3V3"}),
+    cap("C_BUCK_HF", "100nF", "VBUS", "GND"),
     cap22u("C_BUCK_IN", "VBUS", "GND"),
     cap22u("C_BUCK_OUT1", "+3V3", "GND"),
     cap22u("C_BUCK_OUT2", "+3V3", "GND"),

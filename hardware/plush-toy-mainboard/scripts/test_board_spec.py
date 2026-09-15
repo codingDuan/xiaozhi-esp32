@@ -104,6 +104,12 @@ class HardConstraintTest(unittest.TestCase):
                 self.assertNotIn("VBUS_FUSED", part(load).pins.values())
                 self.assertIn("VBUS", part(load).pins.values())
 
+    def test_buck_has_local_high_frequency_input_capacitor(self):
+        capacitor = part("C_BUCK_HF")
+        self.assertEqual(capacitor.value, "100nF")
+        self.assertEqual(capacitor.footprint, "Capacitor_SMD:C_0402_1005Metric")
+        self.assertEqual(capacitor.pins, {"1": "VBUS", "2": "GND"})
+
     def test_revised_camera_touch_and_led_parts(self):
         self.assertTrue(part("R_SIOC").fitted)
         self.assertTrue(part("R_SIOD").fitted)

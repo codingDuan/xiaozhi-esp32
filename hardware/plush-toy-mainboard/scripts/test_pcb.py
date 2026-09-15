@@ -1,4 +1,5 @@
 """PCB 外框、叠层、放置与网络核对。用 KiCad 自带 Python 运行：KICAD_PYTHON -m unittest test_pcb"""
+import re
 import unittest
 from pathlib import Path
 
@@ -30,6 +31,46 @@ class PcbTest(unittest.TestCase):
 
     def test_four_copper_layers(self):
         self.assertEqual(self.board.GetCopperLayerCount(), 4)
+
+    def _pad_distance(self, ref_a, pad_a, ref_b, pad_b):
+        a = self.fps[ref_a].FindPadByNumber(pad_a).GetPosition()
+        b = self.fps[ref_b].FindPadByNumber(pad_b).GetPosition()
+        return ((mm(a.x - b.x) ** 2) + (mm(a.y - b.y) ** 2)) ** 0.5
+
+    def _footprint_distance(self, ref_a, ref_b):
+        a = self.fps[ref_a].GetPosition()
+        b = self.fps[ref_b].GetPosition()
+        return ((mm(a.x - b.x) ** 2) + (mm(a.y - b.y) ** 2)) ** 0.5
+
+    def test_revised_parts_are_placed(self):
+        required = {"U_EFUSE", "C_EFUSE_IN", "C_EFUSE_DVDT", "R_EFUSE_ILM", "C_BUCK_HF",
+                    "J_TOUCH", "R_SIOC", "R_SIOD"}
+        self.assertEqual(required - self.fps.keys(), set())
+
+    def test_buck_and_esp32_local_parts_are_close(self):
+        self.assertLessEqual(self._pad_distance("U_BUCK", "4", "C_BUCK_HF", "1"), 2.5)
+        self.assertLessEqual(self._pad_distance("U_BUCK", "2", "C_BUCK_HF", "2"), 2.5)
+        self.assertLessEqual(self._footprint_distance("U_BUCK", "C_BUCK_IN"), 3.0)
+        for ref in ("C_U1", "C_U1_BULK"):
+            with self.subTest(ref=ref):
+                self.assertLessEqual(self._pad_distance("U1", "2", ref, "1"), 4.0)
+        for ref, pad in (("R_EN", "2"), ("C_EN", "1")):
+            with self.subTest(ref=ref):
+                self.assertLessEqual(self._pad_distance("U1", "3", ref, pad), 5.0)
+
+    def test_stackup_matches_jlc04161h_7628(self):
+        text = PCB.read_text(encoding="utf-8")
+        layers = re.findall(r'\(layer "(F\.Cu|In1\.Cu|In2\.Cu|B\.Cu|dielectric [123])"\s+'
+                            r'\(type "?([^"()]+)"?\)\s+\(thickness ([0-9.]+)\)', text)
+        self.assertEqual(layers, [
+            ("F.Cu", "copper", "0.035"),
+            ("dielectric 1", "prepreg", "0.2104"),
+            ("In1.Cu", "copper", "0.0152"),
+            ("dielectric 2", "core", "1.065"),
+            ("In2.Cu", "copper", "0.0152"),
+            ("dielectric 3", "prepreg", "0.2104"),
+            ("B.Cu", "copper", "0.035"),
+        ])
 
     def test_every_fitted_part_placed_inside_outline(self):
         box = self.board.GetBoardEdgesBoundingBox()
@@ -95,6 +136,13 @@ class PcbTest(unittest.TestCase):
         self.assertNotIn("℃", heater[0])
         self.assertIn("65", heater[0])
         self.assertIn("常闭", heater[0])
+
+    def test_required_safety_silkscreen_is_present(self):
+        texts = {t.GetText() for t in self.board.GetDrawings()
+                 if isinstance(t, pcbnew.PCB_TEXT) and t.GetLayer() == pcbnew.F_SilkS}
+        required = {"电机/加热专用 5V", "+", "-", "CH0 左", "CH1 右",
+                    "必须串 KSD9700 65度 常闭", "VMOT 仅限 5V", "头部触摸 E0 / GND"}
+        self.assertEqual(required - texts, set())
 
     def test_pads_of_different_parts_do_not_touch(self):
         # 庭院层不重叠不等于焊盘不重叠：第三方封装的庭院层可能比焊盘小。

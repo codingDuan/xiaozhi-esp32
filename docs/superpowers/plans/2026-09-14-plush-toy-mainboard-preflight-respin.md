@@ -53,7 +53,7 @@
 
 **Interfaces:**
 - Consumes: existing `Part`, `res()`, `cap()`, `nc()`, `PARTS`, `nets()`, and `is_assembly_item(part)`.
-- Produces: `Part.assembly: bool`; `VBUS_FUSED`; `U_EFUSE`, `C_EFUSE_IN`, `C_EFUSE_DVDT`, `R_EFUSE_ILM`, and `J_TOUCH`; fitted `R_SIOC/R_SIOD`; V6 `D_LED`; a hand-installed set derived from `Part.assembly`.
+- Produces: `Part.assembly: bool`; `VBUS_FUSED`; `U_EFUSE`, `C_EFUSE_IN`, `C_EFUSE_DVDT`, `R_EFUSE_ILM`, `C_BUCK_HF`, and `J_TOUCH`; fitted `R_SIOC/R_SIOD`; V6 `D_LED`; a hand-installed set derived from `Part.assembly`.
 
 - [ ] **Step 1: Add failing source-of-truth tests**
 
@@ -211,8 +211,9 @@ def distance(self, a, pa, b, pb):
     return ((mm(p.x - q.x) ** 2) + (mm(p.y - q.y) ** 2)) ** 0.5
 
 def test_buck_and_esp32_local_parts_are_close(self):
-    self.assertLessEqual(self.distance("U_BUCK", "4", "C_BUCK_IN", "1"), 2.5)
-    self.assertLessEqual(self.distance("U_BUCK", "2", "C_BUCK_IN", "2"), 2.5)
+    self.assertLessEqual(self.distance("U_BUCK", "4", "C_BUCK_HF", "1"), 2.5)
+    self.assertLessEqual(self.distance("U_BUCK", "2", "C_BUCK_HF", "2"), 2.5)
+    self.assertLessEqual(self.footprint_distance("U_BUCK", "C_BUCK_IN"), 3.0)
     for ref in ("C_U1", "C_U1_BULK"):
         self.assertLessEqual(self.distance("U1", "2", ref, "1"), 4.0)
     for ref in ("R_EN", "C_EN"):

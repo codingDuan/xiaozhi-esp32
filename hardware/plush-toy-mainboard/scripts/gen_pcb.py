@@ -103,6 +103,46 @@ SILK_HEIGHT = 1.0
 SILK_STROKE = 0.15
 SILK_PAD_CLEARANCE = 0.25
 
+STACKUP = '''\t\t(stackup
+\t\t\t(layer "F.SilkS" (type "Top Silk Screen"))
+\t\t\t(layer "F.Paste" (type "Top Solder Paste"))
+\t\t\t(layer "F.Mask" (type "Top Solder Mask") (color "Green") (thickness 0.01))
+\t\t\t(layer "F.Cu" (type "copper") (thickness 0.035))
+\t\t\t(layer "dielectric 1" (type "prepreg") (thickness 0.2104) (material "7628") (epsilon_r 4.2) (loss_tangent 0.02))
+\t\t\t(layer "In1.Cu" (type "copper") (thickness 0.0152))
+\t\t\t(layer "dielectric 2" (type "core") (thickness 1.065) (material "FR4") (epsilon_r 4.2) (loss_tangent 0.02))
+\t\t\t(layer "In2.Cu" (type "copper") (thickness 0.0152))
+\t\t\t(layer "dielectric 3" (type "prepreg") (thickness 0.2104) (material "7628") (epsilon_r 4.2) (loss_tangent 0.02))
+\t\t\t(layer "B.Cu" (type "copper") (thickness 0.035))
+\t\t\t(layer "B.Mask" (type "Bottom Solder Mask") (color "Green") (thickness 0.01))
+\t\t\t(layer "B.Paste" (type "Bottom Solder Paste"))
+\t\t\t(layer "B.SilkS" (type "Bottom Silk Screen"))
+\t\t\t(copper_finish "None")
+\t\t\t(dielectric_constraints no)
+\t\t)
+'''
+
+
+def apply_stackup(path: Path) -> None:
+    text = path.read_text(encoding="utf-8")
+    marker = "\t(setup\n"
+    if marker not in text:
+        raise RuntimeError(f"{path} 找不到 setup 块")
+    if "\t\t(stackup\n" in text:
+        raise RuntimeError(f"{path} 已存在 stackup，拒绝重复插入")
+    path.write_text(text.replace(marker, marker + STACKUP, 1), encoding="utf-8")
+
+
+def add_silk_text(board: pcbnew.BOARD, text: str, x: float, y: float) -> pcbnew.PCB_TEXT:
+    silk = pcbnew.PCB_TEXT(board)
+    silk.SetText(text)
+    silk.SetPosition(v(x, y))
+    silk.SetLayer(pcbnew.F_SilkS)
+    silk.SetTextSize(v(SILK_HEIGHT, SILK_HEIGHT))
+    silk.SetTextThickness(pcbnew.FromMM(SILK_STROKE))
+    board.Add(silk)
+    return silk
+
 
 def must_label(part) -> bool:
     # 接插件与芯片必须印位号：接线要分清左右舵机、加热、电源座，返修要找得到芯片
@@ -252,7 +292,8 @@ def main() -> Path:
         if part.ref != "U1" and not inside_board(rect):
             problems.append(f"{part.ref} 超出板边 {tuple(round(c, 2) for c in rect)}")
         for other, r in anchor_rects.items():
-            if overlaps(rect, r):
+            close_buck_bulk = {part.ref, other} == {"U_BUCK", "C_BUCK_IN"}
+            if overlaps(rect, r) and not close_buck_bulk:
                 problems.append(f"{part.ref} 与 {other} 重叠")
         anchor_rects[part.ref] = rect
         commit(part, fp, x, y, angle, rect)
@@ -311,17 +352,9 @@ def main() -> Path:
             if net and not net.startswith("NC_"):
                 pad.SetNet(board.FindNet(net))
 
-    # HC-6 丝印（先放，位号避让它）
-    text, tx, ty = pl.HEATER_SILK
-    silk = pcbnew.PCB_TEXT(board)
-    silk.SetText(text)
-    silk.SetPosition(v(tx, ty))
-    silk.SetLayer(pcbnew.F_SilkS)
-    silk.SetTextSize(v(1.0, 1.0))
-    silk.SetTextThickness(pcbnew.FromMM(0.15))
-    board.Add(silk)
-
-    hidden = tidy_silkscreen(fitted, fps, [silk.GetBoundingBox()])
+    # 安全丝印先放，所有位号必须避让。
+    safety = [add_silk_text(board, text, x, y) for text, x, y in pl.safety_silk(fps)]
+    hidden = tidy_silkscreen(fitted, fps, [item.GetBoundingBox() for item in safety])
     print(f"丝印：{hidden} 个位号找不到空位已隐藏")
 
     # 分区铺铜：L2 整层 GND；L3 的 3V3 只铺逻辑区；L4 功率区铺 PGND（设计方案 4.3、6.1 节）
@@ -331,6 +364,7 @@ def main() -> Path:
 
     board.Save(str(tmp))
     tmp.replace(PCB)
+    apply_stackup(PCB)
     # NewBoard 会顺带给临时板建同名 .kicad_pro / .kicad_prl，正式规则在真正的工程文件里，删掉
     for leftover in (tmp.with_suffix(".kicad_pro"), tmp.with_suffix(".kicad_prl")):
         leftover.unlink(missing_ok=True)

@@ -54,12 +54,12 @@ class ExportBomTest(unittest.TestCase):
                    and row["Footprint"] == "Capacitor_SMD:C_0402_1005Metric"
                    and row["LCSC Part #"] == "C1525")
         expected = {
-            "C_ADC", "C_AMP", "C_CAM_AVDD", "C_CAM_DVDD", "C_CAM_RST", "C_EFUSE_IN", "C_IMU",
+            "C_ADC", "C_AMP", "C_BUCK_HF", "C_CAM_AVDD", "C_CAM_DVDD", "C_CAM_RST", "C_EFUSE_IN", "C_IMU",
             "C_IMU_REG", "C_LCD", "C_LED", "C_MIC", "C_NTC", "C_PWM", "C_TOUCH",
             "C_TOUCH_VREG", "C_U1", "C_VMOT_HF",
         }
         self.assertEqual(set(row["Designator"].split(",")), expected)
-        self.assertEqual(row["Quantity"], "17")
+        self.assertEqual(row["Quantity"], "18")
 
     def test_position_filter_excludes_hand_installed_connectors(self):
         source = self.output.with_name("raw.csv")
