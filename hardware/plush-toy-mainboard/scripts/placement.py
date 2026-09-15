@@ -35,6 +35,9 @@ ANCHORS = {
     "C_BUCK_HF": (39.2, 16.49, 180),
     "C_BUCK_IN": (40.0, 11.0, 0),
     "U_EFUSE": (34.5, 19.0, 0),
+    "C_EFUSE_IN": (31.0, 19.25, 180),
+    "C_EFUSE_DVDT": (32.0, 21.5, 90),
+    "R_EFUSE_ILM": (35.0, 21.5, 0),
     "J_LCD_L": (47.0, 2.5, 90),
     "J_LCD_R": (47.0, 7.5, 90),
     # 中部：传感器
@@ -87,7 +90,6 @@ NEAR = {
     # I2C 上拉靠近 ESP32（设计方案 6.4 节）
     "R_SDA": (23.0, 32.0), "R_SCL": (23.0, 34.0), "TP_SDA": (23.0, 38.0), "TP_SCL": (26.0, 38.0),
     "R_CC1": "J_USB", "R_CC2": "J_USB", "F_USB": "J_USB", "D_USB_DP": "J_USB", "D_USB_DN": "J_USB",
-    "C_EFUSE_IN": "U_EFUSE", "C_EFUSE_DVDT": "U_EFUSE", "R_EFUSE_ILM": "U_EFUSE",
     "TP_VBUS": "J_USB",
     "R_BUCK_EN": "U_BUCK", "C_BUCK_OUT1": "U_BUCK",
     "C_BUCK_OUT2": "U_BUCK", "R_FB1": "U_BUCK", "R_FB2": "U_BUCK", "C_FF": "U_BUCK", "TP_3V3": "U_BUCK",
@@ -122,10 +124,10 @@ def safety_silk(fps) -> tuple[tuple[str, float, float], ...]:
 
     return (
         ("必须串 KSD9700 65度 常闭", 70.0, 39.6),
-        ("电机/加热专用 5V", *at_ref("J_VMOT", -12.8, -5.0)),
+        ("电机/加热专用 5V", 70.0, 7.0),
         ("+", *at_pad("J_VMOT", "1", -2.5, 0.0)),
         ("-", *at_pad("J_VMOT", "2", -2.5, 0.0)),
-        ("CH0 左", *at_ref("J_SERVO_L", -5.0, -3.75)),
+        ("CH0 左", 73.5, 28.0),
         ("CH1 右", *at_ref("J_SERVO_R", -5.0, 0.0)),
         ("VMOT 仅限 5V", *at_ref("C_VMOT_BULK", 0.0, -11.8)),
         ("头部触摸 E0 / GND", *at_ref("J_TOUCH", -9.0, -11.0)),

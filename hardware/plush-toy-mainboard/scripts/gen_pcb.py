@@ -34,6 +34,8 @@ def load(part: board_spec.Part) -> pcbnew.FOOTPRINT:
     fp.SetFPIDAsString(part.footprint)
     fp.SetReference(part.ref)
     fp.SetValue(part.value)
+    fp.SetExcludedFromBOM(not part.assembly)
+    fp.SetExcludedFromPosFiles(not part.assembly)
     if part.lcsc:
         fp.SetField("LCSC", part.lcsc)
         fp.GetField("LCSC").SetVisible(False)

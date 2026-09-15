@@ -117,6 +117,11 @@ class Fanout:
         for first, second in zip(pins, pins[1:]):
             self.add_track(first.GetNet(), first.GetPosition(), second.GetPosition(), 0.2)
 
+        cap = self.pad("C_EFUSE_IN", "1")
+        self.add_track(pins[1].GetNet(), pins[1].GetPosition(), cap.GetPosition(), 0.5)
+        output = self.pad("U_EFUSE", "5")
+        self.add_track(output.GetNet(), output.GetPosition(), v(36.50, 19.75), 0.2)
+
         return added
 
     def route_buck_hot_loop(self) -> int:
@@ -185,6 +190,15 @@ class Fanout:
         self.add_via(amp_ep.GetNet(), "GND", x, y)
         return 3
 
+    def route_touch_e8(self) -> int:
+        """锁定触摸芯片顶边 E8 到测试点，避免 XCLK 护线封住后续出口。"""
+        source = self.pad("U_TOUCH", "16")
+        target = self.pad("TP_E8", "1")
+        path = [source.GetPosition(), v(30.80, 43.25), v(28.25, 43.25), target.GetPosition()]
+        for a, b in zip(path, path[1:]):
+            self.add_track(source.GetNet(), a, b, 0.2)
+        return 0
+
     def route_camera_xclk_guards(self) -> int:
         """在 F.Cu 独立走 XCLK，并给所有长直段加 0.65mm 双侧接地护线。"""
         source = self.pad("U1", "8")
@@ -219,9 +233,13 @@ class Fanout:
                     ratio = index / count
                     via_points.add((round(start[0] + (end[0] - start[0]) * ratio, 3),
                                     round(start[1] + (end[1] - start[1]) * ratio, 3)))
+        stitched = []
         for x, y in sorted(via_points):
+            if any(math.hypot(x - ox, y - oy) < HOLE_CLEARANCE for ox, oy in stitched):
+                continue
             self.add_via(guard_net, "GND", x, y)
-        return len(via_points)
+            stitched.append((x, y))
+        return len(stitched)
 
     def escape_camera_fpc(self) -> int:
         """先把 0.5mm 间距相机焊盘引到连接器外，避免自动布线封住出口。"""
@@ -369,6 +387,7 @@ class Fanout:
         added += self.route_buck_hot_loop()
         added += self.route_u1_power_and_en()
         added += self.route_sensitive_ground_islands()
+        added += self.route_touch_e8()
         added += self.route_camera_xclk_guards()
         added += self.escape_camera_fpc()
         added += self.escape_touch_ground()
@@ -402,6 +421,7 @@ class Fanout:
             if (ref == "U_IMU" and pad.GetNumber() in ("8", "9", "11")) or \
                     (ref == "U_TOUCH" and pad.GetNumber() == "4") or \
                     (ref == "D_USB_DP" and pad.GetNumber() == "2") or \
+                    (ref == "U_TOUCH" and pad.GetNumber() == "16") or \
                     (ref, pad.GetNumber()) in {("C_EN", "2"), ("U_MIC", "5"), ("U_AMP", "17")}:
                 continue
             b = box_mm(pad.GetBoundingBox())

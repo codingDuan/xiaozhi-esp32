@@ -466,6 +466,9 @@ def sync_footprint_metadata(board: pcbnew.BOARD) -> None:
         if part is not None and part.lcsc:
             fp.SetField("LCSC", part.lcsc)
             fp.GetField("LCSC").SetVisible(False)
+        if part is not None:
+            fp.SetExcludedFromBOM(not part.assembly)
+            fp.SetExcludedFromPosFiles(not part.assembly)
 
 
 def sync_schematic_unconnected_nets(board: pcbnew.BOARD, report: dict) -> int:

@@ -144,6 +144,19 @@ class PcbTest(unittest.TestCase):
                 self.assertLessEqual(self._shortest_top_path("EN", source, target), 10.0)
         self.assertEqual(self._vias("EN"), [])
 
+    def test_touch_e8_has_locked_top_layer_path(self):
+        source = self.fps["U_TOUCH"].FindPadByNumber("16").GetPosition()
+        target = self.fps["TP_E8"].FindPadByNumber("1").GetPosition()
+        self.assertLessEqual(self._shortest_top_path("TOUCH_E8", source, target), 8.0)
+
+    def test_efuse_output_has_outward_escape(self):
+        pad = self.fps["U_EFUSE"].FindPadByNumber("5")
+        pos = pad.GetPosition()
+        attached = [track for track in self._tracks("VBUS")
+                    if track.GetStart() == pos or track.GetEnd() == pos]
+        self.assertTrue(any(max(mm(track.GetStart().x), mm(track.GetEnd().x)) >= mm(pos.x) + 0.7
+                            for track in attached))
+
     @staticmethod
     def _parallel_guard_coverage(signal, guard):
         sx = mm(signal.GetEnd().x - signal.GetStart().x)
@@ -495,6 +508,11 @@ class PcbTest(unittest.TestCase):
     def test_single_sided_assembly(self):
         flipped = sorted(ref for ref, fp in self.fps.items() if fp.IsFlipped())
         self.assertEqual(flipped, [])
+        parts = {part.ref: part for part in board_spec.PARTS if part.fitted}
+        mismatches = sorted(ref for ref, fp in self.fps.items()
+                            if fp.IsExcludedFromBOM() == parts[ref].assembly or
+                            fp.IsExcludedFromPosFiles() == parts[ref].assembly)
+        self.assertEqual(mismatches, [])
 
 
 if __name__ == "__main__":
