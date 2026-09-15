@@ -8,6 +8,10 @@ from pathlib import Path
 
 import pcbnew
 
+import board_spec
+import kicad_env
+import test_part_pins
+
 PRETTY = Path(__file__).resolve().parents[1] / "lib/plush.pretty"
 MM = 1e6
 
@@ -56,6 +60,23 @@ class Inmp441FootprintTest(unittest.TestCase):
         box = ring.GetBoundingBox()
         self.assertAlmostEqual(box.GetWidth() / MM, 1.56, delta=0.02)
         self.assertAlmostEqual(box.Centre().x / MM, 1.29, delta=0.02)
+
+
+class RevisedPartLibraryTest(unittest.TestCase):
+    def test_tps259531_symbol_and_footprint_expose_all_nine_pads(self):
+        self.assertTrue(kicad_env.symbol_exists("plush", "TPS259531"),
+                        "缺少按 TI 数据手册绘制的 plush:TPS259531 符号")
+        expected = {str(number) for number in range(1, 10)}
+        self.assertEqual(test_part_pins.symbol_pins("plush:TPS259531"), expected)
+        self.assertEqual(test_part_pins.footprint_pads(
+            "Package_SON:Texas_DSG0008A_WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm_ThermalVias"), expected)
+
+    def test_ws2812b_v6_uses_verified_pin_order_and_four_pad_footprint(self):
+        led = next(part for part in board_spec.PARTS if part.ref == "D_LED")
+        self.assertEqual(led.pins, {
+            "1": "NC_D_LED_DOUT", "2": "GND", "3": "LED_RGB", "4": "+3V3",
+        })
+        self.assertEqual(test_part_pins.footprint_pads(led.footprint), {"1", "2", "3", "4"})
 
 
 if __name__ == "__main__":
