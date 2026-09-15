@@ -1,5 +1,6 @@
 """制造 BOM 必须使用 board_spec 的规范位号，而不是 KiCad 的自动注释结果。"""
 import csv
+import json
 import sys
 import subprocess
 import tempfile
@@ -69,7 +70,59 @@ class ExportBomTest(unittest.TestCase):
                           "C_ADC,100nF,C0402,3,4,0,top\n")
         fab_tools.filter_positions(source, destination)
         with destination.open(newline="") as stream:
-            self.assertEqual([row["Ref"] for row in csv.DictReader(stream)], ["C_ADC"])
+            reader = csv.DictReader(stream)
+            self.assertEqual(reader.fieldnames,
+                             ["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
+            self.assertEqual(list(reader), [{
+                "Designator": "C_ADC", "Mid X": "3", "Mid Y": "4",
+                "Layer": "Top", "Rotation": "0",
+            }])
+
+    def test_position_filter_maps_layers_and_normalizes_rotation(self):
+        source = self.output.with_name("raw.csv")
+        destination = self.output.with_name("positions.csv")
+        source.write_text("Ref,Val,Package,PosX,PosY,Rot,Side\n"
+                          "C_ADC,100nF,C0402,3,4,-90,bottom\n"
+                          "R_EN,10k,R0402,5,6,450,top\n")
+        fab_tools.filter_positions(source, destination)
+        with destination.open(newline="") as stream:
+            rows = list(csv.DictReader(stream))
+        self.assertEqual(rows[0]["Layer"], "Bottom")
+        self.assertEqual(rows[0]["Rotation"], "270")
+        self.assertEqual(rows[1]["Layer"], "Top")
+        self.assertEqual(rows[1]["Rotation"], "90")
+
+    def test_position_filter_rejects_missing_raw_columns(self):
+        source = self.output.with_name("raw.csv")
+        source.write_text("Ref,PosX,PosY,Rot\nC_ADC,3,4,0\n")
+        with self.assertRaisesRegex(ValueError, "缺少列"):
+            fab_tools.filter_positions(source, self.output.with_name("positions.csv"))
+
+    def test_expected_assembly_refs_uses_board_spec(self):
+        expected = {part.ref for part in board_spec.PARTS if export_bom.is_assembly_item(part)}
+        self.assertEqual(fab_tools.expected_assembly_refs(), expected)
+
+    def test_position_refs_reject_duplicate_designators(self):
+        positions = self.output.with_name("positions.csv")
+        positions.write_text("Designator,Mid X,Mid Y,Layer,Rotation\n"
+                             "C_ADC,1,2,Top,0\nC_ADC,3,4,Top,0\n")
+        with self.assertRaisesRegex(ValueError, "位号重复"):
+            fab_tools._position_refs(positions)
+
+    def test_assembly_sets_must_match_board_spec(self):
+        with self.assertRaisesRegex(ValueError, "装配集合不一致"):
+            fab_tools.validate_assembly_sets({"C_ADC"}, {"C_ADC"})
+
+    def test_stackup_rejects_wrong_dielectric_thickness(self):
+        job = self.output.with_name("board-job.gbrjob")
+        thicknesses = [0.035, 0.2104, 0.0152, 0.48, 0.0152, 0.2104, 0.035]
+        types = ["Copper", "Dielectric", "Copper", "Dielectric", "Copper", "Dielectric", "Copper"]
+        job.write_text(json.dumps({"MaterialStackup": [
+            {"Type": kind, "Thickness": thickness}
+            for kind, thickness in zip(types, thicknesses)
+        ]}))
+        with self.assertRaisesRegex(ValueError, "叠层"):
+            fab_tools.validate_stackup(job)
 
 
 if __name__ == "__main__":

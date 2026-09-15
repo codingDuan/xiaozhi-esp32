@@ -30,7 +30,7 @@ $KC pcb export drill --format excellon --excellon-separate-th --generate-map --m
 # BOM：描述性位号不符合 KiCad 的字母+数字注释规则，直接从唯一数据源 board_spec 导出。
 python3 "$ROOT/scripts/export_bom.py" "$TMP/fab/bom.csv"
 
-# 坐标文件：只有正面，单位 mm
+# 坐标文件：KiCad 原始 CSV 转为嘉立创 Designator/Mid X/Mid Y/Layer/Rotation，单位 mm
 $KC pcb export pos --format csv --units mm --side front --exclude-dnp -o "$TMP/raw-positions.csv" "$PCB"
 python3 "$ROOT/scripts/fab_tools.py" filter-positions "$TMP/raw-positions.csv" "$TMP/fab/positions.csv"
 
