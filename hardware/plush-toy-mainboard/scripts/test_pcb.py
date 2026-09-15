@@ -147,7 +147,25 @@ class PcbTest(unittest.TestCase):
     def test_touch_e8_has_locked_top_layer_path(self):
         source = self.fps["U_TOUCH"].FindPadByNumber("16").GetPosition()
         target = self.fps["TP_E8"].FindPadByNumber("1").GetPosition()
-        self.assertLessEqual(self._shortest_top_path("TOUCH_E8", source, target), 8.0)
+        self.assertLessEqual(self._shortest_top_path("TOUCH_E8", source, target), 12.0)
+
+    def test_touch_top_signals_have_locked_paths_or_escapes(self):
+        for number, net, target in (("17", "TOUCH_E9", "TP_E9"),
+                                    ("19", "TOUCH_E11", "TP_E11")):
+            source = self.fps["U_TOUCH"].FindPadByNumber(number).GetPosition()
+            end = self.fps[target].FindPadByNumber("1").GetPosition()
+            with self.subTest(net=net):
+                self.assertLessEqual(self._shortest_top_path(net, source, end), 12.0)
+
+        sda = self.fps["U_TOUCH"].FindPadByNumber("3")
+        pos = sda.GetPosition()
+        self.assertTrue(any(track.GetStart() == pos or track.GetEnd() == pos
+                            for track in self._tracks("I2C_SDA")))
+
+        pwm = self.fps["U_PWM"].FindPadByNumber("28")
+        pos = pwm.GetPosition()
+        self.assertTrue(any(track.GetStart() == pos or track.GetEnd() == pos
+                            for track in self._tracks("+3V3")))
 
     def test_efuse_output_has_outward_escape(self):
         pad = self.fps["U_EFUSE"].FindPadByNumber("5")
@@ -413,6 +431,17 @@ class PcbTest(unittest.TestCase):
                        and int(pad.GetNumber()) <= 24]
         bottommost = max(mm(pad.GetBoundingBox().GetBottom()) for pad in signal_pads)
         self.assertGreaterEqual(H - bottommost, 3.5)
+
+    def test_camera_y5_escape_is_locked_for_autorouter(self):
+        pad = self.fps["J_CAM"].FindPadByNumber("20")
+        pos = pad.GetPosition()
+        tracks = [track for track in self._tracks("CAM_Y5")
+                  if track.GetStart() == pos or track.GetEnd() == pos]
+        self.assertTrue(tracks)
+        self.assertTrue(all(track.IsLocked() for track in tracks))
+        other_ends = [track.GetEnd() if track.GetStart() == pos else track.GetStart() for track in tracks]
+        vias = self._vias("CAM_Y5")
+        self.assertTrue(any(via.IsLocked() and via.GetPosition() in other_ends for via in vias))
 
     def test_camera_fpc_bottom_fanout_corridor_is_unobstructed(self):
         pads = [pad for pad in self.fps["J_CAM"].Pads() if pad.GetNumber().isdigit()

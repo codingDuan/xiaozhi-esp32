@@ -70,7 +70,7 @@ class Fanout:
         return not any(n != net and check(ob, HOLE_CLEARANCE if npth else CLEARANCE)
                        for n, ob, npth in self.obstacles)
 
-    def add_layer_track(self, net_item, start, end, width, layer) -> None:
+    def add_layer_track(self, net_item, start, end, width, layer):
         t = pcbnew.PCB_TRACK(self.board)
         t.SetStart(start)
         t.SetEnd(end)
@@ -84,11 +84,12 @@ class Fanout:
             self.obstacles.append((net_item.GetNetname(),
                                    (x1 - width / 2, y1 - width / 2,
                                     x2 + width / 2, y2 + width / 2), False))
+        return t
 
-    def add_track(self, net_item, start, end, width) -> None:
-        self.add_layer_track(net_item, start, end, width, pcbnew.F_Cu)
+    def add_track(self, net_item, start, end, width):
+        return self.add_layer_track(net_item, start, end, width, pcbnew.F_Cu)
 
-    def add_via(self, net_item, net, x, y, diameter=VIA_D, drill=VIA_DRILL) -> None:
+    def add_via(self, net_item, net, x, y, diameter=VIA_D, drill=VIA_DRILL):
         via = pcbnew.PCB_VIA(self.board)
         via.SetPosition(v(x, y))
         via.SetWidth(pcbnew.FromMM(diameter))
@@ -98,6 +99,7 @@ class Fanout:
         self.vias.append((net, x, y))
         self.obstacles.append((net, (x - diameter / 2, y - diameter / 2,
                                      x + diameter / 2, y + diameter / 2), False))
+        return via
 
     def via_ok(self, net, x, y, plane) -> bool:
         if not (EDGE <= x <= pl.W - EDGE and EDGE <= y <= pl.H - EDGE and plane[0] <= x <= plane[1]):
@@ -190,13 +192,25 @@ class Fanout:
         self.add_via(amp_ep.GetNet(), "GND", x, y)
         return 3
 
-    def route_touch_e8(self) -> int:
-        """锁定触摸芯片顶边 E8 到测试点，避免 XCLK 护线封住后续出口。"""
-        source = self.pad("U_TOUCH", "16")
-        target = self.pad("TP_E8", "1")
-        path = [source.GetPosition(), v(30.80, 43.25), v(28.25, 43.25), target.GetPosition()]
-        for a, b in zip(path, path[1:]):
-            self.add_track(source.GetNet(), a, b, 0.2)
+    def route_touch_top_testpoints(self) -> int:
+        """把触摸芯片顶边三根线分层扇开，避免它们在测试点簇内互相封锁。"""
+        routes = (
+            ("19", "TP_E11", 42.5),
+            ("17", "TP_E9", 42.9),
+            ("16", "TP_E8", 43.3),
+        )
+        for number, target_ref, lane_y in routes:
+            source = self.pad("U_TOUCH", number)
+            target = self.pad(target_ref, "1")
+            sx, tx = source.GetPosition().x * TO_MM, target.GetPosition().x * TO_MM
+            path = [source.GetPosition(), v(sx, lane_y), v(tx, lane_y), target.GetPosition()]
+            for a, b in zip(path, path[1:]):
+                self.add_track(source.GetNet(), a, b, 0.2)
+        return 0
+
+    def escape_pwm_3v3(self) -> int:
+        pad = self.pad("U_PWM", "28")
+        self.add_track(pad.GetNet(), pad.GetPosition(), v(66.20, 21.375), 0.3)
         return 0
 
     def route_camera_xclk_guards(self) -> int:
@@ -262,8 +276,10 @@ class Fanout:
             if any(t.GetClass() == "PCB_TRACK" and t.GetNetname() == net and
                    (t.GetStart() == start or t.GetEnd() == start) for t in self.board.GetTracks()):
                 continue
-            self.add_track(pad.GetNet(), start, end, 0.2)
-            self.add_via(pad.GetNet(), net, x, end_y, diameter=0.45, drill=0.2)
+            track = self.add_track(pad.GetNet(), start, end, 0.2)
+            via = self.add_via(pad.GetNet(), net, x, end_y, diameter=0.45, drill=0.2)
+            track.SetLocked(True)
+            via.SetLocked(True)
             self.obstacles.append((net, (x - 0.1, y, x + 0.1, end_y), False))
             added += 1
         return added
@@ -342,8 +358,9 @@ class Fanout:
     def escape_touch_ground(self) -> int:
         pad = self.board.FindFootprintByReference("U_TOUCH").FindPadByNumber("4")
         pos = pad.GetPosition()
-        via_x, via_y = 27.3, pos.y * TO_MM
-        self.add_track(pad.GetNet(), pos, v(via_x, via_y), 0.2)
+        via_x, via_y = 27.3, 47.3
+        self.add_track(pad.GetNet(), pos, v(27.8, pos.y * TO_MM), 0.2)
+        self.add_track(pad.GetNet(), v(27.8, pos.y * TO_MM), v(via_x, via_y), 0.2)
         self.add_via(pad.GetNet(), "GND", via_x, via_y)
         return 1
 
@@ -387,7 +404,8 @@ class Fanout:
         added += self.route_buck_hot_loop()
         added += self.route_u1_power_and_en()
         added += self.route_sensitive_ground_islands()
-        added += self.route_touch_e8()
+        added += self.route_touch_top_testpoints()
+        added += self.escape_pwm_3v3()
         added += self.route_camera_xclk_guards()
         added += self.escape_camera_fpc()
         added += self.escape_touch_ground()
@@ -421,7 +439,7 @@ class Fanout:
             if (ref == "U_IMU" and pad.GetNumber() in ("8", "9", "11")) or \
                     (ref == "U_TOUCH" and pad.GetNumber() == "4") or \
                     (ref == "D_USB_DP" and pad.GetNumber() == "2") or \
-                    (ref == "U_TOUCH" and pad.GetNumber() == "16") or \
+                    (ref == "U_TOUCH" and pad.GetNumber() in ("16", "17", "19")) or \
                     (ref, pad.GetNumber()) in {("C_EN", "2"), ("U_MIC", "5"), ("U_AMP", "17")}:
                 continue
             b = box_mm(pad.GetBoundingBox())
