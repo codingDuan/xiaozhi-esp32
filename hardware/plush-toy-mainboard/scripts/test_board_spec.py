@@ -27,6 +27,13 @@ def two_terminal(part):
     return len(part.pins) == 2
 
 
+def part(ref):
+    matches = [item for item in board_spec.PARTS if item.ref == ref]
+    if len(matches) != 1:
+        raise AssertionError(f"{ref} 应有且仅有一个定义，实际 {len(matches)}")
+    return matches[0]
+
+
 class GpioMatchesConfigTest(unittest.TestCase):
     def test_every_config_gpio_lands_on_its_net(self):
         pins = config_pins.load(CONFIG_H)
@@ -81,6 +88,36 @@ class HardConstraintTest(unittest.TestCase):
             with self.subTest(net=net):
                 self.assertEqual(len(ups), 1)
                 self.assertEqual(ups[0].value, "4.7k")
+
+    def test_usb_efuse_is_between_fuse_and_every_vbus_load(self):
+        self.assertEqual(part("F_USB").pins, {"1": "VBUS_IN", "2": "VBUS_FUSED"})
+        self.assertEqual(part("U_EFUSE").pins, {
+            "1": "EFUSE_DVDT", "2": "VBUS_FUSED", "3": "VBUS_FUSED",
+            "4": "VBUS_FUSED", "5": "VBUS", "6": "NC_U_EFUSE_FLT",
+            "7": "EFUSE_ILM", "8": "GND", "9": "GND",
+        })
+        self.assertEqual(part("C_EFUSE_IN").pins, {"1": "VBUS_FUSED", "2": "GND"})
+        self.assertEqual(part("C_EFUSE_DVDT").pins, {"1": "EFUSE_DVDT", "2": "GND"})
+        self.assertEqual(part("R_EFUSE_ILM").pins, {"1": "EFUSE_ILM", "2": "GND"})
+        for load in ("U_BUCK", "R_BUCK_EN", "U_AMP", "R_AMP_SD", "C_AMP_BULK", "C_AMP"):
+            with self.subTest(load=load):
+                self.assertNotIn("VBUS_FUSED", part(load).pins.values())
+                self.assertIn("VBUS", part(load).pins.values())
+
+    def test_revised_camera_touch_and_led_parts(self):
+        self.assertTrue(part("R_SIOC").fitted)
+        self.assertTrue(part("R_SIOD").fitted)
+        self.assertNotIn("TP_E0", {item.ref for item in board_spec.PARTS})
+        self.assertEqual(part("J_TOUCH").pins, {"1": "TOUCH_E0", "2": "GND"})
+        self.assertEqual(part("D_LED").value, "WS2812B-2020-V6")
+        self.assertEqual(part("D_LED").lcsc, "C52917434")
+
+    def test_hand_installed_parts_are_owned_by_board_spec(self):
+        expected = {"J_HEAT", "J_LCD_L", "J_LCD_R", "J_SERVO_L", "J_SERVO_R",
+                    "J_NTC", "J_SPK", "J_VMOT", "J_TOUCH"}
+        actual = {item.ref for item in board_spec.PARTS
+                  if item.fitted and not getattr(item, "assembly", True) and item.ref.startswith("J_")}
+        self.assertEqual(actual, expected)
 
 
 class NetIntegrityTest(unittest.TestCase):

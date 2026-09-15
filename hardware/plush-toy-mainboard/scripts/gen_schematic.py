@@ -182,9 +182,8 @@ def main() -> Path:
         row_h = max(row_h, height)
 
     for part in board_spec.PARTS:
-        assembly_item = not part.ref.startswith(("H", "TP_"))
         place(part.symbol, part.ref, part.value, part.footprint, part.lcsc, part.fitted,
-              part.fitted, part.fitted and assembly_item, part.pins)
+              part.fitted, part.fitted and part.assembly, part.pins)
     for index, net in enumerate(_flag_nets(blocks), start=1):
         place(flag_id, f"#FLG{index:02d}", "PWR_FLAG", "", "", True, False, False, {"1": net})
 

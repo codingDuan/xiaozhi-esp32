@@ -7,11 +7,11 @@
 | 阶段 | 状态 | 产物 |
 |---|---|---|
 | 工具链 | 完成 | KiCad 10.0.6、OpenJDK 26（Freerouting 2.4.1 需 Java 25+） |
-| 器件与连接数据 | 完成 | `scripts/board_spec.py`，config.h、硬约束、库引脚核对全绿 |
-| 原理图 | **生成完成，待委托方评审** | `plush-toy-mainboard.kicad_sch`，网表与 board_spec 逐网络一致，ERC 零错误；`renders/schematic.pdf` |
-| 布局 | **完成，待委托方过目** | `plush-toy-mainboard.kicad_pcb`：90×60mm 四层、单面贴片，108 个板上器件；`renders/place_top.png` |
-| 走线 | **静态检查完成** | 确定性扇出 + Freerouting + DRC 驱动收尾；全量 KiCad DRC **0 个错误、2 个已审阅 U1 丝印板边告警、0 条未连接、0 条原理图一致性问题** |
-| 制造文件 | **已导出并完成静态检查** | `fab/`：14 个非空 Gerber/钻孔文件、74 个有 LCSC 料号的自动贴装位号；8 个板外接线座明确为手焊，不进入 BOM/CPL；双面最终渲染在 `renders/` |
+| 器件与连接数据 | **改版中** | 正在加入 USB eFuse、必贴 SCCB 上拉、头部触摸连接器与 3.3V 状态灯 |
+| 原理图 | **改版中** | 旧原理图已被电路改动取代，等待重新生成与 ERC/网表检查 |
+| 布局 | **改版中** | 等待重新生成并验证降压、ESP32 去耦/EN 与 XCLK 关键几何 |
+| 走线 | **改版中** | 旧走线不再作为打样依据，等待完整重布与 DRC 收敛 |
+| 制造文件 | **改版中** | 旧 `fab/` 不可下单，等待新 Gerber/BOM/CPL 通过静态检查 |
 | 首板验收 | 清单完成，待打样 | [`TESTING.md`](TESTING.md)：制造文件、电源隔离、接口、外设、热与压力测试 |
 
 ## 已定的物理约束

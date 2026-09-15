@@ -14,7 +14,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "fab" / "bom.csv"
 FIELDS = ("Designator", "Comment", "Footprint", "LCSC Part #", "Quantity")
 HAND_INSTALLED_REFS = {
-    "J_HEAT", "J_LCD_L", "J_LCD_R", "J_SERVO_L", "J_SERVO_R", "J_NTC", "J_SPK", "J_VMOT",
+    part.ref for part in board_spec.PARTS
+    if part.fitted and not part.assembly and part.ref.startswith("J_")
 }
 
 
@@ -23,9 +24,7 @@ def natural_ref(ref: str) -> tuple:
 
 
 def is_assembly_item(part: board_spec.Part) -> bool:
-    mechanical = part.ref.startswith("H") and part.ref[1:].isdigit()
-    return part.fitted and not mechanical and not part.ref.startswith("TP_") \
-        and part.ref not in HAND_INSTALLED_REFS
+    return part.fitted and part.assembly
 
 
 def rows() -> list[dict[str, str]]:

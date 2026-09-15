@@ -11,6 +11,8 @@ SCRIPT = Path(__file__).with_name("export_bom.py")
 sys.path.insert(0, str(SCRIPT.parent))
 
 import fab_tools
+import board_spec
+import export_bom
 
 
 class ExportBomTest(unittest.TestCase):
@@ -21,19 +23,30 @@ class ExportBomTest(unittest.TestCase):
         with self.output.open(newline="", encoding="utf-8-sig") as source:
             self.rows = list(csv.DictReader(source))
 
-    def test_exports_each_of_the_74_automated_assembly_items_once(self):
+    def test_exports_each_automated_assembly_item_once(self):
         refs = [ref for row in self.rows for ref in row["Designator"].split(",")]
-        self.assertEqual(len(refs), 74)
-        self.assertEqual(len(set(refs)), 74)
+        expected = {part.ref for part in board_spec.PARTS
+                    if part.fitted and getattr(part, "assembly", True)}
+        self.assertEqual(set(refs), expected)
+        self.assertEqual(len(refs), len(set(refs)))
         self.assertFalse(any("?" in ref for ref in refs))
         self.assertFalse(any(not row["LCSC Part #"] for row in self.rows))
 
     def test_excludes_dnp_mechanical_and_testpoint_items(self):
         refs = {ref for row in self.rows for ref in row["Designator"].split(",")}
-        self.assertTrue({"R_SIOC", "R_SIOD", "H1", "H2", "H3", "H4"}.isdisjoint(refs))
+        self.assertTrue({"R_SIOC", "R_SIOD"} <= refs)
+        self.assertTrue({"H1", "H2", "H3", "H4"}.isdisjoint(refs))
         self.assertTrue({"J_HEAT", "J_LCD_L", "J_LCD_R", "J_SERVO_L", "J_SERVO_R",
-                         "J_NTC", "J_SPK", "J_VMOT"}.isdisjoint(refs))
+                         "J_NTC", "J_SPK", "J_VMOT", "J_TOUCH"}.isdisjoint(refs))
         self.assertFalse(any(ref.startswith("TP_") for ref in refs))
+
+    def test_assembly_classifier_uses_board_spec_attribute(self):
+        for ref in ("J_TOUCH", "J_VMOT", "TP_3V3", "H1"):
+            with self.subTest(ref=ref):
+                matches = [part for part in board_spec.PARTS if part.ref == ref]
+                self.assertEqual(len(matches), 1, f"{ref} 应有且仅有一个定义")
+                item = matches[0]
+                self.assertFalse(export_bom.is_assembly_item(item))
 
     def test_groups_identical_100nf_parts_with_correct_quantity(self):
         row = next(row for row in self.rows
@@ -41,12 +54,12 @@ class ExportBomTest(unittest.TestCase):
                    and row["Footprint"] == "Capacitor_SMD:C_0402_1005Metric"
                    and row["LCSC Part #"] == "C1525")
         expected = {
-            "C_ADC", "C_AMP", "C_CAM_AVDD", "C_CAM_DVDD", "C_CAM_RST", "C_IMU",
+            "C_ADC", "C_AMP", "C_CAM_AVDD", "C_CAM_DVDD", "C_CAM_RST", "C_EFUSE_IN", "C_IMU",
             "C_IMU_REG", "C_LCD", "C_LED", "C_MIC", "C_NTC", "C_PWM", "C_TOUCH",
             "C_TOUCH_VREG", "C_U1", "C_VMOT_HF",
         }
         self.assertEqual(set(row["Designator"].split(",")), expected)
-        self.assertEqual(row["Quantity"], "16")
+        self.assertEqual(row["Quantity"], "17")
 
     def test_position_filter_excludes_hand_installed_connectors(self):
         source = self.output.with_name("raw.csv")

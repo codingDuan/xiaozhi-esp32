@@ -15,6 +15,7 @@ class Part:
     lcsc: str = ""
     fitted: bool = True
     pins: dict[str, str] = field(default_factory=dict)
+    assembly: bool = True
 
 
 # GPIO → 网络。键集合必须与 test_board_spec.MACRO_TO_NET 覆盖的 GPIO 一致，
@@ -50,10 +51,11 @@ SOT23_5 = "Package_TO_SOT_SMD:SOT-23-5"
 TESTPAD = "TestPoint:TestPoint_Pad_D1.0mm"
 
 # 阻容料号，均已在产品页核对（设计方案 12.5 节）
-LCSC_R = {"0": "C17168", "33": "C25105", "100": "C25076", "1k": "C11702", "4.7k": "C25900",
+LCSC_R = {"0": "C17168", "33": "C25105", "100": "C25076", "1k": "C11702", "1.02k": "C226838",
+          "4.7k": "C25900",
           "5.1k": "C25905", "10k": "C25744", "22k": "C25768", "75k": "C25798", "100k": "C25741",
           "1M": "C26083"}
-LCSC_C = {"22pF": "C1555", "2.2nF": "C1531", "10nF": "C15195", "100nF": "C1525",
+LCSC_C = {"22pF": "C1555", "2.2nF": "C1531", "3.3nF": "C696855", "10nF": "C15195", "100nF": "C1525",
           "1uF": "C52923", "4.7uF": "C23733"}
 
 
@@ -74,7 +76,7 @@ def cap22u(ref: str, a: str, b: str) -> Part:
 
 
 def testpoint(ref: str, net: str) -> Part:
-    return Part(ref, net, "Connector:TestPoint", TESTPAD, pins={"1": net})
+    return Part(ref, net, "Connector:TestPoint", TESTPAD, pins={"1": net}, assembly=False)
 
 
 def nc(ref: str, pin: str) -> str:
@@ -100,8 +102,8 @@ PARTS: list[Part] = [
          "lcsc:SW-SMD_4P-L5.1-W5.1-P3.70-LS6.5-TL_H1.5", "C318884",
          pins={"1": "BOOT", "2": "BOOT", "3": "GND", "4": "GND"}),
     # RGB 状态灯。VDD 取 3V3：5V 供电时 3.3V 数据线达不到 0.7×VDD（设计方案 12.5 节）
-    Part("D_LED", "WS2812B-2020", "LED:WS2812B-2020", "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm",
-         "C965555", pins={"1": nc("D_LED", "DOUT"), "2": "GND", "3": "LED_RGB", "4": "+3V3"}),
+    Part("D_LED", "WS2812B-2020-V6", "LED:WS2812B-2020", "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm",
+         "C52917434", pins={"1": nc("D_LED", "DOUT"), "2": "GND", "3": "LED_RGB", "4": "+3V3"}),
     cap("C_LED", "100nF", "+3V3", "GND"),
 
     # ── USB-C 与逻辑域 5V ──
@@ -117,7 +119,14 @@ PARTS: list[Part] = [
     res("R_CC1", "5.1k", "USB_CC1", "GND"),
     res("R_CC2", "5.1k", "USB_CC2", "GND"),
     Part("F_USB", "BSMD1206-150-6V", "Device:Fuse", "Fuse:Fuse_1206_3216Metric", "C883132",
-         pins={"1": "VBUS_IN", "2": "VBUS"}),
+         pins={"1": "VBUS_IN", "2": "VBUS_FUSED"}),
+    Part("U_EFUSE", "TPS259531DSGR", "plush:TPS259531",
+         "Package_SON:Texas_DSG0008A_WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm_ThermalVias", "C2155674",
+         pins={"1": "EFUSE_DVDT", "2": "VBUS_FUSED", "3": "VBUS_FUSED", "4": "VBUS_FUSED",
+               "5": "VBUS", "6": nc("U_EFUSE", "FLT"), "7": "EFUSE_ILM", "8": "GND", "9": "GND"}),
+    cap("C_EFUSE_IN", "100nF", "VBUS_FUSED", "GND"),
+    cap("C_EFUSE_DVDT", "3.3nF", "EFUSE_DVDT", "GND"),
+    res("R_EFUSE_ILM", "1.02k", "EFUSE_ILM", "GND"),
     Part("D_USB_DP", "LESD8D3.3CAT5G", "Device:D_TVS", "Diode_SMD:D_SOD-882", "C172409",
          pins={"1": "USB_DP", "2": "GND"}),
     Part("D_USB_DN", "LESD8D3.3CAT5G", "Device:D_TVS", "Diode_SMD:D_SOD-882", "C172409",
@@ -150,7 +159,7 @@ PARTS: list[Part] = [
     # ── 功率域 VMOT：舵机与加热，与 VBUS 无任何铜连接（HC-1）──
     Part("J_VMOT", "VMOT 5V", "Connector_Generic:Conn_01x02",
          "TerminalBlock_CUI:TerminalBlock_CUI_TB007-508-02_1x02_P5.08mm_Horizontal",
-         pins={"1": "VMOT_IN", "2": "PGND"}),
+         pins={"1": "VMOT_IN", "2": "PGND"}, assembly=False),
     # 高边 P-MOS 防反接：漏极接输入、源极接负载，栅极经 10k 拉到 PGND。
     # 极性正确时体二极管先导通，随后 Vgs≈-5V 使沟道完全导通
     Part("Q_REV", "AO3401A", "Transistor_FET:AO3401A", SOT23, "C15127",
@@ -183,10 +192,10 @@ PARTS: list[Part] = [
     # 舵机插针顺序与原 PCA9685 模块一致：PWM / V+ / GND
     Part("J_SERVO_L", "Servo L", "Connector_Generic:Conn_01x03",
          "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical",
-         pins={"1": "SERVO_L_PWM", "2": "VMOT", "3": "PGND"}),
+         pins={"1": "SERVO_L_PWM", "2": "VMOT", "3": "PGND"}, assembly=False),
     Part("J_SERVO_R", "Servo R", "Connector_Generic:Conn_01x03",
          "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical",
-         pins={"1": "SERVO_R_PWM", "2": "VMOT", "3": "PGND"}),
+         pins={"1": "SERVO_R_PWM", "2": "VMOT", "3": "PGND"}, assembly=False),
 
     # ── 加热：板载低边 MOSFET（设计方案 5.2 节）──
     res("R_GATE", "100", "HEAT_PWM", "HEAT_GATE"),
@@ -195,7 +204,8 @@ PARTS: list[Part] = [
          pins={"1": "HEAT_GATE", "2": "PGND", "3": "HEAT_LOW"}),
     # 脚 1 接 VMOT，经板外 KSD9700 到加热膜，回到脚 2（HC-6 丝印在 gen_pcb 中加）
     Part("J_HEAT", "Heater", "Connector_Generic:Conn_01x02",
-         "Connector_JST:JST_VH_B2P-VH_1x02_P3.96mm_Vertical", pins={"1": "VMOT", "2": "HEAT_LOW"}),
+         "Connector_JST:JST_VH_B2P-VH_1x02_P3.96mm_Vertical", pins={"1": "VMOT", "2": "HEAT_LOW"},
+         assembly=False),
     testpoint("TP_GATE", "HEAT_GATE"),
 
     # ── 测温：ADS1115，地址 0x48（ADDR 接地）──
@@ -207,7 +217,8 @@ PARTS: list[Part] = [
     res("R_NTC", "10k", "+3V3", "NTC_SENSE"),
     cap("C_NTC", "100nF", "NTC_SENSE", "GND"),
     Part("J_NTC", "NTC 10K", "Connector_Generic:Conn_01x02",
-         "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical", pins={"1": "NTC_SENSE", "2": "GND"}),
+         "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical", pins={"1": "NTC_SENSE", "2": "GND"},
+         assembly=False),
 
     # ── 触摸：MPR121，地址 0x5A（ADDR 接地）；IRQ 无 GPIO 可接，悬空轮询 ──
     Part("U_TOUCH", "MPR121QR2", "Sensor_Touch:MPR121QR2", "Package_DFN_QFN:UQFN-20_3x3mm_P0.4mm", "C91322",
@@ -217,7 +228,10 @@ PARTS: list[Part] = [
     cap("C_TOUCH", "100nF", "+3V3", "GND"),
     cap("C_TOUCH_VREG", "100nF", "TOUCH_VREG", "GND"),
     res("R_TOUCH_REXT", "75k", "TOUCH_REXT", "GND"),
-    *[testpoint(f"TP_E{i}", f"TOUCH_E{i}") for i in range(12)],
+    Part("J_TOUCH", "Head Touch", "Connector_Generic:Conn_01x02",
+         "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical",
+         pins={"1": "TOUCH_E0", "2": "GND"}, assembly=False),
+    *[testpoint(f"TP_E{i}", f"TOUCH_E{i}") for i in range(1, 12)],
 
     # ── 运动：MPU-6050，地址 0x68（AD0 接地）；INT 无 GPIO 可接 ──
     Part("U_IMU", "MPU-6050", "Sensor_Motion:MPU-6050", "Sensor_Motion:InvenSense_QFN-24_4x4mm_P0.5mm", "C24112",
@@ -246,8 +260,8 @@ PARTS: list[Part] = [
     cap("C_CAM_AVDD", "100nF", "+2V8", "GND"),
     cap("C_CAM_DVDD", "100nF", "+1V5", "GND"),
     # SCCB 上拉预留不贴：面包板原型靠 ESP32 内部上拉工作正常
-    res("R_SIOC", "4.7k", "CAM_SIOC", "+2V8", fitted=False),
-    res("R_SIOD", "4.7k", "CAM_SIOD", "+2V8", fitted=False),
+    res("R_SIOC", "4.7k", "CAM_SIOC", "+2V8"),
+    res("R_SIOD", "4.7k", "CAM_SIOD", "+2V8"),
 
     # ── 双屏：7 针排针，顺序 RST CS DC SDA SCL GND VCC（与现有 GC9A01 模块一致）──
     # CLK 与 MOSI 在 ESP32 端串 33Ω，两屏共用这两根线（设计方案 6.5 节）
@@ -256,11 +270,11 @@ PARTS: list[Part] = [
     Part("J_LCD_L", "LCD L", "Connector_Generic:Conn_01x07",
          "Connector_PinHeader_2.54mm:PinHeader_1x07_P2.54mm_Vertical",
          pins={"1": "LCD_RST", "2": "LCD_CS_L", "3": "LCD_DC", "4": "LCD_MOSI_S", "5": "LCD_CLK_S",
-               "6": "GND", "7": "+3V3"}),
+               "6": "GND", "7": "+3V3"}, assembly=False),
     Part("J_LCD_R", "LCD R", "Connector_Generic:Conn_01x07",
          "Connector_PinHeader_2.54mm:PinHeader_1x07_P2.54mm_Vertical",
          pins={"1": "LCD_RST", "2": "LCD_CS_R", "3": "LCD_DC", "4": "LCD_MOSI_S", "5": "LCD_CLK_S",
-               "6": "GND", "7": "+3V3"}),
+               "6": "GND", "7": "+3V3"}, assembly=False),
     cap("C_LCD", "100nF", "+3V3", "GND"),
 
     # ── 麦克风：INMP441，引脚按 TDK DS-INMP441-00 表 6 ──
@@ -283,7 +297,8 @@ PARTS: list[Part] = [
     cap("C_AMP", "100nF", "VBUS", "GND"),
     # BTL 差分输出，喇叭两端都不能接地
     Part("J_SPK", "Speaker", "Connector_Generic:Conn_01x02",
-         "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical", pins={"1": "SPK_P", "2": "SPK_N"}),
+         "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical", pins={"1": "SPK_P", "2": "SPK_N"},
+         assembly=False),
 
     # ── 测试点（设计方案第 9 节）──
     testpoint("TP_3V3", "+3V3"),
@@ -296,7 +311,8 @@ PARTS: list[Part] = [
     testpoint("TP_TX", "UART_TX"),
 
     # ── 安装孔 M3 ──
-    *[Part(f"H{i}", "M3", "Mechanical:MountingHole", "MountingHole:MountingHole_3.2mm_M3") for i in range(1, 5)],
+    *[Part(f"H{i}", "M3", "Mechanical:MountingHole", "MountingHole:MountingHole_3.2mm_M3",
+           assembly=False) for i in range(1, 5)],
 ]
 
 
