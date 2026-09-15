@@ -171,6 +171,20 @@ class Fanout:
             self.add_track(en.GetNet(), a, b, 0.2)
         return len(ground_vias)
 
+    def route_sensitive_ground_islands(self) -> int:
+        """固定三个自动扇出难以安全处理的地脚，并避开麦克风声孔。"""
+        for ref, number, x, y, width in (
+                ("C_EN", "2", 6.75, 41.52, 0.4),
+                ("U_MIC", "5", 16.80, 50.00, 0.2)):
+            pad = self.pad(ref, number)
+            self.add_track(pad.GetNet(), pad.GetPosition(), v(x, y), width)
+            self.add_via(pad.GetNet(), "GND", x, y)
+
+        amp_ep = self.pad("U_AMP", "17")
+        x, y = amp_ep.GetPosition().x * TO_MM, amp_ep.GetPosition().y * TO_MM
+        self.add_via(amp_ep.GetNet(), "GND", x, y)
+        return 3
+
     def route_camera_xclk_guards(self) -> int:
         """在 F.Cu 独立走 XCLK，并给所有长直段加 0.65mm 双侧接地护线。"""
         source = self.pad("U1", "8")
@@ -354,6 +368,7 @@ class Fanout:
         added = self.route_usb_efuse()
         added += self.route_buck_hot_loop()
         added += self.route_u1_power_and_en()
+        added += self.route_sensitive_ground_islands()
         added += self.route_camera_xclk_guards()
         added += self.escape_camera_fpc()
         added += self.escape_touch_ground()
@@ -386,7 +401,8 @@ class Fanout:
                 continue
             if (ref == "U_IMU" and pad.GetNumber() in ("8", "9", "11")) or \
                     (ref == "U_TOUCH" and pad.GetNumber() == "4") or \
-                    (ref == "D_USB_DP" and pad.GetNumber() == "2"):
+                    (ref == "D_USB_DP" and pad.GetNumber() == "2") or \
+                    (ref, pad.GetNumber()) in {("C_EN", "2"), ("U_MIC", "5"), ("U_AMP", "17")}:
                 continue
             b = box_mm(pad.GetBoundingBox())
             w, h = b[2] - b[0], b[3] - b[1]

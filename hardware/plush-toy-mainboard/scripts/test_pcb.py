@@ -124,6 +124,18 @@ class PcbTest(unittest.TestCase):
             with self.subTest(ref=ref, pad=number):
                 self.assertLessEqual(nearest, 1.0)
 
+    def test_sensitive_ground_islands_have_deterministic_vias(self):
+        vias = {(via.GetPosition().x, via.GetPosition().y) for via in self._vias("GND")}
+        for ref, number in (("C_EN", "2"), ("U_MIC", "5"), ("U_AMP", "17")):
+            pad = self.fps[ref].FindPadByNumber(number).GetPosition()
+            attached = [track for track in self._tracks("GND")
+                        if track.GetStart() == pad or track.GetEnd() == pad]
+            with self.subTest(ref=ref, pad=number):
+                self.assertTrue((pad.x, pad.y) in vias or
+                                any((track.GetStart().x, track.GetStart().y) in vias or
+                                    (track.GetEnd().x, track.GetEnd().y) in vias
+                                    for track in attached))
+
     def test_u1_en_rc_has_short_top_layer_paths(self):
         source = self.fps["U1"].FindPadByNumber("3").GetPosition()
         for ref, number in (("R_EN", "2"), ("C_EN", "1")):

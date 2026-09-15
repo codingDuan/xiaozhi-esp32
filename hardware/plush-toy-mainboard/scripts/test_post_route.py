@@ -10,6 +10,13 @@ import post_route
 
 
 class PostRouteTest(unittest.TestCase):
+    def test_router_reuses_unchanged_obstacle_grid(self):
+        board = pcbnew.LoadBoard(str(post_route.PCB))
+        router = post_route.Router(board)
+        first = router.blocked_grid("CAM_VSYNC", pcbnew.F_Cu)
+        second = router.blocked_grid("CAM_VSYNC", pcbnew.F_Cu)
+        self.assertIs(first, second)
+
     def test_power_reroute_never_replaces_critical_copper(self):
         board = pcbnew.BOARD()
         net = pcbnew.NETINFO_ITEM(board, "BUCK_SW")

@@ -58,6 +58,14 @@ def point_segment_distance(p, a, b) -> float:
 class Router:
     def __init__(self, board: pcbnew.BOARD):
         self.board = board
+        self._blocked_cache: dict[tuple[str, int, float], set[tuple[int, int]]] = {}
+
+    def invalidate_obstacles(self, added_net: str | None = None) -> None:
+        # 新增同网络铜不会成为该网络自己的障碍，可保留其昂贵的栅格结果。
+        self._blocked_cache = {
+            key: value for key, value in self._blocked_cache.items()
+            if added_net is not None and key[0] == added_net
+        }
 
     @staticmethod
     def track_width(net: str) -> float:
@@ -80,6 +88,8 @@ class Router:
             if math.dist(p, MIC_HOLE) < MIC_EXCLUSION:
                 self.board.Remove(item)
                 removed += 1
+        if removed:
+            self.invalidate_obstacles()
         return removed
 
     def blocked(self, p: tuple[float, float], net: str) -> bool:
@@ -113,8 +123,11 @@ class Router:
 
     def blocked_grid(self, net: str, layer: int, width: float | None = None) -> set[tuple[int, int]]:
         """一次性栅格化障碍物，避免 A* 每个节点遍历整块板。"""
-        blocked: set[tuple[int, int]] = set()
         width = self.track_width(net) if width is None else width
+        key = (net, layer, width)
+        if key in self._blocked_cache:
+            return self._blocked_cache[key]
+        blocked: set[tuple[int, int]] = set()
         margin = self.clearance(net) + width / 2
 
         def mark_rect(x1, y1, x2, y2):
@@ -157,6 +170,7 @@ class Router:
                     t = i / samples
                     mark_disk(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, radius)
         mark_disk(MIC_HOLE[0], MIC_HOLE[1], 0.20 + 0.25 + TRACK_W / 2)
+        self._blocked_cache[key] = blocked
         return blocked
 
     def find_escape_path(self, net: str, start, narrow_width: float, radius: float = 2.0):
@@ -306,6 +320,8 @@ class Router:
             track.SetNet(netinfo)
             self.board.Add(track)
             added.append(track)
+        if added:
+            self.invalidate_obstacles(net)
         return added
 
     def add_via(self, net: str, p: tuple[float, float]) -> None:
@@ -316,6 +332,7 @@ class Router:
         via.SetDrill(pcbnew.FromMM(drill))
         via.SetNet(self.board.FindNet(net))
         self.board.Add(via)
+        self.invalidate_obstacles(net)
 
 
 def drc(path: Path) -> dict:
@@ -499,6 +516,7 @@ def reroute_long_power_tracks(board: pcbnew.BOARD, router: Router) -> int:
         backup = item.Duplicate()
         narrow_width = mm(backup.GetWidth())
         board.Delete(item)
+        router.invalidate_obstacles()
         added = []
         try:
             start_escape = router.find_escape_path(net, start, narrow_width)
