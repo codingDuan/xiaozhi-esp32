@@ -33,8 +33,13 @@ _PIN_RE = re.compile(
     r'\(pin\s+(\w+)\s+\w+\s*\(at ([-\d.]+) ([-\d.]+) ([-\d.]+)\).*?\(number\s+"([^"]+)"', re.S)
 
 
-def _uid() -> str:
-    return str(uuid.uuid4())
+# UUID 由对象身份（位号、引脚号）确定性派生：重复生成的文件逐字节相同，
+# 跑测试不再把整个 .kicad_sch 改脏。PCB 与原理图按位号对应，不依赖这些值。
+_NAMESPACE = uuid.uuid5(uuid.NAMESPACE_URL, f"xiaozhi-esp32/hardware/{PROJECT}")
+
+
+def _uid(key: str) -> str:
+    return str(uuid.uuid5(_NAMESPACE, key))
 
 
 def _snap(v: float) -> float:
@@ -99,7 +104,7 @@ def _placed(lib_id: str, ref: str, value: str, footprint: str, lcsc: str, fitted
     out = [f'\t(symbol\n\t\t(lib_id "{lib_id}")\n\t\t(at {x:.2f} {y:.2f} 0)\n\t\t(unit 1)\n'
            f'\t\t(exclude_from_sim no)\n\t\t(in_bom {"yes" if in_bom else "no"})\n'
            f'\t\t(on_board {"yes" if on_board else "no"})\n\t\t(dnp {"no" if fitted else "yes"})\n'
-           f'\t\t(uuid "{_uid()}")\n']
+           f'\t\t(uuid "{_uid(f"symbol/{ref}")}")\n']
     out.append(_property("Reference", ref, *ref_xy, False, "left"))
     out.append(_property("Value", value, *value_xy, False, "left"))
     out.append(_property("Footprint", footprint, x, y, True))
@@ -107,24 +112,24 @@ def _placed(lib_id: str, ref: str, value: str, footprint: str, lcsc: str, fitted
     if lcsc:
         out.append(_property("LCSC", lcsc, x, y, True))
     for number in pin_numbers:
-        out.append(f'\t\t(pin "{number}"\n\t\t\t(uuid "{_uid()}")\n\t\t)\n')
+        out.append(f'\t\t(pin "{number}"\n\t\t\t(uuid "{_uid(f"pin/{ref}/{number}")}")\n\t\t)\n')
     out.append(f'\t\t(instances\n\t\t\t(project "{PROJECT}"\n\t\t\t\t(path "/{root_uuid}"\n'
                f'\t\t\t\t\t(reference "{ref}")\n\t\t\t\t\t(unit 1)\n\t\t\t\t)\n\t\t\t)\n\t\t)\n\t)\n')
     return "".join(out)
 
 
-def _label(net: str, x: float, y: float, pin_angle: int) -> str:
+def _label(net: str, x: float, y: float, pin_angle: int, key: str) -> str:
     # 标签朝引脚的反方向伸出，文字落在符号本体之外，不压住引脚名。
     # 只改文字朝向，锚点仍在引脚末端，电气连接不受影响。
     angle = (pin_angle + 180) % 360
     justify = "left bottom" if angle in (0, 90) else "right bottom"
     shown = angle if angle in (0, 90) else angle - 180
     return (f'\t(global_label "{net}"\n\t\t(shape input)\n\t\t(at {x:.2f} {y:.2f} {shown})\n\t\t(effects\n\t\t\t(font\n'
-            f'\t\t\t\t(size 1.27 1.27)\n\t\t\t)\n\t\t\t(justify {justify})\n\t\t)\n\t\t(uuid "{_uid()}")\n\t)\n')
+            f'\t\t\t\t(size 1.27 1.27)\n\t\t\t)\n\t\t\t(justify {justify})\n\t\t)\n\t\t(uuid "{_uid(key)}")\n\t)\n')
 
 
-def _no_connect(x: float, y: float) -> str:
-    return f'\t(no_connect\n\t\t(at {x:.2f} {y:.2f})\n\t\t(uuid "{_uid()}")\n\t)\n'
+def _no_connect(x: float, y: float, key: str) -> str:
+    return f'\t(no_connect\n\t\t(at {x:.2f} {y:.2f})\n\t\t(uuid "{_uid(key)}")\n\t)\n'
 
 
 def _flag_nets(blocks: dict[str, str]) -> list[str]:
@@ -141,7 +146,7 @@ def _flag_nets(blocks: dict[str, str]) -> list[str]:
 
 
 def main() -> Path:
-    root_uuid = _uid()
+    root_uuid = _uid("sheet")
     blocks: dict[str, str] = {}
     for part in board_spec.PARTS:
         if part.symbol not in blocks:
@@ -177,7 +182,8 @@ def main() -> Path:
         for number, net in pin_nets.items():
             px, py, _, pin_angle = pins[number]
             ax, ay = x + px, y - py      # 符号坐标 y 轴向上，原理图坐标 y 轴向下
-            body.append(_no_connect(ax, ay) if net.startswith("NC_") else _label(net, ax, ay, pin_angle))
+            body.append(_no_connect(ax, ay, f"nc/{ref}/{number}") if net.startswith("NC_")
+                        else _label(net, ax, ay, pin_angle, f"label/{ref}/{number}"))
         cursor_x += width
         row_h = max(row_h, height)
 

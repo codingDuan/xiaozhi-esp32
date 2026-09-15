@@ -1,5 +1,6 @@
 """原理图是生成物，必须证明它和 board_spec 等价：导出网表逐网络比对，再跑 ERC。"""
 import json
+import re
 import subprocess
 import tempfile
 import unittest
@@ -32,6 +33,14 @@ class NetlistRoundTripTest(unittest.TestCase):
             members = sorted((n.get("ref"), n.get("pin")) for n in net.iter("node")
                              if not n.get("ref", "").startswith("#") and n.get("ref") not in dnp)
             cls.exported[net.get("name").lstrip("/")] = members
+
+    def test_regeneration_is_byte_identical_with_unique_uuids(self):
+        # 随机 uuid4 让每次跑测试都改写整个 .kicad_sch，工作区永远是脏的
+        first = self.sch.read_text(encoding="utf-8")
+        second = gen_schematic.main().read_text(encoding="utf-8")
+        self.assertEqual(first, second)
+        uuids = re.findall(r'\(uuid "([^"]+)"\)', first)
+        self.assertEqual(len(uuids), len(set(uuids)))
 
     def test_every_part_keeps_its_reference(self):
         # 缺 instances 块时 KiCad 会把位号当成未标注，网表里全是 U?、R?
