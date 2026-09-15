@@ -106,6 +106,109 @@ class Fanout:
             return False
         return self.clear(net, lambda ob, c: circle_hits_box(x, y, VIA_D / 2 + c, ob))
 
+    def pad(self, ref: str, number: str):
+        return self.board.FindFootprintByReference(ref).FindPadByNumber(number)
+
+    def route_usb_efuse(self) -> int:
+        """先并联 eFuse 的三个输入脚，长电源干线和支持元件留给自动布线。"""
+        added = 0
+        # 三个 IN 焊盘先在芯片侧并成一体；这段短铜也为远端保险丝提供单一入口。
+        pins = [self.pad("U_EFUSE", number) for number in ("2", "3", "4")]
+        for first, second in zip(pins, pins[1:]):
+            self.add_track(first.GetNet(), first.GetPosition(), second.GetPosition(), 0.2)
+
+        return added
+
+    def route_buck_hot_loop(self) -> int:
+        """固定降压高 di/dt 回路：SW 全程顶层、输入去耦与地回流都在芯片旁。"""
+        sw = self.pad("U_BUCK", "3")
+        inductor = self.pad("L_BUCK", "1")
+        sw_path = [sw.GetPosition(), v(37.15, 14.95), inductor.GetPosition()]
+        for a, b in zip(sw_path, sw_path[1:]):
+            self.add_track(sw.GetNet(), a, b, 0.5)
+
+        vin = self.pad("U_BUCK", "4")
+        hf_vin = self.pad("C_BUCK_HF", "1")
+        bulk_vin = self.pad("C_BUCK_IN", "1")
+        self.add_track(vin.GetNet(), vin.GetPosition(), hf_vin.GetPosition(), 0.5)
+        bulk_path = [vin.GetPosition(), v(42.25, 14.95), v(42.25, 9.70),
+                     v(39.05, 9.70), bulk_vin.GetPosition()]
+        for a, b in zip(bulk_path, bulk_path[1:]):
+            self.add_track(vin.GetNet(), a, b, 0.5)
+
+        # 不在小贴片焊盘里打孔，避免回流焊吸锡；每个焊盘用极短支线接平面。
+        ground_vias = [
+            (self.pad("U_BUCK", "2"), (39.70, 14.00)),
+            (self.pad("C_BUCK_HF", "2"), (38.72, 17.24)),
+            (self.pad("C_BUCK_IN", "2"), (41.00, 11.75)),
+        ]
+        for pad, (x, y) in ground_vias:
+            self.add_track(pad.GetNet(), pad.GetPosition(), v(x, y), 0.4)
+            self.add_via(pad.GetNet(), "GND", x, y)
+        return len(ground_vias)
+
+    def route_u1_power_and_en(self) -> int:
+        """先锁定 ESP32 就地去耦与 EN RC，按键的长支路仍交给自动布线。"""
+        v3 = self.pad("U1", "2")
+        local_v3 = self.pad("C_U1", "1")
+        bulk_v3 = self.pad("C_U1_BULK", "1")
+        self.add_track(v3.GetNet(), v3.GetPosition(), local_v3.GetPosition(), 0.5)
+        self.add_track(v3.GetNet(), local_v3.GetPosition(), bulk_v3.GetPosition(), 0.5)
+
+        ground_vias = [
+            (self.pad("C_U1", "2"), (3.00, 43.23)),
+            (self.pad("C_U1_BULK", "2"), (1.30, 44.025)),
+        ]
+        for pad, (x, y) in ground_vias:
+            self.add_track(pad.GetNet(), pad.GetPosition(), v(x, y), 0.4)
+            self.add_via(pad.GetNet(), "GND", x, y)
+
+        en = self.pad("U1", "3")
+        resistor = self.pad("R_EN", "2")
+        capacitor = self.pad("C_EN", "1")
+        en_path = [en.GetPosition(), resistor.GetPosition(), capacitor.GetPosition()]
+        for a, b in zip(en_path, en_path[1:]):
+            self.add_track(en.GetNet(), a, b, 0.2)
+        return len(ground_vias)
+
+    def route_camera_xclk_guards(self) -> int:
+        """在 F.Cu 独立走 XCLK，并给所有长直段加 0.65mm 双侧接地护线。"""
+        source = self.pad("U1", "8")
+        target = self.pad("J_CAM", "13")
+        points = [
+            source.GetPosition(), v(10.38, 41.50), v(19.50, 41.50),
+            v(19.50, 45.50), v(25.80, 45.50), v(25.80, 49.50),
+            v(39.75, 49.50), v(39.75, 52.50), target.GetPosition(),
+        ]
+        for a, b in zip(points, points[1:]):
+            self.add_track(source.GetNet(), a, b, 0.2)
+
+        guard_net = self.board.FindNet("GND")
+        via_points: set[tuple[float, float]] = set()
+        for a, b in zip(points, points[1:]):
+            ax, ay = a.x * TO_MM, a.y * TO_MM
+            bx, by = b.x * TO_MM, b.y * TO_MM
+            length = math.hypot(bx - ax, by - ay)
+            if length <= 3.0:
+                continue
+            nx, ny = -(by - ay) / length, (bx - ax) / length
+            for side in (-1.0, 1.0):
+                ux, uy = (bx - ax) / length, (by - ay) / length
+                trim = 0.70
+                start = (ax + trim * ux + side * 0.65 * nx,
+                         ay + trim * uy + side * 0.65 * ny)
+                end = (bx - trim * ux + side * 0.65 * nx,
+                       by - trim * uy + side * 0.65 * ny)
+                self.add_track(guard_net, v(*start), v(*end), 0.5)
+                count = max(1, math.ceil((length - 2 * trim) / 3.0))
+                for index in range(count + 1):
+                    ratio = index / count
+                    via_points.add((round(start[0] + (end[0] - start[0]) * ratio, 3),
+                                    round(start[1] + (end[1] - start[1]) * ratio, 3)))
+        for x, y in sorted(via_points):
+            self.add_via(guard_net, "GND", x, y)
+        return len(via_points)
+
     def escape_camera_fpc(self) -> int:
         """先把 0.5mm 间距相机焊盘引到连接器外，避免自动布线封住出口。"""
         fp = self.board.FindFootprintByReference("J_CAM")
@@ -116,6 +219,8 @@ class Fanout:
             number = pad.GetNumber()
             net = pad.GetNetname()
             if not number.isdigit() or int(number) > 24 or not net or net.startswith("unconnected-"):
+                continue
+            if net == "CAM_XCLK":
                 continue
             start = pad.GetPosition()
             x, y = start.x * TO_MM, start.y * TO_MM
@@ -176,6 +281,10 @@ class Fanout:
                     end = v((box[2] + 0.9) if dx > 0 else (box[0] - 0.9), y)
                 else:
                     end = v(x, (box[3] + 0.9) if dy > 0 else (box[1] - 0.9))
+                half = 0.1 + CLEARANCE
+                if not self.clear(net, lambda ob, c: segment_hits_box(x, y, end.x * TO_MM,
+                                                                       end.y * TO_MM, half, ob)):
+                    continue
                 self.add_track(pad.GetNet(), pos, end, 0.2)
                 added += 1
 
@@ -201,8 +310,16 @@ class Fanout:
     def escape_touch_ground(self) -> int:
         pad = self.board.FindFootprintByReference("U_TOUCH").FindPadByNumber("4")
         pos = pad.GetPosition()
-        via_x, via_y = box_mm(pad.GetBoundingBox())[0] - 1.65, pos.y * TO_MM
+        via_x, via_y = 27.3, pos.y * TO_MM
         self.add_track(pad.GetNet(), pos, v(via_x, via_y), 0.2)
+        self.add_via(pad.GetNet(), "GND", via_x, via_y)
+        return 1
+
+    def escape_usb_esd_ground(self) -> int:
+        """给 USB ESD 阵列地脚固定短回路，避免两颗器件竞争同一狭窄过孔位置。"""
+        pad = self.pad("D_USB_DP", "2")
+        via_x, via_y = 27.60, 11.00
+        self.add_track(pad.GetNet(), pad.GetPosition(), v(via_x, via_y), 0.2)
         self.add_via(pad.GetNet(), "GND", via_x, via_y)
         return 1
 
@@ -218,7 +335,7 @@ class Fanout:
         # J_CAM 侧复用 escape_camera_fpc 已放置的交错过孔。
         self.add_track(net_item, cap.GetPosition(), v(cx, cy), 0.2)
         self.add_via(net_item, "+1V5", cx, cy)
-        detour_x, inner_y = 33.8, 56.2
+        detour_x, inner_y = 33.4, 56.2
         self.add_layer_track(net_item, v(jx, jy), v(jx, inner_y), 0.2, pcbnew.B_Cu)
         self.add_layer_track(net_item, v(jx, inner_y), v(detour_x, inner_y), 0.2, pcbnew.B_Cu)
         self.add_layer_track(net_item, v(detour_x, inner_y), v(detour_x, cy), 0.2, pcbnew.B_Cu)
@@ -234,11 +351,16 @@ class Fanout:
         return 0
 
     def run(self) -> tuple[int, list[str]]:
-        added = self.escape_camera_fpc()
+        added = self.route_usb_efuse()
+        added += self.route_buck_hot_loop()
+        added += self.route_u1_power_and_en()
+        added += self.route_camera_xclk_guards()
+        added += self.escape_camera_fpc()
+        added += self.escape_touch_ground()
         added += self.escape_dense_sensor_signals()
         added += self.route_imu_regout()
         added += self.escape_imu_plane_pads()
-        added += self.escape_touch_ground()
+        added += self.escape_usb_esd_ground()
         added += self.route_camera_dvdd()
         added += self.anchor_servo_pgnd()
         skipped = []
@@ -263,7 +385,8 @@ class Fanout:
             if any(n == net and math.hypot(x - px, y - py) <= VIA_D for n, x, y in self.vias):
                 continue
             if (ref == "U_IMU" and pad.GetNumber() in ("8", "9", "11")) or \
-                    (ref == "U_TOUCH" and pad.GetNumber() == "4"):
+                    (ref == "U_TOUCH" and pad.GetNumber() == "4") or \
+                    (ref == "D_USB_DP" and pad.GetNumber() == "2"):
                 continue
             b = box_mm(pad.GetBoundingBox())
             w, h = b[2] - b[0], b[3] - b[1]

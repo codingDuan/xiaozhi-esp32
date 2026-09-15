@@ -1,5 +1,7 @@
 """PCB 外框、叠层、放置与网络核对。用 KiCad 自带 Python 运行：KICAD_PYTHON -m unittest test_pcb"""
 import re
+import heapq
+import math
 import unittest
 from pathlib import Path
 
@@ -42,6 +44,39 @@ class PcbTest(unittest.TestCase):
         b = self.fps[ref_b].GetPosition()
         return ((mm(a.x - b.x) ** 2) + (mm(a.y - b.y) ** 2)) ** 0.5
 
+    def _tracks(self, net):
+        return [item for item in self.board.GetTracks()
+                if item.GetClass() == "PCB_TRACK" and item.GetNetname() == net]
+
+    def _vias(self, net):
+        return [item for item in self.board.GetTracks()
+                if item.GetClass() == "PCB_VIA" and item.GetNetname() == net]
+
+    def _shortest_top_path(self, net, start, end):
+        graph = {}
+        for track in self._tracks(net):
+            if track.GetLayer() != pcbnew.F_Cu:
+                continue
+            a = (track.GetStart().x, track.GetStart().y)
+            b = (track.GetEnd().x, track.GetEnd().y)
+            length = mm(track.GetLength())
+            graph.setdefault(a, []).append((b, length))
+            graph.setdefault(b, []).append((a, length))
+        source = (start.x, start.y)
+        target = (end.x, end.y)
+        queue = [(0.0, source)]
+        seen = {}
+        while queue:
+            distance, node = heapq.heappop(queue)
+            if node == target:
+                return distance
+            if distance >= seen.get(node, math.inf):
+                continue
+            seen[node] = distance
+            for neighbor, length in graph.get(node, []):
+                heapq.heappush(queue, (distance + length, neighbor))
+        return math.inf
+
     def test_revised_parts_are_placed(self):
         required = {"U_EFUSE", "C_EFUSE_IN", "C_EFUSE_DVDT", "R_EFUSE_ILM", "C_BUCK_HF",
                     "J_TOUCH", "R_SIOC", "R_SIOD"}
@@ -71,6 +106,94 @@ class PcbTest(unittest.TestCase):
             ("dielectric 3", "prepreg", "0.2104"),
             ("B.Cu", "copper", "0.035"),
         ])
+
+    def test_buck_sw_is_short_top_only_and_vialess(self):
+        tracks = self._tracks("BUCK_SW")
+        self.assertTrue(tracks)
+        self.assertEqual(self._vias("BUCK_SW"), [])
+        self.assertEqual({track.GetLayer() for track in tracks}, {pcbnew.F_Cu})
+        self.assertLessEqual(sum(mm(track.GetLength()) for track in tracks), 3.0)
+
+    def test_critical_ground_pads_have_via_within_one_mm(self):
+        vias = [via.GetPosition() for via in self._vias("GND")]
+        self.assertTrue(vias)
+        for ref, number in (("U_BUCK", "2"), ("C_BUCK_HF", "2"), ("C_BUCK_IN", "2"),
+                            ("C_U1", "2"), ("C_U1_BULK", "2")):
+            pad = self.fps[ref].FindPadByNumber(number).GetPosition()
+            nearest = min(math.hypot(mm(pad.x - via.x), mm(pad.y - via.y)) for via in vias)
+            with self.subTest(ref=ref, pad=number):
+                self.assertLessEqual(nearest, 1.0)
+
+    def test_u1_en_rc_has_short_top_layer_paths(self):
+        source = self.fps["U1"].FindPadByNumber("3").GetPosition()
+        for ref, number in (("R_EN", "2"), ("C_EN", "1")):
+            target = self.fps[ref].FindPadByNumber(number).GetPosition()
+            with self.subTest(ref=ref):
+                self.assertLessEqual(self._shortest_top_path("EN", source, target), 10.0)
+        self.assertEqual(self._vias("EN"), [])
+
+    @staticmethod
+    def _parallel_guard_coverage(signal, guard):
+        sx = mm(signal.GetEnd().x - signal.GetStart().x)
+        sy = mm(signal.GetEnd().y - signal.GetStart().y)
+        gx = mm(guard.GetEnd().x - guard.GetStart().x)
+        gy = mm(guard.GetEnd().y - guard.GetStart().y)
+        slen = math.hypot(sx, sy)
+        glen = math.hypot(gx, gy)
+        if slen == 0 or glen == 0 or abs(sx * gy - sy * gx) > 1e-3 * slen * glen:
+            return None
+        ux, uy = sx / slen, sy / slen
+        ax = mm(guard.GetStart().x - signal.GetStart().x)
+        ay = mm(guard.GetStart().y - signal.GetStart().y)
+        bx = mm(guard.GetEnd().x - signal.GetStart().x)
+        by = mm(guard.GetEnd().y - signal.GetStart().y)
+        side = ux * ay - uy * ax
+        distance = abs(side)
+        lo, hi = sorted((ux * ax + uy * ay, ux * bx + uy * by))
+        overlap = max(0.0, min(slen, hi) - max(0.0, lo))
+        return side, distance, overlap
+
+    def test_camera_xclk_is_top_only_vialess_and_guarded(self):
+        xclk = self._tracks("CAM_XCLK")
+        self.assertTrue(xclk)
+        self.assertEqual(self._vias("CAM_XCLK"), [])
+        self.assertEqual({track.GetLayer() for track in xclk}, {pcbnew.F_Cu})
+        guards = self._tracks("GND")
+        for signal in (track for track in xclk if mm(track.GetLength()) > 3.0):
+            matches = [self._parallel_guard_coverage(signal, guard) for guard in guards]
+            matches = [match for match in matches if match is not None and 0.5 <= match[1] <= 0.8]
+            required = max(1.0, mm(signal.GetLength()) - 2.5)
+            with self.subTest(start=signal.GetStart(), end=signal.GetEnd()):
+                self.assertTrue(any(side > 0 and overlap >= required for side, _, overlap in matches))
+                self.assertTrue(any(side < 0 and overlap >= required for side, _, overlap in matches))
+
+    def test_xclk_guard_vias_are_stitched_at_three_mm_pitch(self):
+        vias = [(mm(via.GetPosition().x), mm(via.GetPosition().y)) for via in self._vias("GND")]
+        guards = self._tracks("GND")
+        for signal in (track for track in self._tracks("CAM_XCLK") if mm(track.GetLength()) > 3.0):
+            matches = [guard for guard in guards
+                       if (coverage := self._parallel_guard_coverage(signal, guard)) is not None
+                       and 0.5 <= coverage[1] <= 0.8 and coverage[2] >= mm(signal.GetLength()) - 2.5]
+            for guard in matches:
+                length = mm(guard.GetLength())
+                count = max(1, math.ceil(length / 3.0))
+                for index in range(count + 1):
+                    ratio = index / count
+                    x = mm(guard.GetStart().x) + ratio * mm(guard.GetEnd().x - guard.GetStart().x)
+                    y = mm(guard.GetStart().y) + ratio * mm(guard.GetEnd().y - guard.GetStart().y)
+                    with self.subTest(x=round(x, 3), y=round(y, 3)):
+                        self.assertTrue(any(math.hypot(x - vx, y - vy) <= 0.15 for vx, vy in vias))
+
+    def test_xclk_has_no_long_close_parallel_signal(self):
+        offenders = []
+        for signal in self._tracks("CAM_XCLK"):
+            for other in self.board.GetTracks():
+                if other.GetClass() != "PCB_TRACK" or other.GetNetname() in ("CAM_XCLK", "GND"):
+                    continue
+                match = self._parallel_guard_coverage(signal, other)
+                if match is not None and match[1] < 0.7 and match[2] > 3.0:
+                    offenders.append((other.GetNetname(), round(match[1], 3), round(match[2], 3)))
+        self.assertEqual(offenders, [])
 
     def test_every_fitted_part_placed_inside_outline(self):
         box = self.board.GetBoardEdgesBoundingBox()

@@ -36,6 +36,7 @@ POWER_WIDTHS = {
     "VBUS": 0.5, "VBUS_IN": 0.5, "+3V3": 0.5, "GND": 0.5,
     "BUCK_SW": 0.5, "SPK_P": 0.5, "SPK_N": 0.5, "+2V8": 0.5, "+1V5": 0.3,
 }
+CRITICAL_NETS = {"BUCK_SW", "CAM_XCLK"}
 
 
 def mm(value: int) -> float:
@@ -481,6 +482,8 @@ def reroute_long_power_tracks(board: pcbnew.BOARD, router: Router) -> int:
     for item in list(board.GetTracks()):
         if item.GetClass() != "PCB_TRACK":
             continue
+        if item.GetNetname() in CRITICAL_NETS:
+            continue
         width = POWER_WIDTHS.get(item.GetNetname())
         endpoints = ((item.GetNetname(), item.GetStart().x, item.GetStart().y),
                      (item.GetNetname(), item.GetEnd().x, item.GetEnd().y))
@@ -551,6 +554,8 @@ def open_pairs(report: dict, board: pcbnew.BOARD):
             continue
         match = re.search(r"\[([^]]+)]", items[0].get("description", ""))
         if not match:
+            continue
+        if match.group(1) in CRITICAL_NETS:
             continue
         candidates = [(a, b) for a in endpoints(items[0]) for b in endpoints(items[1])]
         if candidates:

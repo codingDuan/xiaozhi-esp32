@@ -10,6 +10,23 @@ import post_route
 
 
 class PostRouteTest(unittest.TestCase):
+    def test_power_reroute_never_replaces_critical_copper(self):
+        board = pcbnew.BOARD()
+        net = pcbnew.NETINFO_ITEM(board, "BUCK_SW")
+        board.Add(net)
+        track = pcbnew.PCB_TRACK(board)
+        track.SetStart(pcbnew.VECTOR2I(pcbnew.FromMM(10), pcbnew.FromMM(10)))
+        track.SetEnd(pcbnew.VECTOR2I(pcbnew.FromMM(15), pcbnew.FromMM(10)))
+        track.SetWidth(pcbnew.FromMM(0.2))
+        track.SetLayer(pcbnew.F_Cu)
+        track.SetNet(net)
+        board.Add(track)
+
+        changed = post_route.reroute_long_power_tracks(board, post_route.Router(board))
+
+        self.assertEqual(changed, 0)
+        self.assertIn(track, list(board.GetTracks()))
+
     def test_candidate_drc_uses_full_project_context_and_parity(self):
         candidate = Path(tempfile.mkdtemp()) / "arbitrary-candidate.kicad_pcb"
         shutil.copy2(post_route.PCB, candidate)
