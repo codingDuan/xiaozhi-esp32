@@ -33,7 +33,7 @@ MIC_HOLE = (15.29, 50.00)
 MIC_EXCLUSION = 0.20 + 0.25 + 0.30
 POWER_WIDTHS = {
     "VMOT": 1.0, "VMOT_IN": 1.0, "PGND": 1.0, "HEAT_LOW": 1.0,
-    "VBUS": 0.5, "VBUS_IN": 0.5, "+3V3": 0.5, "GND": 0.5,
+    "VBUS": 0.5, "VBUS_IN": 0.5, "VBUS_FUSED": 0.5, "+3V3": 0.5, "GND": 0.5,
     "BUCK_SW": 0.5, "SPK_P": 0.5, "SPK_N": 0.5, "+2V8": 0.5, "+1V5": 0.3,
 }
 CRITICAL_NETS = {"BUCK_SW", "CAM_XCLK"}
@@ -73,6 +73,8 @@ class Router:
 
     @staticmethod
     def clearance(net: str) -> float:
+        if net == "TOUCH_E0":
+            return 0.30
         return 0.20 if net == "PGND" else CLEARANCE
 
     @staticmethod
@@ -253,15 +255,58 @@ class Router:
         path[0], path[-1] = start, end
         return self.compress(path)
 
-    def find_via_path(self, net: str, start: tuple[float, float], radius: float = 3.0):
+    def find_layer_path(self, net: str, start, end, width: float):
+        """在单层用指定窄线宽连接密脚距端点，不引入额外过孔。"""
+        if start[2] != end[2]:
+            raise RuntimeError(f"{net}: 单层路径的起止层不同")
+        layer = start[2]
+        source = self.grid_point(start[:2])
+        target = self.grid_point(end[:2])
+        blocked = self.blocked_grid(net, layer, width)
+        queue = [(0.0, source)]
+        cost = {source: 0.0}
+        parent = {source: None}
+        while queue:
+            _, here = heapq.heappop(queue)
+            if here == target:
+                break
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nxt = (here[0] + dx, here[1] + dy)
+                p = self.physical(nxt)
+                if not (EDGE <= p[0] <= 90.0 - EDGE and EDGE <= p[1] <= 60.0 - EDGE):
+                    continue
+                if nxt != target and nxt in blocked:
+                    continue
+                new_cost = cost[here] + 1
+                if new_cost >= cost.get(nxt, math.inf):
+                    continue
+                cost[nxt] = new_cost
+                parent[nxt] = here
+                estimate = abs(nxt[0] - target[0]) + abs(nxt[1] - target[1])
+                heapq.heappush(queue, (new_cost + estimate, nxt))
+        if target not in parent:
+            raise RuntimeError(f"{net}: 找不到 {start} -> {end} 的 {width}mm 单层路径")
+        path = []
+        node = target
+        while node is not None:
+            path.append((*self.physical(node), layer))
+            node = parent[node]
+        path.reverse()
+        path[0], path[-1] = start, end
+        return self.compress(path)
+
+    def find_via_path(self, net: str, start: tuple[float, float], radius: float = 3.0,
+                      width: float | None = None):
         source = self.grid_point(start)
-        blocked = {layer: self.blocked_grid(net, layer) for layer in (pcbnew.F_Cu, pcbnew.B_Cu)}
+        width = self.track_width(net) if width is None else width
+        blocked = {layer: self.blocked_grid(net, layer, width)
+                   for layer in (pcbnew.F_Cu, pcbnew.B_Cu)}
         queue = [source]
         parent = {source: None}
         for here in queue:
             p = self.physical(here)
             via_diameter, _ = self.via_size(net)
-            via_cells = max(0, math.ceil(((via_diameter - self.track_width(net)) / 2) / GRID))
+            via_cells = max(0, math.ceil(((via_diameter - width) / 2) / GRID))
             via_clear = all((here[0] + dx, here[1] + dy) not in blocked[layer]
                             for layer in (pcbnew.F_Cu, pcbnew.B_Cu)
                             for dx in range(-via_cells, via_cells + 1)
@@ -361,13 +406,20 @@ def drc(path: Path) -> dict:
 def reviewed_u1_silk_warnings(violations: list[dict]) -> bool:
     if len(violations) != 2:
         return False
+    seen_positions = set()
     for finding in violations:
-        descriptions = [item.get("description", "") for item in finding.get("items", [])]
+        items = finding.get("items", [])
+        edge = [item for item in items if item.get("description") == "Segment on Edge.Cuts"]
+        silk = [item for item in items
+                if item.get("description") == "Segment of U1 on F.Silkscreen"]
         if finding.get("type") != "silk_edge_clearance" \
-                or not any("Segment of U1 on F.Silkscreen" in text for text in descriptions) \
-                or not any("Edge.Cuts" in text for text in descriptions):
+                or finding.get("severity") != "warning" or len(edge) != 1 or len(silk) != 1:
             return False
-    return True
+        edge_pos, silk_pos = edge[0].get("pos", {}), silk[0].get("pos", {})
+        if (edge_pos.get("x"), edge_pos.get("y")) != (0.0, 60.0):
+            return False
+        seen_positions.add((silk_pos.get("x"), silk_pos.get("y")))
+    return seen_positions == {(-6.15, 20.8), (-6.15, 39.2)}
 
 
 def redundant_hole_via_uuid(finding: dict) -> str | None:
@@ -381,6 +433,29 @@ def redundant_hole_via_uuid(finding: dict) -> str | None:
     vias = [item.get("uuid") for item in items
             if item.get("description", "").startswith("Via [PGND]")]
     return vias[0] if len(vias) == 1 else None
+
+
+def redundant_same_net_via_uuid(finding: dict, board: pcbnew.BOARD) -> str | None:
+    """同网过孔过近时，只删没有底层走线附着的那一颗冗余过孔。"""
+    if finding.get("type") != "hole_to_hole":
+        return None
+    tracks = {item.m_Uuid.AsString(): item for item in board.GetTracks()}
+    vias = [tracks.get(item.get("uuid")) for item in finding.get("items", [])]
+    if len(vias) != 2 or any(via is None or via.GetClass() != "PCB_VIA" for via in vias):
+        return None
+    if vias[0].GetNetname() != vias[1].GetNetname():
+        return None
+    candidates = []
+    for via in vias:
+        position = via.GetPosition()
+        attached_bottom = any(track.GetClass() == "PCB_TRACK"
+                              and track.GetNetname() == via.GetNetname()
+                              and track.GetLayer() == pcbnew.B_Cu
+                              and (track.GetStart() == position or track.GetEnd() == position)
+                              for track in board.GetTracks())
+        if not attached_bottom:
+            candidates.append(via.m_Uuid.AsString())
+    return candidates[0] if len(candidates) == 1 else None
 
 
 def clean_drc_warnings(board: pcbnew.BOARD, path: Path) -> tuple[pcbnew.BOARD, dict[str, int]]:
@@ -405,7 +480,8 @@ def clean_drc_warnings(board: pcbnew.BOARD, path: Path) -> tuple[pcbnew.BOARD, d
             if kind in ("via_dangling", "track_dangling"):
                 candidates = [item.get("uuid") for item in items]
             elif kind == "hole_to_hole":
-                candidate = redundant_hole_via_uuid(finding)
+                candidate = redundant_hole_via_uuid(finding) \
+                    or redundant_same_net_via_uuid(finding, board)
                 candidates = [candidate] if candidate else []
             else:
                 candidates = []
@@ -471,6 +547,15 @@ def sync_footprint_metadata(board: pcbnew.BOARD) -> None:
             fp.SetExcludedFromPosFiles(not part.assembly)
 
 
+def sync_usb_shield_zone_connection(board: pcbnew.BOARD) -> int:
+    changed = 0
+    for pad in board.FindFootprintByReference("J_USB").Pads():
+        if pad.GetNumber() == "SH" and pad.GetLocalZoneConnection() != pcbnew.ZONE_CONNECTION_FULL:
+            pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
+            changed += 1
+    return changed
+
+
 def sync_schematic_unconnected_nets(board: pcbnew.BOARD, report: dict) -> int:
     """让 PCB 的明确 NC 焊盘采用 KiCad 原理图生成的 unconnected-* 网络名。"""
     pads = {pad.m_Uuid.AsString(): pad for fp in board.GetFootprints() for pad in fp.Pads()}
@@ -493,6 +578,157 @@ def sync_schematic_unconnected_nets(board: pcbnew.BOARD, report: dict) -> int:
     return changed
 
 
+def repair_touch_controller_bottleneck(board: pcbnew.BOARD, report: dict) -> set[str]:
+    """局部修复 U_TOUCH 左下角被既有铜墙封住的 SDA 与 E2。
+
+    这两个端点无法在已收敛的外层布线中直接补线。仅平移一排 GND 缝合过孔、挪开
+    E0 过孔，并局部改走 CAM_VSYNC/CAM_Y6，为两条低速信号腾出 B.Cu 通道。
+    """
+    open_nets = set()
+    for finding in report.get("unconnected_items", []):
+        for item in finding.get("items", []):
+            match = re.search(r"\[([^]]+)]", item.get("description", ""))
+            if match:
+                open_nets.add(match.group(1))
+    targets = {"I2C_SDA", "TOUCH_E2"}
+    if not targets.issubset(open_nets):
+        return set()
+
+    def xy(item, end: bool = False) -> tuple[float, float]:
+        point = item.GetEnd() if end else item.GetStart()
+        return mm(point.x), mm(point.y)
+
+    def near(point, target, tolerance=0.02) -> bool:
+        return math.dist(point, target) < tolerance
+
+    remove = []
+    for item in board.GetTracks():
+        net = item.GetNetname()
+        points = (xy(item), xy(item, True))
+        if net == "GND":
+            local_escape = any(near(point, target) for point in points for target in
+                               ((28.6125, 46.4), (27.8, 46.5), (26.45, 46.2)))
+            stitch_track = item.GetClass() == "PCB_TRACK" \
+                and all(abs(point[1] - 48.85) < 0.02 for point in points) \
+                and max(point[0] for point in points) >= 26.5
+            stitch_via = item.GetClass() == "PCB_VIA" and (
+                (26.0 <= points[0][0] <= 40.0 and abs(points[0][1] - 48.85) < 0.02)
+                or near(points[0], (26.45, 48.8)))
+            if local_escape or stitch_track or stitch_via:
+                remove.append(item)
+        elif net == "TOUCH_E0" and any(near(point, (31.3, 48.1)) for point in points):
+            remove.append(item)
+        elif item.GetClass() == "PCB_TRACK" and item.GetLayer() == pcbnew.B_Cu:
+            rounded = {tuple(round(value, 4) for value in point) for point in points}
+            if net == "CAM_VSYNC" and rounded == {
+                    (24.986, 40.3701), (19.3507, 34.7348)}:
+                remove.append(item)
+            if net == "CAM_Y6" and rounded in (
+                    {(18.9557, 35.3712), (26.2434, 42.6589)},
+                    {(26.2434, 42.6589), (26.2434, 44.1312)},
+                    {(26.2434, 44.1312), (29.3158, 47.2036)},
+                    {(29.3158, 47.2036), (31.1839, 47.2036)},
+                    {(31.1839, 47.2036), (32.1578, 48.1775)},
+            ):
+                remove.append(item)
+    for item in remove:
+        board.Delete(item)
+
+    def add_track(net: str, start, end, width=0.2, layer=pcbnew.F_Cu):
+        track = pcbnew.PCB_TRACK(board)
+        track.SetStart(vec(start))
+        track.SetEnd(vec(end))
+        track.SetWidth(pcbnew.FromMM(width))
+        track.SetLayer(layer)
+        track.SetNet(board.FindNet(net))
+        board.Add(track)
+
+    def add_via(net: str, point):
+        via = pcbnew.PCB_VIA(board)
+        via.SetPosition(vec(point))
+        via.SetWidth(pcbnew.FromMM(0.5))
+        via.SetDrill(pcbnew.FromMM(0.25))
+        via.SetNet(board.FindNet(net))
+        board.Add(via)
+
+    add_track("GND", (28.6125, 46.4), (27.9, 46.4), 0.15)
+    add_track("GND", (27.9, 46.4), (27.7, 46.6), 0.15)
+    add_track("GND", (27.7, 46.6), (26.3, 46.6), 0.15)
+    add_via("GND", (26.3, 46.6))
+
+    add_track("TOUCH_E0", (30.0, 48.1), (29.1, 48.3))
+    add_via("TOUCH_E0", (29.1, 48.3))
+    add_track("TOUCH_E0", (29.1, 48.3), (29.8, 48.1), layer=pcbnew.B_Cu)
+
+    # XCLK 的上侧横向包地线平移 0.10mm，为 E0 过孔留出净距；右侧纵向包地线
+    # 从 SDA 过孔下方开始，仍覆盖测试要求的 1.5mm 以上有效长度。
+    add_track("GND", (26.6, 47.0), (26.6, 48.95), 0.5)
+    add_track("GND", (26.6, 48.95), (39.05, 48.95), 0.5)
+    for point in ((26.6, 47.0), (26.6, 48.95), (29.09, 48.95),
+                  (31.58, 48.95), (34.07, 48.95), (36.56, 48.95), (39.05, 48.95)):
+        add_via("GND", point)
+
+    router = Router(board)
+    add_track("I2C_SDA", (28.6125, 46.0), (26.85, 46.0), 0.15)
+    add_via("I2C_SDA", (26.85, 46.0))
+    add_track("I2C_SDA", (23.0, 38.0), (23.6, 38.0))
+    add_via("I2C_SDA", (23.6, 38.0))
+    router.add_path("I2C_SDA", router.find_layer_path(
+        "I2C_SDA", (26.85, 46.0, pcbnew.B_Cu),
+        (23.6, 38.0, pcbnew.B_Cu), 0.2), 0.2)
+
+    router.add_path("TOUCH_E2", [(30.8, 47.3875, pcbnew.F_Cu),
+                                  (30.9, 47.4, pcbnew.F_Cu),
+                                  (31.0, 47.4, pcbnew.F_Cu),
+                                  (31.0, 48.0, pcbnew.F_Cu)])
+    add_via("TOUCH_E2", (31.0, 48.0))
+    add_via("TOUCH_E2", (30.9, 40.2))
+    router.invalidate_obstacles()
+    router.add_path("TOUCH_E2", router.find_layer_path(
+        "TOUCH_E2", (31.0, 48.0, pcbnew.B_Cu),
+        (30.9, 40.2, pcbnew.B_Cu), 0.2), 0.2)
+
+    for net, start, end in (
+            ("CAM_VSYNC", (19.3507, 34.7348, pcbnew.B_Cu),
+             (24.986, 40.3701, pcbnew.B_Cu)),
+            ("CAM_Y6", (18.9557, 35.3712, pcbnew.B_Cu),
+             (32.1578, 48.1775, pcbnew.B_Cu)),
+    ):
+        router.invalidate_obstacles()
+        router.add_path(net, router.find_path(net, start, end))
+
+    # CAM_Y6 的新换层点可能落在既有过孔 0.25mm 内；把附着铜统一吸附到既有孔，
+    # 避免同网络重复钻孔。
+    existing = (18.0347, 31.7017)
+    existing_vec = vec(existing)
+    redundant = []
+    for item in board.GetTracks():
+        if item.GetNetname() != "CAM_Y6":
+            continue
+        points = (xy(item), xy(item, True))
+        if item.GetClass() == "PCB_VIA" and 0.01 < math.dist(points[0], existing) < 0.25:
+            redundant.append(item)
+        elif item.GetClass() == "PCB_TRACK":
+            if 0.01 < math.dist(points[0], existing) < 0.25:
+                item.SetStart(existing_vec)
+            if 0.01 < math.dist(points[1], existing) < 0.25:
+                item.SetEnd(existing_vec)
+    for item in redundant:
+        board.Delete(item)
+    return targets
+
+
+def widen_pgnd_anchor_tracks(board: pcbnew.BOARD) -> int:
+    """把超过允许窄颈长度的 PGND 连接恢复到 1.0mm 网络类宽度。"""
+    changed = 0
+    for item in board.GetTracks():
+        if item.GetClass() == "PCB_TRACK" and item.GetNetname() == "PGND" \
+                and mm(item.GetLength()) > 2.0 and mm(item.GetWidth()) < 1.0:
+            item.SetWidth(pcbnew.FromMM(1.0))
+            changed += 1
+    return changed
+
+
 def reroute_long_power_tracks(board: pcbnew.BOARD, router: Router) -> int:
     """按网络类宽度重走超过 2mm 的窄线；原路径找不到替代时恢复，不留下半成品。"""
     changed = 0
@@ -502,7 +738,7 @@ def reroute_long_power_tracks(board: pcbnew.BOARD, router: Router) -> int:
     for item in list(board.GetTracks()):
         if item.GetClass() != "PCB_TRACK":
             continue
-        if item.GetNetname() in CRITICAL_NETS:
+        if item.GetNetname() in CRITICAL_NETS or item.GetNetname() == "PGND":
             continue
         width = POWER_WIDTHS.get(item.GetNetname())
         endpoints = ((item.GetNetname(), item.GetStart().x, item.GetStart().y),
@@ -587,17 +823,52 @@ def open_pairs(report: dict, board: pcbnew.BOARD):
 
 def main(apply: bool) -> None:
     CANDIDATE.parent.mkdir(exist_ok=True)
-    board = pcbnew.LoadBoard(str(PCB))
-    initial_report = drc(PCB)
+    source = PCB
+    initial_report = drc(source)
+    board = pcbnew.LoadBoard(str(source))
     pairs = open_pairs(initial_report, board)
+    repaired_nets = repair_touch_controller_bottleneck(board, initial_report)
+    pairs = [pair for pair in pairs if pair[0] not in repaired_nets]
+    widened_pgnd = widen_pgnd_anchor_tracks(board)
     router = Router(board)
     restore_u1_library_graphics(board)
     retidy_silkscreen(board)
     sync_footprint_metadata(board)
+    shield_pads = sync_usb_shield_zone_connection(board)
     synced_nc = sync_schematic_unconnected_nets(board, initial_report)
     widened = reroute_long_power_tracks(board, router)
 
     def connect_pair(net, start, end):
+        pwm_pad = (64.8625, 21.375)
+        adc_pad = (72.15, 48.0)
+        if net == "+3V3" and any(math.dist(point[:2], pwm_pad) < 0.05 for point in (start, end)):
+            other = end if math.dist(start[:2], pwm_pad) < 0.05 else start
+            escape = (66.2, 21.375, pcbnew.F_Cu)
+            via_path, via_at = router.find_via_path(net, escape[:2], radius=8.0, width=0.2)
+            router.add_path(net, via_path, 0.2)
+            router.add_via(net, via_at)
+            target_via = (57.0, 25.71, pcbnew.B_Cu)
+            router.add_path(net, router.find_path(net, (*via_at, pcbnew.B_Cu), target_via))
+            print(f"{net}: PWM 从 {escape} 窄线扇出到 {via_at}")
+            return True
+        if net == "+3V3" and any(math.dist(point[:2], adc_pad) < 0.05 for point in (start, end)):
+            other = end if math.dist(start[:2], adc_pad) < 0.05 else start
+            escape = (73.2, 48.0, pcbnew.F_Cu)
+            router.add_path(net, [(*adc_pad, pcbnew.F_Cu), escape], 0.2)
+            router.add_path(net, router.find_path(net, escape, other))
+            print(f"{net}: ADC 窄线逃逸 {adc_pad} 经 {escape} -> {other}")
+            return True
+        if net == "TOUCH_VREG":
+            vias = []
+            for endpoint in (start, end):
+                path, via_at = router.find_via_path(net, endpoint[:2], radius=8.0, width=0.15)
+                router.add_path(net, path, 0.15)
+                router.add_via(net, via_at)
+                vias.append(via_at)
+            router.add_path(net, router.find_path(net, (*vias[0], pcbnew.B_Cu),
+                                                   (*vias[1], pcbnew.B_Cu)))
+            print(f"{net}: 密脚距端点扇出到 {vias}")
+            return True
         try:
             path = router.find_path(net, start, end)
             router.add_path(net, path)
@@ -655,8 +926,10 @@ def main(apply: bool) -> None:
     reviewed = reviewed_u1_silk_warnings(errors)
     print(f"候选结果：{len(errors)} 个 DRC 告警（U1 已审阅={reviewed}），{len(opens)} 条未连接，"
           f"{len(parity)} 条原理图一致性问题；"
+          f"局部修复 {sorted(repaired_nets)}，"
           f"移除声孔过孔 {removed} 个，同步 NC 焊盘 {synced_nc} 个，"
-          f"重走电源线 {widened} 条，清理 {cleaned}")
+          f"实连 USB 外壳脚 {shield_pads} 个，"
+          f"加宽 PGND {widened_pgnd} 条，重走电源线 {widened} 条，清理 {cleaned}")
     if not reviewed or opens or parity:
         raise SystemExit(1)
     if apply:

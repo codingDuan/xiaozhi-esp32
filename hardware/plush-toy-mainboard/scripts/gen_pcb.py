@@ -354,6 +354,12 @@ def main() -> Path:
             if net and not net.startswith("NC_"):
                 pad.SetNet(board.FindNet(net))
 
+    # USB 外壳脚面积大且只承担屏蔽接地；内层整面地使用实连，避免狭长热焊盘
+    # 辐条被周边信号焊盘截断后产生 starved thermal。
+    for pad in fps["J_USB"].Pads():
+        if pad.GetNumber() == "SH":
+            pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
+
     # 安全丝印先放，所有位号必须避让。
     safety = [add_silk_text(board, text, x, y) for text, x, y in pl.safety_silk(fps)]
     hidden = tidy_silkscreen(fitted, fps, [item.GetBoundingBox() for item in safety])

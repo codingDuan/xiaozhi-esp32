@@ -35,7 +35,7 @@ NETCLASSES = [
 PATTERNS = (
     [{"netclass": "Power", "pattern": n} for n in ("VMOT", "VMOT_IN", "PGND", "HEAT_LOW")]
     + [{"netclass": "Supply", "pattern": n}
-       for n in ("VBUS", "VBUS_IN", "+3V3", "GND", "BUCK_SW", "SPK_P", "SPK_N", "+2V8")]
+       for n in ("VBUS", "VBUS_IN", "VBUS_FUSED", "+3V3", "GND", "BUCK_SW", "SPK_P", "SPK_N", "+2V8")]
     + [{"netclass": "CameraSupply", "pattern": "+1V5"}]
 )
 

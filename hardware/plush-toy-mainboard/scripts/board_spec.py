@@ -260,7 +260,7 @@ PARTS: list[Part] = [
     cap("C_CAM_RST", "100nF", "CAM_RESET", "GND"),
     cap("C_CAM_AVDD", "100nF", "+2V8", "GND"),
     cap("C_CAM_DVDD", "100nF", "+1V5", "GND"),
-    # SCCB 上拉预留不贴：面包板原型靠 ESP32 内部上拉工作正常
+    # FPC 走线比面包板原型长，SCCB 使用外部 4.7k 上拉保证边沿与抗干扰能力
     res("R_SIOC", "4.7k", "CAM_SIOC", "+2V8"),
     res("R_SIOD", "4.7k", "CAM_SIOD", "+2V8"),
 

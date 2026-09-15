@@ -124,6 +124,15 @@ class Fanout:
         output = self.pad("U_EFUSE", "5")
         self.add_track(output.GetNet(), output.GetPosition(), v(36.50, 19.75), 0.2)
 
+        # ILM 必须从上排 7 脚直接向右离开。旧版电阻位于芯片下方，自动布线形成的
+        # U 形铜线包围了 VBUS 输出，导致最后一条连接无净距出口。
+        ilm = self.pad("U_EFUSE", "7")
+        ilm_resistor = self.pad("R_EFUSE_ILM", "1")
+        self.add_track(ilm.GetNet(), ilm.GetPosition(), ilm_resistor.GetPosition(), 0.2)
+        ilm_ground = self.pad("R_EFUSE_ILM", "2")
+        self.add_track(ilm_ground.GetNet(), ilm_ground.GetPosition(), v(38.50, 18.75), 0.4)
+        self.add_via(ilm_ground.GetNet(), "GND", 38.50, 18.75)
+
         return added
 
     def route_buck_hot_loop(self) -> int:
@@ -139,7 +148,7 @@ class Fanout:
         bulk_vin = self.pad("C_BUCK_IN", "1")
         self.add_track(vin.GetNet(), vin.GetPosition(), hf_vin.GetPosition(), 0.5)
         bulk_path = [vin.GetPosition(), v(42.25, 14.95), v(42.25, 9.70),
-                     v(39.05, 9.70), bulk_vin.GetPosition()]
+                     v(40.00, 9.70), v(40.00, 11.00), bulk_vin.GetPosition()]
         for a, b in zip(bulk_path, bulk_path[1:]):
             self.add_track(vin.GetNet(), a, b, 0.5)
 
@@ -195,9 +204,10 @@ class Fanout:
     def route_touch_top_testpoints(self) -> int:
         """把触摸芯片顶边三根线分层扇开，避免它们在测试点簇内互相封锁。"""
         routes = (
-            ("19", "TP_E11", 42.5),
-            ("17", "TP_E9", 42.9),
-            ("16", "TP_E8", 43.3),
+            ("19", "TP_E11", 39.0),
+            ("18", "TP_E10", 41.2),
+            ("17", "TP_E9", 42.2),
+            ("16", "TP_E8", 43.2),
         )
         for number, target_ref, lane_y in routes:
             source = self.pad("U_TOUCH", number)
@@ -205,13 +215,20 @@ class Fanout:
             sx, tx = source.GetPosition().x * TO_MM, target.GetPosition().x * TO_MM
             path = [source.GetPosition(), v(sx, lane_y), v(tx, lane_y), target.GetPosition()]
             for a, b in zip(path, path[1:]):
-                self.add_track(source.GetNet(), a, b, 0.2)
+                self.add_track(source.GetNet(), a, b, 0.15)
         return 0
 
     def escape_pwm_3v3(self) -> int:
         pad = self.pad("U_PWM", "28")
         self.add_track(pad.GetNet(), pad.GetPosition(), v(66.20, 21.375), 0.3)
-        return 0
+        # U_PWM 位于 3V3 内层平面边界之外；先向上避开 PWM 信号逃逸，再在底层
+        # 接回平面覆盖区，避免自动布线把这个电源脚完全围住。
+        self.add_track(pad.GetNet(), v(66.20, 21.375), v(66.20, 19.60), 0.2)
+        self.add_via(pad.GetNet(), "+3V3", 66.20, 19.60)
+        self.add_layer_track(pad.GetNet(), v(66.20, 19.60), v(60.00, 19.60), 0.5,
+                             pcbnew.B_Cu)
+        self.add_via(pad.GetNet(), "+3V3", 60.00, 19.60)
+        return 2
 
     def route_camera_xclk_guards(self) -> int:
         """在 F.Cu 独立走 XCLK，并给所有长直段加 0.65mm 双侧接地护线。"""
@@ -319,6 +336,8 @@ class Fanout:
                 net = pad.GetNetname()
                 if not net or net in PLANES or net.startswith("unconnected-"):
                     continue
+                if net in {"TOUCH_E0", "TOUCH_E2", "TOUCH_E3", "TOUCH_E10", "TOUCH_REXT"}:
+                    continue
                 pos = pad.GetPosition()
                 dx, dy = (pos.x - center.x) * TO_MM, (pos.y - center.y) * TO_MM
                 if math.hypot(dx, dy) < 1.0:
@@ -356,13 +375,104 @@ class Fanout:
         return 0
 
     def escape_touch_ground(self) -> int:
+        sda = self.board.FindFootprintByReference("U_TOUCH").FindPadByNumber("3")
+        self.add_track(sda.GetNet(), sda.GetPosition(), v(27.25, 46.00), 0.2)
         pad = self.board.FindFootprintByReference("U_TOUCH").FindPadByNumber("4")
         pos = pad.GetPosition()
-        via_x, via_y = 27.3, 47.3
-        self.add_track(pad.GetNet(), pos, v(27.8, pos.y * TO_MM), 0.2)
-        self.add_track(pad.GetNet(), v(27.8, pos.y * TO_MM), v(via_x, via_y), 0.2)
-        self.add_via(pad.GetNet(), "GND", via_x, via_y)
-        return 1
+        via_x, via_y = 26.45, 46.20
+        self.add_track(pad.GetNet(), pos, v(27.80, 46.50), 0.15)
+        self.add_track(pad.GetNet(), v(27.80, 46.50), v(via_x, via_y), 0.2)
+        return 0
+
+    def route_touch_vreg(self) -> int:
+        source = self.pad("U_TOUCH", "5")
+        target = self.pad("C_TOUCH_VREG", "1")
+        top_path = [source.GetPosition(), v(28.10, 47.00), v(27.50, 47.00), v(27.50, 47.70)]
+        for a, b in zip(top_path, top_path[1:]):
+            self.add_track(source.GetNet(), a, b, 0.15)
+        self.add_via(source.GetNet(), "TOUCH_VREG", 27.50, 47.70)
+        self.add_layer_track(source.GetNet(), v(27.50, 47.70), v(23.50, 47.70),
+                             0.2, pcbnew.B_Cu)
+        self.add_via(source.GetNet(), "TOUCH_VREG", 23.50, 47.70)
+        self.add_track(source.GetNet(), v(23.50, 47.70), target.GetPosition(), 0.15)
+        ground = self.pad("C_TOUCH_VREG", "2")
+        self.add_track(ground.GetNet(), ground.GetPosition(), v(25.15, 48.80), 0.2)
+        return 2
+
+    def route_dense_touch_signals(self) -> int:
+        """在其他信号占满底层前固定三根最容易被 QFN 邻脚封住的触摸线。"""
+        routes = (
+            ("11", "TP_E3", (32.50, 47.50),
+             [(32.50, 47.50), (32.50, 45.80), (35.00, 45.80),
+              (35.00, 40.25), (27.75, 38.50)]),
+        )
+        for number, target_ref, escape, bottom_points in routes:
+            source = self.pad("U_TOUCH", number)
+            target = self.pad(target_ref, "1")
+            self.add_track(source.GetNet(), source.GetPosition(), v(*escape), 0.2)
+            self.add_via(source.GetNet(), source.GetNetname(), *escape)
+            for a, b in zip(bottom_points, bottom_points[1:]):
+                self.add_layer_track(source.GetNet(), v(*a), v(*b), 0.2, pcbnew.B_Cu)
+            end = bottom_points[-1]
+            self.add_via(source.GetNet(), source.GetNetname(), *end)
+            self.add_track(source.GetNet(), v(*end), target.GetPosition(), 0.2)
+
+        source = self.pad("U_TOUCH", "8")
+        target = self.pad("J_TOUCH", "1")
+        escape = (31.30, 48.10)
+        self.add_track(source.GetNet(), source.GetPosition(), v(30.00, 48.10), 0.2)
+        self.add_track(source.GetNet(), v(30.00, 48.10), v(*escape), 0.2)
+        self.add_via(source.GetNet(), source.GetNetname(), *escape)
+        from post_route import Router
+        router = Router(self.board)
+        end = (target.GetPosition().x * TO_MM, target.GetPosition().y * TO_MM, pcbnew.B_Cu)
+        router.add_path(source.GetNetname(), router.find_path(
+            source.GetNetname(), (*escape, pcbnew.B_Cu), end))
+
+        source = self.pad("U_TOUCH", "7")
+        target = self.pad("R_TOUCH_REXT", "1")
+        router = Router(self.board)
+        vias = []
+        for pad in (source, target):
+            position = pad.GetPosition()
+            start = (position.x * TO_MM, position.y * TO_MM)
+            path, via_at = router.find_via_path(source.GetNetname(), start,
+                                                radius=8.0, width=0.15)
+            router.add_path(source.GetNetname(), path, 0.15)
+            router.add_via(source.GetNetname(), via_at)
+            vias.append(via_at)
+        router.add_path(source.GetNetname(), router.find_path(
+            source.GetNetname(), (*vias[0], pcbnew.B_Cu), (*vias[1], pcbnew.B_Cu)))
+
+        dense_pairs = (
+            ("I2C_SDA", (27.25, 46.00), self.pad("TP_SDA", "1")),
+            ("TOUCH_E2", None, self.pad("TP_E2", "1")),
+        )
+        for net, known_start, target in dense_pairs:
+            source = self.pad("U_TOUCH", "3" if net == "I2C_SDA" else "10")
+            position = source.GetPosition()
+            start = known_start or (position.x * TO_MM, position.y * TO_MM)
+            target_position = target.GetPosition()
+            ends = []
+            for point in (start, (target_position.x * TO_MM, target_position.y * TO_MM)):
+                router = Router(self.board)
+                path, via_at = router.find_via_path(net, point, radius=8.0, width=0.15)
+                router.add_path(net, path, 0.15)
+                router.add_via(net, via_at)
+                ends.append(via_at)
+            router = Router(self.board)
+            router.add_path(net, router.find_path(
+                net, (*ends[0], pcbnew.B_Cu), (*ends[1], pcbnew.B_Cu)))
+        return 9
+
+    def route_camera_y7_edge(self) -> int:
+        """沿板底/左边缘连接 Y7 两颗既有逃逸过孔，避开摄像头总线密集区。"""
+        net = self.pad("J_CAM", "16").GetNet()
+        points = [(38.25, 57.08), (38.25, 58.80), (10.50, 58.80),
+                  (10.50, 37.131), (11.4577, 37.131)]
+        for a, b in zip(points, points[1:]):
+            self.add_layer_track(net, v(*a), v(*b), 0.2, pcbnew.B_Cu)
+        return 0
 
     def escape_usb_esd_ground(self) -> int:
         """给 USB ESD 阵列地脚固定短回路，避免两颗器件竞争同一狭窄过孔位置。"""
@@ -409,6 +519,8 @@ class Fanout:
         added += self.route_camera_xclk_guards()
         added += self.escape_camera_fpc()
         added += self.escape_touch_ground()
+        added += self.route_touch_vreg()
+        added += self.route_camera_y7_edge()
         added += self.escape_dense_sensor_signals()
         added += self.route_imu_regout()
         added += self.escape_imu_plane_pads()
@@ -440,7 +552,8 @@ class Fanout:
                     (ref == "U_TOUCH" and pad.GetNumber() == "4") or \
                     (ref == "D_USB_DP" and pad.GetNumber() == "2") or \
                     (ref == "U_TOUCH" and pad.GetNumber() in ("16", "17", "19")) or \
-                    (ref, pad.GetNumber()) in {("C_EN", "2"), ("U_MIC", "5"), ("U_AMP", "17")}:
+                    (ref, pad.GetNumber()) in {("C_EN", "2"), ("U_MIC", "5"), ("U_AMP", "17"),
+                                               ("C_TOUCH_VREG", "2")}:
                 continue
             b = box_mm(pad.GetBoundingBox())
             w, h = b[2] - b[0], b[3] - b[1]
@@ -488,6 +601,8 @@ class Fanout:
                     break
             if not placed:
                 skipped.append(f"{ref}.{pad.GetNumber()}[{net}]")
+        # 最后再放跨区触摸线：此时通用扇出过孔已全部存在，Router 才能避开它们。
+        added += self.route_dense_touch_signals()
         return added, skipped
 
 

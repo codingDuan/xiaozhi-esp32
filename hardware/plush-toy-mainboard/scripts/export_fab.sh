@@ -4,6 +4,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 KC=/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli
+KP=/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
 PCB="$ROOT/plush-toy-mainboard.kicad_pcb"
 FAB="$ROOT/fab"
 TMP="$(mktemp -d "$ROOT/.fab-export.XXXXXX")"
@@ -16,7 +17,9 @@ trap cleanup EXIT
 mkdir -p "$TMP/fab/gerber"
 
 cd "$ROOT/scripts"
-python3 -m unittest test_drc -v
+python3 -m unittest test_kicad_env test_config_pins test_board_spec test_part_pins \
+    test_netlist_roundtrip test_export_bom -v
+"$KP" -m unittest test_project_lib test_pcb test_drc test_post_route -v
 
 # 四层铜 + 双面阻焊 + 正面丝印与钢网（单面贴片，底面无丝印无钢网）+ 板框
 $KC pcb export gerbers \

@@ -598,6 +598,10 @@
       },
       {
         "netclass": "Supply",
+        "pattern": "VBUS_FUSED"
+      },
+      {
+        "netclass": "Supply",
         "pattern": "+3V3"
       },
       {
@@ -760,7 +764,13 @@
     "reuse_designators": true,
     "subpart_first_id": 65,
     "subpart_id_separator": 0,
-    "top_level_sheets": [],
+    "top_level_sheets": [
+      {
+        "filename": "plush-toy-mainboard.kicad_sch",
+        "name": "plush-toy-mainboard",
+        "uuid": "00000000-0000-0000-0000-000000000000"
+      }
+    ],
     "used_designators": "",
     "variants": []
   },
