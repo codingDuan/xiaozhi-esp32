@@ -33,7 +33,8 @@ ANCHORS = {
     "U_BUCK": (40.0, 14.0, 0),
     "L_BUCK": (35.65, 14.0, 180),
     "C_BUCK_HF": (39.2, 16.49, 180),
-    "C_BUCK_IN": (40.0, 11.0, 0),
+    # 转 180°：1 脚 VBUS 朝 U_BUCK.4，2 脚 GND 朝 U_BUCK.2，缩短输入电容回路。
+    "C_BUCK_IN": (40.0, 11.0, 180),
     "U_EFUSE": (34.5, 19.0, 0),
     "C_EFUSE_IN": (31.0, 19.25, 180),
     "C_EFUSE_DVDT": (32.0, 21.5, 90),
@@ -120,7 +121,8 @@ NEAR = {
 # 硬约束 HC-6：加热插座旁的丝印（设计方案 5.3 节）。
 # 不能写 ℃：KiCad 内置笔画字体没有这个字形，渲染与 Gerber 里都是方框（2026-09-14 实测）。
 # 位置放在 J_SERVO_R 下沿（y≈38.9）与 J_HEAT 上沿（y≈40.5）之间的空隙左侧，不压插座丝印
-def safety_silk(fps) -> tuple[tuple[str, float, float], ...]:
+def safety_silk(fps) -> tuple[tuple[str, float, float, str], ...]:
+    """(文字, x, y, 水平对齐)。"""
     def at_ref(ref, dx, dy):
         p = fps[ref].GetPosition()
         return p.x * 1e-6 + dx, p.y * 1e-6 + dy
@@ -130,12 +132,16 @@ def safety_silk(fps) -> tuple[tuple[str, float, float], ...]:
         return p.x * 1e-6 + dx, p.y * 1e-6 + dy
 
     return (
-        ("必须串 KSD9700 65度 常闭", 70.0, 39.6),
-        ("电机/加热专用 5V", 70.0, 7.0),
-        ("+", *at_pad("J_VMOT", "1", -2.5, 0.0)),
-        ("-", *at_pad("J_VMOT", "2", -2.5, 0.0)),
-        ("CH0 左", 73.5, 28.0),
-        ("CH1 右", *at_ref("J_SERVO_R", -5.0, 0.0)),
-        ("VMOT 仅限 5V", *at_ref("C_VMOT_BULK", 0.0, -11.8)),
-        ("头部触摸 E0 / GND", *at_ref("J_TOUCH", -9.0, -11.0)),
+        ("必须串 KSD9700 65度 常闭", 70.0, 39.6, "center"),
+        # 两行 5V 标签右对齐叠在 J_VMOT 位号上方、H3 安装孔左侧。2026-09-14 评审：
+        # 原位置排在两排圆屏排针末端，容易被读成屏幕座是 5V 电机电源。
+        ("VMOT 仅限 5V", *at_ref("J_VMOT", 0.6, -13.4), "right"),
+        ("电机/加热专用 5V", *at_ref("J_VMOT", 0.6, -11.5), "right"),
+        ("+", *at_pad("J_VMOT", "1", -2.5, 0.0), "center"),
+        ("-", *at_pad("J_VMOT", "2", -2.5, 0.0), "center"),
+        ("CH0 左", 73.5, 28.0, "center"),
+        ("CH1 右", *at_ref("J_SERVO_R", -5.0, 0.0), "center"),
+        # J_TOUCH 四周放不下 14mm 的单行字；改两行放在连接器左侧、与 1 脚同高，
+        # 读序 E0 / GND 与针序一致。
+        ("头部触摸\nE0 / GND", *at_pad("J_TOUCH", "1", -7.4, 0.0), "center"),
     )

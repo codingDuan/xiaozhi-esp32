@@ -135,9 +135,12 @@ def apply_stackup(path: Path) -> None:
     path.write_text(text.replace(marker, marker + STACKUP, 1), encoding="utf-8")
 
 
-def add_silk_text(board: pcbnew.BOARD, text: str, x: float, y: float) -> pcbnew.PCB_TEXT:
+def add_silk_text(board: pcbnew.BOARD, text: str, x: float, y: float,
+                  justify: str = "center") -> pcbnew.PCB_TEXT:
     silk = pcbnew.PCB_TEXT(board)
     silk.SetText(text)
+    if justify == "right":
+        silk.SetHorizJustify(pcbnew.GR_TEXT_H_ALIGN_RIGHT)
     silk.SetPosition(v(x, y))
     silk.SetLayer(pcbnew.F_SilkS)
     silk.SetTextSize(v(SILK_HEIGHT, SILK_HEIGHT))
@@ -361,7 +364,7 @@ def main() -> Path:
             pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
 
     # 安全丝印先放，所有位号必须避让。
-    safety = [add_silk_text(board, text, x, y) for text, x, y in pl.safety_silk(fps)]
+    safety = [add_silk_text(board, *item) for item in pl.safety_silk(fps)]
     hidden = tidy_silkscreen(fitted, fps, [item.GetBoundingBox() for item in safety])
     print(f"丝印：{hidden} 个位号找不到空位已隐藏")
 

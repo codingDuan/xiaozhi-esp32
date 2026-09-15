@@ -333,8 +333,94 @@ class PcbTest(unittest.TestCase):
         texts = {t.GetText() for t in self.board.GetDrawings()
                  if isinstance(t, pcbnew.PCB_TEXT) and t.GetLayer() == pcbnew.F_SilkS}
         required = {"电机/加热专用 5V", "+", "-", "CH0 左", "CH1 右",
-                    "必须串 KSD9700 65度 常闭", "VMOT 仅限 5V", "头部触摸 E0 / GND"}
+                    "必须串 KSD9700 65度 常闭", "VMOT 仅限 5V", "头部触摸\nE0 / GND"}
         self.assertEqual(required - texts, set())
+
+    def _board_text(self, text):
+        matches = [t for t in self.board.GetDrawings()
+                   if isinstance(t, pcbnew.PCB_TEXT) and t.GetLayer() == pcbnew.F_SilkS
+                   and t.GetText() == text]
+        self.assertEqual(len(matches), 1, text)
+        return matches[0]
+
+    @staticmethod
+    def _box_gap(a, b):
+        dx = max(mm(b.GetX() - a.GetRight()), mm(a.GetX() - b.GetRight()), 0.0)
+        dy = max(mm(b.GetY() - a.GetBottom()), mm(a.GetY() - b.GetBottom()), 0.0)
+        return math.hypot(dx, dy)
+
+    def test_power_input_labels_sit_at_vmot_terminal(self):
+        # 2026-09-14 评审：两行 5V 标签排在圆屏排针末端，容易被读成屏幕座是 5V/电机电源。
+        # 标签必须贴着 J_VMOT，并远离两排 3.3V 屏幕排针。
+        terminal = self.fps["J_VMOT"].GetCourtyard(pcbnew.F_CrtYd).BBox()
+        lcd_pads = [pad.GetBoundingBox() for ref in ("J_LCD_L", "J_LCD_R")
+                    for pad in self.fps[ref].Pads()]
+        for text in ("电机/加热专用 5V", "VMOT 仅限 5V"):
+            box = self._board_text(text).GetBoundingBox()
+            with self.subTest(text=text):
+                self.assertLessEqual(self._box_gap(box, terminal), 4.0)
+                self.assertGreaterEqual(min(self._box_gap(box, pad) for pad in lcd_pads), 7.0)
+
+    def test_touch_label_sits_beside_touch_connector(self):
+        # 标签在 J_TOUCH 左侧、与 1 脚同高，读序 E0 / GND 与针序一致。
+        box = self._board_text("头部触摸\nE0 / GND").GetBoundingBox()
+        connector = self.fps["J_TOUCH"].GetCourtyard(pcbnew.F_CrtYd).BBox()
+        pin1 = self.fps["J_TOUCH"].FindPadByNumber("1").GetPosition()
+        self.assertLessEqual(self._box_gap(box, connector), 2.0)
+        self.assertLess(box.GetRight(), pin1.x)
+        self.assertTrue(box.GetY() <= pin1.y <= box.GetBottom())
+
+    def test_buck_input_bulk_capacitor_faces_ic(self):
+        # C_BUCK_IN 的 VBUS 焊盘朝 U_BUCK.4、GND 焊盘朝 U_BUCK.2；反向时 VIN 预布线要绕 10.9mm。
+        self.assertLess(self._pad_distance("U_BUCK", "4", "C_BUCK_IN", "1"),
+                        self._pad_distance("U_BUCK", "4", "C_BUCK_IN", "2"))
+        self.assertLess(self._pad_distance("U_BUCK", "2", "C_BUCK_IN", "2"),
+                        self._pad_distance("U_BUCK", "2", "C_BUCK_IN", "1"))
+        vin = self.fps["U_BUCK"].FindPadByNumber("4").GetPosition()
+        bulk = self.fps["C_BUCK_IN"].FindPadByNumber("1").GetPosition()
+        self.assertLessEqual(self._shortest_top_path("VBUS", vin, bulk), 7.0)
+
+    def test_high_current_nets_have_no_long_necks(self):
+        # 逐段 2mm 的豁免会放过「几段短窄线首尾相接」和「宽焊盘出口的窄线」。
+        # 大电流主干上相连的窄线合并成一条链：只允许在比线宽还窄的焊盘出口处，总长 ≤ 2mm。
+        # 只接电阻或测试点的偏置/测试支路电流为 µA 级，不受此约束。
+        required = {"VBUS_IN": 0.5, "VBUS_FUSED": 0.5, "VBUS": 0.5,
+                    "VMOT_IN": 1.0, "VMOT": 1.0, "PGND": 1.0, "HEAT_LOW": 1.0}
+        narrow = [t for t in self.board.GetTracks()
+                  if t.GetClass() == "PCB_TRACK" and t.GetNetname() in required
+                  and mm(t.GetWidth()) < required[t.GetNetname()] - 1e-6]
+        parent = {}
+
+        def root(node):
+            while parent.setdefault(node, node) != node:
+                node = parent[node]
+            return node
+
+        def node(track, point):
+            return track.GetNetname(), track.GetLayer(), point.x, point.y
+
+        for track in narrow:
+            parent[root(node(track, track.GetStart()))] = root(node(track, track.GetEnd()))
+        chains = {}
+        for track in narrow:
+            chains.setdefault(root(node(track, track.GetStart())), []).append(track)
+        pads = [(ref, pad) for ref, fp in self.fps.items() for pad in fp.Pads()]
+        offenders = []
+        for tracks in chains.values():
+            net = tracks[0].GetNetname()
+            points = [p for t in tracks for p in (t.GetStart(), t.GetEnd())]
+            touched = {(ref, pad.GetNumber()): min(mm(pad.GetSizeX()), mm(pad.GetSizeY()))
+                       for ref, pad in pads if pad.GetNetname() == net
+                       and any(pad.HitTest(p) for p in points)}
+            if touched and all(ref.startswith(("R_", "TP_")) for ref, _ in touched):
+                continue
+            length = sum(mm(t.GetLength()) for t in tracks)
+            forced = any(size < required[net] for size in touched.values())
+            if not forced or length > 2.0 + 1e-6:
+                start = points[0]
+                offenders.append((net, round(length, 2), sorted(touched),
+                                  (round(mm(start.x), 2), round(mm(start.y), 2))))
+        self.assertEqual(offenders, [])
 
     def test_pads_of_different_parts_do_not_touch(self):
         # 庭院层不重叠不等于焊盘不重叠：第三方封装的庭院层可能比焊盘小。

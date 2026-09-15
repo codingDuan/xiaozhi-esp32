@@ -147,8 +147,8 @@ class Fanout:
         hf_vin = self.pad("C_BUCK_HF", "1")
         bulk_vin = self.pad("C_BUCK_IN", "1")
         self.add_track(vin.GetNet(), vin.GetPosition(), hf_vin.GetPosition(), 0.5)
-        bulk_path = [vin.GetPosition(), v(42.25, 14.95), v(42.25, 9.70),
-                     v(40.00, 9.70), v(40.00, 11.00), bulk_vin.GetPosition()]
+        # C_BUCK_IN.1 在右侧，绕开 FB 脚后直接进入电容焊盘。
+        bulk_path = [vin.GetPosition(), v(42.25, 14.95), v(42.25, 11.00), bulk_vin.GetPosition()]
         for a, b in zip(bulk_path, bulk_path[1:]):
             self.add_track(vin.GetNet(), a, b, 0.5)
 
@@ -156,7 +156,7 @@ class Fanout:
         ground_vias = [
             (self.pad("U_BUCK", "2"), (39.70, 14.00)),
             (self.pad("C_BUCK_HF", "2"), (38.72, 17.24)),
-            (self.pad("C_BUCK_IN", "2"), (41.00, 11.75)),
+            (self.pad("C_BUCK_IN", "2"), (39.05, 11.95)),
         ]
         for pad, (x, y) in ground_vias:
             self.add_track(pad.GetNet(), pad.GetPosition(), v(x, y), 0.4)
@@ -603,7 +603,25 @@ class Fanout:
                 skipped.append(f"{ref}.{pad.GetNumber()}[{net}]")
         # 最后再放跨区触摸线：此时通用扇出过孔已全部存在，Router 才能避开它们。
         added += self.route_dense_touch_signals()
+        added += self.route_usb_fused_trunk()
         return added, skipped
+
+    def route_usb_fused_trunk(self) -> int:
+        """保险丝到 eFuse 输入的逻辑域电源主干按 0.5mm 单层走完并锁定。
+
+        以前交给自动布线与收尾路由器，保险丝出口和中途拐点各留下一段 0.2mm 窄颈。
+        放在平面扇出之后搜索，路径会避开已经存在的过孔。
+        """
+        from post_route import Router
+        fuse = self.pad("F_USB", "2").GetPosition()
+        start = (fuse.x * TO_MM, fuse.y * TO_MM, pcbnew.F_Cu)
+        # 终点落在 C_EFUSE_IN.1 → U_EFUSE.3 的 0.5mm 预布线上，不压 eFuse 细间距焊盘。
+        end = (32.50, 19.25, pcbnew.F_Cu)
+        router = Router(self.board)
+        path = router.find_layer_path("VBUS_FUSED", start, end, 0.5)
+        for item in router.add_path("VBUS_FUSED", path, 0.5):
+            item.SetLocked(True)
+        return 0
 
 
 def main() -> tuple[int, list[str]]:
