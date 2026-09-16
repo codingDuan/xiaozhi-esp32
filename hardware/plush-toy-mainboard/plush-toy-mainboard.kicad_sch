@@ -9340,7 +9340,7 @@
 		(at 513.08 48.26 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "6625ce31-132c-5aff-9058-0d9f4d8e0007")
@@ -9372,6 +9372,15 @@
 			)
 		)
 		(property "Datasheet" ""
+			(at 513.08 48.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C160391"
 			(at 513.08 48.26 0)
 			(effects
 				(font
@@ -18865,7 +18874,7 @@
 		(at 990.60 421.64 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "42b9c137-f335-5ca2-a35d-727cd69f73ca")
@@ -18897,6 +18906,15 @@
 			)
 		)
 		(property "Datasheet" ""
+			(at 990.60 421.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C160392"
 			(at 990.60 421.64 0)
 			(effects
 				(font

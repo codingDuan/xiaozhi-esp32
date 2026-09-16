@@ -109,10 +109,12 @@ PARTS: list[Part] = [
     # 用 SH 1.0mm 而不是板上其余连接器的 PH 2.0mm：PH 是通孔件，焊盘穿透所有层，
     # 会撞上按键一带 B.Cu 的 LCD_CLK 和 USB_DP；贴片 PH 全板只剩一处放得下，
     # 且离 EN/BOOT/TX 有 33~48mm。SH 全贴片、只占 8.9x5.3mm，能贴着两个按键放。
+    # 交给机器贴：1.0mm 脚距手焊容易连锡，而板上其余手工件都是通孔件。
+    # 料号 BM05B-SRSS-TB(LF)(SN)。这颗在 LCSC 的库存显示不稳定，下单前要与
+    # 供应商确认；实在缺货就退回手焊，或换等效的国产 SH 座（针序与封装相同）。
     Part("J_EXT", "Debug / Keys", "Connector_Generic:Conn_01x05",
-         "Connector_JST:JST_SH_BM05B-SRSS-TB_1x05-1MP_P1.00mm_Vertical",
-         pins={"1": "+3V3", "2": "UART_TX", "3": "EN", "4": "BOOT", "5": "GND"},
-         assembly=False),
+         "Connector_JST:JST_SH_BM05B-SRSS-TB_1x05-1MP_P1.00mm_Vertical", "C160391",
+         pins={"1": "+3V3", "2": "UART_TX", "3": "EN", "4": "BOOT", "5": "GND"}),
     # ── USB-C 与逻辑域 5V ──
     # 符号 Connector:USB_C_Receptacle_USB2.0_16P 引脚名与 HRO TYPE-C-31-M-12 封装焊盘名一一对应
     Part("J_USB", "TYPE-C-31-M-12", "Connector:USB_C_Receptacle_USB2.0_16P",
@@ -296,10 +298,10 @@ PARTS: list[Part] = [
     # 6 脚顺序按常见 I2S 麦克风模块丝印：VDD GND SD WS SCK L/R。
     # 末脚给 GND，即 L/R 拉低 = 左声道，与原板载 INMP441 的第 4 脚接法一致。
     # 兼容 INMP441 / ICS43434 / ZTS6672 等 I2S 数字麦克风模块（委托方 2026-09-15 确认）。
+    # 同 J_EXT，交给机器贴。料号 BM06B-SRSS-TB(LF)(SN)，库存充足。
     Part("J_MIC", "Mic", "Connector_Generic:Conn_01x06",
-         "Connector_JST:JST_SH_BM06B-SRSS-TB_1x06-1MP_P1.00mm_Vertical",
-         pins={"1": "+3V3", "2": "GND", "3": "MIC_SD", "4": "MIC_WS", "5": "MIC_SCK", "6": "GND"},
-         assembly=False),
+         "Connector_JST:JST_SH_BM06B-SRSS-TB_1x06-1MP_P1.00mm_Vertical", "C160392",
+         pins={"1": "+3V3", "2": "GND", "3": "MIC_SD", "4": "MIC_WS", "5": "MIC_SCK", "6": "GND"}),
 
     # ── 功放：MAX98357A，供电取 VBUS（设计方案 12.3 节）──
     # GAIN_SLOT 悬空为 9dB；SD_MODE 经 1MΩ 上拉到 VDD，工作在 (左+右)/2 模式

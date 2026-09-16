@@ -11168,7 +11168,18 @@
 				)
 			)
 		)
-		(attr smd exclude_from_pos_files exclude_from_bom)
+		(property "LCSC" "C160392"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "68e0d72a-fd7c-4d86-87ad-0736e57100e0")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
 			(start -2.94 -2.01)
@@ -17072,7 +17083,18 @@
 				)
 			)
 		)
-		(attr smd exclude_from_pos_files exclude_from_bom)
+		(property "LCSC" "C160391"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "5de05ea0-582e-4097-b9ae-953401da36f3")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(attr smd)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
 			(start -2.44 -2.01)
