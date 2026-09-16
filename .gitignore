@@ -4,8 +4,10 @@ managed_components/
 build/
 dist/
 .vscode/
+.idea/
 .devcontainer/
 sdkconfig.old
+sdkconfig.bak.*
 sdkconfig
 dependencies.lock
 .env
