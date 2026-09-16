@@ -36,8 +36,16 @@ void LimbController::Start() {
     ESP_LOGI(TAG, "动作任务已启动，行程限制 ±%d°", SERVO_MAX_ANGLE);
 }
 
+void LimbController::SetEnabled(bool enabled) {
+    enabled_.store(enabled, std::memory_order_relaxed);
+    if (!enabled && pca_ != nullptr) {
+        Relax();
+    }
+}
+
 bool LimbController::Enqueue(Gesture g, int times) {
     if (pca_ == nullptr || queue_ == nullptr) return false;
+    if (!enabled_.load(std::memory_order_relaxed)) return false;
     Item it{g, times};
     // 不等待：队列满说明上一个动作还没做完，直接丢弃新动作。
     // 这是串行化的关键 —— 绝不允许两个手势叠加。
@@ -56,6 +64,10 @@ void LimbController::Run() {
     Item it;
     while (true) {
         if (xQueueReceive(queue_, &it, portMAX_DELAY) == pdTRUE) {
+            if (!enabled_.load(std::memory_order_relaxed)) {
+                Relax();                      // 待机期间到达的手势直接丢弃
+                continue;
+            }
             busy_until_us_ = INT64_MAX;       // 动作期间无条件为忙
             Perform(it.g, it.times);
             vTaskDelay(pdMS_TO_TICKS(200));

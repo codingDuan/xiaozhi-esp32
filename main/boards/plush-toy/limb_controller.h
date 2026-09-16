@@ -7,6 +7,7 @@
 #include <freertos/queue.h>
 #include <freertos/task.h>
 
+#include <atomic>
 #include <stdint.h>
 
 // 舵机动作层。
@@ -24,6 +25,11 @@ public:
     bool Enqueue(Gesture g, int times = 1);
     bool available() const { return pca_ != nullptr; }
 
+    // 待机时关掉动作层。关掉后新手势一律拒收，已在队列里的也会被丢弃并泄力 ——
+    // 否则长按待机之后，一个排队中的手势还会把舵机重新带起来。
+    void SetEnabled(bool enabled);
+    bool enabled() const { return enabled_.load(std::memory_order_relaxed); }
+
     // 动作执行期间及结束后的沉降窗口内为 true。
     // 运动感知靠它屏蔽舵机自振，否则摆手会被判成摇晃、再触发摆手。
     bool busy() const;
@@ -36,6 +42,7 @@ private:
     void Relax();
 
     Pca9685* pca_;
+    std::atomic<bool> enabled_{true};
     QueueHandle_t queue_ = nullptr;
     int64_t busy_until_us_ = 0;
     int left_deg_ = 0;

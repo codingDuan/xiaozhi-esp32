@@ -39,6 +39,7 @@
 #include <cJSON.h>
 
 #include <algorithm>
+#include <atomic>
 
 #define TAG "PlushToyBoard"
 
@@ -58,6 +59,8 @@ static_assert(SERVO_I2C_PORT != CAMERA_SCCB_I2C_PORT,
 class PlushToyBoard : public WifiBoard {
 private:
     Button boot_button_;
+    // 长按待机。从按键回调、触摸任务和运动任务同时读，必须是原子的。
+    std::atomic<bool> standby_{false};
     Esp32Camera* camera_ = nullptr;
     EyeDisplay* display_ = nullptr;
     Pca9685* pca_ = nullptr;
@@ -581,8 +584,46 @@ private:
         display_ = new EyeDisplay(left, right, io_left, io_right);
     }
 
+    // 长按（2 秒）进出待机。
+    //
+    // 这是「功能性待机」，不是断电：本版靠 USB 供电、没有电池，省电不是目的，
+    // 目的是让玩偶能安静下来——眼睛熄灭、不出声、不动、不加热。
+    //
+    // 没有调用 light sleep：Application 的音频、显示、协议任务都在跑，从按键回调
+    // 里调 esp_light_sleep_start() 只会挂起当前任务，达不到省电效果，反而会把
+    // WiFi 与 websocket 的状态搅乱。真正的断电要等电池那一期连电源架构一起做。
+    void SetStandby(bool on) {
+        if (standby_.exchange(on) == on) {
+            return;
+        }
+        auto& app = Application::GetInstance();
+        if (on) {
+            // 顺序有讲究：先断掉会自己再次拉起负载的来源，最后才熄灯。
+            if (limbs_ != nullptr) limbs_->SetEnabled(false);   // 拒收并丢弃排队手势
+            if (thermal_ != nullptr) thermal_->Stop();          // 加热是唯一有安全后果的负载
+            // AbortSpeaking 直接改协议状态，仓库里的既有用法一律包在 Schedule 里
+            // 交给 Application 自己的主循环执行，不从别的任务直接调。
+            app.Schedule([&app]() {
+                if (app.GetDeviceState() == kDeviceStateSpeaking) {
+                    app.AbortSpeaking(kAbortReasonNone);
+                }
+            });
+            app.StopListening();
+            if (pca_ != nullptr) pca_->AllOff();                // 舵机泄力
+            GetBacklight()->SetBrightness(0);                   // 熄灯放最后，它是用户看得见的反馈
+        } else {
+            GetBacklight()->RestoreBrightness();
+            if (limbs_ != nullptr) limbs_->SetEnabled(true);
+        }
+        ESP_LOGI(TAG, "待机 %s", on ? "进入" : "退出");
+    }
+
     void InitializeButtons() {
         boot_button_.OnClick([this]() {
+            // 待机中短按不响应：玩偶被抱着的时候误触很容易，别让它突然开口说话。
+            if (standby_.load()) {
+                return;
+            }
             auto& app = Application::GetInstance();
             if (app.GetDeviceState() == kDeviceStateStarting) {
                 EnterWifiConfigMode();
@@ -590,6 +631,7 @@ private:
             }
             app.ToggleChatState();
         });
+        boot_button_.OnLongPress([this]() { SetStandby(!standby_.load()); });
     }
 
 public:
@@ -609,7 +651,8 @@ public:
         InitializeTouch();
         touch_ = new TouchController(mpr121_);
         auto* behavior = behavior_;
-        touch_->SetHandler([behavior](int electrode, bool pressed) {
+        touch_->SetHandler([this, behavior](int electrode, bool pressed) {
+            if (standby_.load()) return;   // 待机中摸头不唤醒，只有长按能唤醒
             behavior->OnTouch(electrode, pressed);
         });
         touch_->Start();
@@ -618,7 +661,8 @@ public:
         motion_ = new MotionController(mpu6050_);
         auto* limbs = limbs_;
         motion_->SetSuppressor([limbs]() { return limbs != nullptr && limbs->busy(); });
-        motion_->SetHandler([behavior](MotionEvent event, Orientation orientation) {
+        motion_->SetHandler([this, behavior](MotionEvent event, Orientation orientation) {
+            if (standby_.load()) return;   // 待机中晃动不唤醒
             behavior->OnMotion(event, orientation);
         });
         motion_->Start();
