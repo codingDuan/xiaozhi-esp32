@@ -29,8 +29,6 @@ GRID = 0.10
 TRACK_W = 0.20
 CLEARANCE = 0.15
 EDGE = 0.60
-MIC_HOLE = (15.29, 50.00)
-MIC_EXCLUSION = 0.20 + 0.25 + 0.30
 POWER_WIDTHS = {
     "VMOT": 1.0, "VMOT_IN": 1.0, "PGND": 1.0, "HEAT_LOW": 1.0,
     "VBUS": 0.5, "VBUS_IN": 0.5, "VBUS_FUSED": 0.5, "+3V3": 0.5, "GND": 0.5,
@@ -82,24 +80,9 @@ class Router:
     def via_size(net: str) -> tuple[float, float]:
         return (0.8, 0.4) if net == "PGND" else (0.6, 0.3)
 
-    def remove_microphone_via(self) -> int:
-        removed = 0
-        for item in list(self.board.GetTracks()):
-            if item.GetClass() != "PCB_VIA" or item.GetNetname() != "GND":
-                continue
-            p = (mm(item.GetPosition().x), mm(item.GetPosition().y))
-            if math.dist(p, MIC_HOLE) < MIC_EXCLUSION:
-                self.board.Remove(item)
-                removed += 1
-        if removed:
-            self.invalidate_obstacles()
-        return removed
-
     def blocked(self, p: tuple[float, float], net: str) -> bool:
         x, y = p
         if not (EDGE <= x <= 90.0 - EDGE and EDGE <= y <= 60.0 - EDGE):
-            return True
-        if math.dist(p, MIC_HOLE) < 0.20 + 0.25 + TRACK_W / 2:
             return True
         margin = CLEARANCE + TRACK_W / 2
         for fp in self.board.GetFootprints():
@@ -172,7 +155,6 @@ class Router:
                 for i in range(samples + 1):
                     t = i / samples
                     mark_disk(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, radius)
-        mark_disk(MIC_HOLE[0], MIC_HOLE[1], 0.20 + 0.25 + TRACK_W / 2)
         self._blocked_cache[key] = blocked
         return blocked
 
@@ -910,7 +892,6 @@ def main(apply: bool) -> None:
 
     for net, start, end in pairs:
         connect_pair(net, start, end)
-    removed = router.remove_microphone_via()
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     board.Save(str(CANDIDATE))
     project_rules.apply()
@@ -928,7 +909,7 @@ def main(apply: bool) -> None:
     print(f"候选结果：{len(errors)} 个 DRC 告警（U1 已审阅={reviewed}），{len(opens)} 条未连接，"
           f"{len(parity)} 条原理图一致性问题；"
           f"局部修复 {sorted(repaired_nets)}，"
-          f"移除声孔过孔 {removed} 个，同步 NC 焊盘 {synced_nc} 个，"
+          f"同步 NC 焊盘 {synced_nc} 个，"
           f"实连 USB 外壳脚 {shield_pads} 个，"
           f"加宽 PGND {widened_pgnd} 条，重走电源线 {widened} 条，清理 {cleaned}")
     if not reviewed or opens or parity:

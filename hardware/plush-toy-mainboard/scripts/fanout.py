@@ -188,10 +188,9 @@ class Fanout:
         return len(ground_vias)
 
     def route_sensitive_ground_islands(self) -> int:
-        """固定三个自动扇出难以安全处理的地脚，并避开麦克风声孔。"""
+        """固定自动扇出难以安全处理的地脚。"""
         for ref, number, x, y, width in (
-                ("C_EN", "2", 6.75, 41.52, 0.4),
-                ("U_MIC", "5", 16.80, 50.00, 0.2)):
+                ("C_EN", "2", 6.75, 41.52, 0.4),):
             pad = self.pad(ref, number)
             self.add_track(pad.GetNet(), pad.GetPosition(), v(x, y), width)
             self.add_via(pad.GetNet(), "GND", x, y)
@@ -552,7 +551,7 @@ class Fanout:
                     (ref == "U_TOUCH" and pad.GetNumber() == "4") or \
                     (ref == "D_USB_DP" and pad.GetNumber() == "2") or \
                     (ref == "U_TOUCH" and pad.GetNumber() in ("16", "17", "19")) or \
-                    (ref, pad.GetNumber()) in {("C_EN", "2"), ("U_MIC", "5"), ("U_AMP", "17"),
+                    (ref, pad.GetNumber()) in {("C_EN", "2"), ("U_AMP", "17"),
                                                ("C_TOUCH_VREG", "2")}:
                 continue
             b = box_mm(pad.GetBoundingBox())

@@ -290,12 +290,16 @@ PARTS: list[Part] = [
                "6": "GND", "7": "+3V3", "8": "LCD_BL"}, assembly=False),
     cap("C_LCD", "100nF", "+3V3", "GND"),
 
-    # ── 麦克风：INMP441，引脚按 TDK DS-INMP441-00 表 6 ──
-    Part("U_MIC", "INMP441", "plush:INMP441", "plush:InvenSense_INMP441_LGA-9_4.72x3.76mm", "C5438445",
-         pins={"1": "MIC_SCK", "2": "MIC_SD", "3": "MIC_WS", "4": "GND", "5": "GND", "6": "GND",
-               "7": "+3V3", "8": "+3V3", "9": "GND"}),
-    res("R_MIC_SD", "100k", "MIC_SD", "GND"),
-    cap("C_MIC", "100nF", "+3V3", "GND"),
+    # ── 麦克风：外接模块 ──
+    # 2026-09-15 改为外接：板载麦克风要求主板本身放在玩偶能「听见」的位置，
+    # 塞进胸腔包一层棉花就废了。拆解的成品机芯也是外接的。
+    # 6 脚顺序按常见 I2S 麦克风模块丝印：VDD GND SD WS SCK L/R。
+    # 末脚给 GND，即 L/R 拉低 = 左声道，与原板载 INMP441 的第 4 脚接法一致。
+    # 兼容 INMP441 / ICS43434 / ZTS6672 等 I2S 数字麦克风模块（委托方 2026-09-15 确认）。
+    Part("J_MIC", "Mic", "Connector_Generic:Conn_01x06",
+         "Connector_JST:JST_SH_BM06B-SRSS-TB_1x06-1MP_P1.00mm_Vertical",
+         pins={"1": "+3V3", "2": "GND", "3": "MIC_SD", "4": "MIC_WS", "5": "MIC_SCK", "6": "GND"},
+         assembly=False),
 
     # ── 功放：MAX98357A，供电取 VBUS（设计方案 12.3 节）──
     # GAIN_SLOT 悬空为 9dB；SD_MODE 经 1MΩ 上拉到 VDD，工作在 (左+右)/2 模式

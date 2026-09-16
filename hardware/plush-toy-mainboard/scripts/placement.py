@@ -26,11 +26,13 @@ ANCHORS = {
     "C_EN": (6.0, 42.0, 90),
     "SW_RST": (12.0, 6.0, 0),
     "SW_BOOT": (12.0, 13.0, 0),
+    # 外接麦克风口。原麦克风那一带被摄像头扇出线占满，放不下这个座子；
+    # 移到模组右上方后三根 MIC 线合计 59.7mm，反而比板载时更短。
+    "J_MIC": (24.5, 18.0, 90),
     # 调试/外接按键口，紧贴两个按键右侧：EN 与 BOOT 本来就在这一带，引线只有几毫米。
     # 立式座线垂直出板，不必占板边。这是全板扫描后唯一既贴着按键、
     # 又不压到 F.Cu 走线的位置。
     "J_EXT": (17.75, 9.75, 90),
-    "U_MIC": (14.0, 50.0, 0),
     # 上边：USB-C、降压、两块圆屏的排针（屏线往上走向头部）
     "J_USB": (28.0, 4.7, 180),        # 开口距上边 0.5mm，满足 EDGE_MARGIN
     "U_BUCK": (40.0, 14.0, 0),
@@ -122,7 +124,6 @@ NEAR = {
     "R_CAM_PWDN": "J_CAM", "R_CAM_RST": "J_CAM", "C_CAM_RST": "J_CAM", "C_CAM_AVDD": "J_CAM",
     "C_CAM_DVDD": "J_CAM",
     "R_LCD_CLK": "J_LCD_L", "R_LCD_MOSI": "J_LCD_L", "C_LCD": "J_LCD_L",
-    "R_MIC_SD": "U_MIC", "C_MIC": "U_MIC",
     "R_AMP_SD": "U_AMP", "C_AMP_BULK": "U_AMP", "C_AMP": "U_AMP",
     "TP_TX": (23.0, 42.0),
 }

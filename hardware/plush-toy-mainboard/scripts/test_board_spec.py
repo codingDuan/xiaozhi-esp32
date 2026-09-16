@@ -144,7 +144,8 @@ class HardConstraintTest(unittest.TestCase):
                          "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical")
 
     def test_hand_installed_parts_are_owned_by_board_spec(self):
-        expected = {"J_EXT", "J_HEAT", "J_LCD_L", "J_LCD_R", "J_SERVO_L", "J_SERVO_R",
+        expected = {"J_EXT", "J_HEAT", "J_LCD_L", "J_LCD_R", "J_MIC",
+                    "J_SERVO_L", "J_SERVO_R",
                     "J_NTC", "J_SPK", "J_VMOT", "J_TOUCH"}
         actual = {item.ref for item in board_spec.PARTS
                   if item.fitted and not getattr(item, "assembly", True) and item.ref.startswith("J_")}

@@ -144,7 +144,7 @@ class PcbTest(unittest.TestCase):
 
     def test_sensitive_ground_islands_have_deterministic_vias(self):
         vias = {(via.GetPosition().x, via.GetPosition().y) for via in self._vias("GND")}
-        for ref, number in (("C_EN", "2"), ("U_MIC", "5"), ("U_AMP", "17")):
+        for ref, number in (("C_EN", "2"), ("U_AMP", "17")):
             pad = self.fps[ref].FindPadByNumber(number).GetPosition()
             attached = [track for track in self._tracks("GND")
                         if track.GetStart() == pad or track.GetEnd() == pad]
@@ -536,18 +536,6 @@ class PcbTest(unittest.TestCase):
                 if not any(n == net and ((vx - px) ** 2 + (vy - py) ** 2) ** 0.5 <= 3.5 for n, vx, vy in vias):
                     lonely.append(f"{ref}.{pad.GetNumber()}[{net}]")
         self.assertEqual(lonely, [])
-
-    def test_microphone_acoustic_hole_clear_of_vias(self):
-        # INMP441 声孔为直径 0.4mm 的 NPTH；0.6mm 过孔必须离孔边至少 0.25mm。
-        # 2026-09-14 Freerouting 曾把 GND 过孔放在 (15.92, 50.00)，实际净距只有 0.13mm。
-        hole_x, hole_y = 15.29, 50.00
-        exclusion = 0.20 + 0.25 + 0.30
-        offenders = [(round(t.GetPosition().x / MM, 3), round(t.GetPosition().y / MM, 3))
-                     for t in self.board.GetTracks()
-                     if t.GetClass() == "PCB_VIA"
-                     and ((t.GetPosition().x / MM - hole_x) ** 2 +
-                          (t.GetPosition().y / MM - hole_y) ** 2) ** 0.5 < exclusion]
-        self.assertEqual(offenders, [])
 
     def test_camera_fpc_has_bottom_fanout_corridor(self):
         # 0.5mm FPC 的密集焊盘需要在排线插入侧留出走线/过孔空间；原布局仅余 1.27mm，
