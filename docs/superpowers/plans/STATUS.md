@@ -1,14 +1,37 @@
 # 毛绒玩具项目 · 进度汇总
 
-**更新时间**：2026-09-08
+**更新时间**：2026-09-16
 **分支**：`feat/plush-toy-design`（C1/C2 已本地提交 `5693891`，尚未推送）
 **板型**：`main/boards/plush-toy/`
 
 相关文档：
 - 设计方案 `docs/superpowers/specs/2026-09-05-plush-toy-design.md`
+- 主板设计 `docs/superpowers/specs/2026-09-14-plush-toy-pcb-4layer-design.md`
+- 接线对照 `hardware/plush-toy-mainboard/WIRING.md`（含外购件清单）
+- 首板验收 `hardware/plush-toy-mainboard/TESTING.md`
 - 计划一（眼睛）`docs/superpowers/plans/2026-09-06-plush-toy-eyes.md`
 - 计划二（肢体）`docs/superpowers/plans/2026-09-07-plush-toy-limbs.md`
 - 眼睛造型原型：分支 `prototype/eye-renderer`
+
+---
+
+## 〇、首板状态
+
+**2026-09-16 已下单付款，预计 09-21 晚上发货（嘉立创 PCB + SMT，订单号 Y1）。**
+
+| 项 | 本批配置 |
+|---|---|
+| 板子 | 90×60mm 四层 FR-4，1.6mm，外层 1oz / 内层 0.5oz，无铅 OSP |
+| 数量 | **5 片空板，只贴 2 块**（#1 主力、#2 对照，#3~#5 空板留存） |
+| **U_IMU（MPU-6050）** | **本批不贴** —— 单颗 ¥116.74，两颗占元件费 49%，而它只驱动摇晃/翻转检测。焊盘仍在板上，以后补装需热风枪 |
+| 换料 | `R_EFUSE_ILM` 1.02k（C226838 缺货）→ **1k（C11702）**，eFuse 限流点 1.9A → 1.94A |
+| 费用 | SMT 约 ¥798（去掉了不划算的首件拍照 ¥500 与 IMU ¥233） |
+
+到货后按 `TESTING.md` 走。注意三点：板子含 5mm 工艺边（7×9cm，掰掉才是 90×60）；
+OSP 会氧化，手焊那 36 个插件要尽早；**第一次上电别插电脑**，先量短路再插充电头。
+
+**外购件还没买** —— 见 `WIRING.md` 第三节，最要紧的是**眼睛屏必须换成 8 针带 BL 版**，
+面包板上那种 7 针的插不上。
 
 ---
 
