@@ -41,12 +41,14 @@ J_USB VBUS ─ VBUS_IN ─ F_USB ─ VBUS_FUSED ─ U_EFUSE ─ VBUS
                                             │
                                             ├─ C_EFUSE_IN 100nF → GND
                                             ├─ C_EFUSE_DVDT 3.3nF → GND
-                                            └─ R_EFUSE_ILM 1.02k → GND
+                                            └─ R_EFUSE_ILM 1k → GND
 ```
 
 U_EFUSE 使用 TI TPS259531DSGR，LCSC C2155674，封装使用 KiCad 官方 `Package_SON:Texas_DSG0008A_WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm_ThermalVias`。项目库新增按 TI 数据手册绘制的符号，禁止借用引脚不一致的近似型号。
 
-引脚连接固定为：1 dVdt 接 C_EFUSE_DVDT；2 EN/UVLO 接 VBUS_FUSED；3/4 IN 接 VBUS_FUSED；5 OUT 接 VBUS；6 FLT 明确 NC；7 ILM 经 1.02k 接 GND；8 和 exposed pad 接 GND。TPS259531 的输出钳位范围为 5.2–5.7V（典型值 5.45V），并支持自动重试；1.02k 将限流点设在约 1.9A，覆盖本板约 1.5A 逻辑域峰值；3.3nF 是数据手册允许的最小 dVdt 电容并限制上电斜率。
+引脚连接固定为：1 dVdt 接 C_EFUSE_DVDT；2 EN/UVLO 接 VBUS_FUSED；3/4 IN 接 VBUS_FUSED；5 OUT 接 VBUS；6 FLT 明确 NC；7 ILM 经 1k 接 GND；8 和 exposed pad 接 GND。TPS259531 的输出钳位范围为 5.2–5.7V（典型值 5.45V），并支持自动重试；1k 将限流点设在约 1.94A，覆盖本板约 1.5A 逻辑域峰值；3.3nF 是数据手册允许的最小 dVdt 电容并限制上电斜率。
+
+> 2026-09-16 变更：原按数据手册算出 1.02kΩ（限流点约 1.9A），但下单时 C226838 库存为 0，而 1.02k 0402 的替代料要么是 0201 封装、要么库存不足最小贴装量。改用 1kΩ（C11702，基础库）：限流点 1.9A → 1.94A，差 2%，离 1.5A 峰值仍有余量，且更早动作的是 F_USB 自恢复保险丝（1.5A 保持电流）。
 
 F_USB 保留，继续承担可恢复保险丝功能。SY8089、MAX98357A 和所有其他逻辑 5V 负载只允许连接 U_EFUSE 后的 `VBUS`，不得连接 `VBUS_IN` 或 `VBUS_FUSED`。
 

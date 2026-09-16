@@ -518,10 +518,16 @@ def retidy_silkscreen(board: pcbnew.BOARD) -> int:
 
 
 def sync_footprint_metadata(board: pcbnew.BOARD) -> None:
-    """把 board_spec 的装配字段同步到已布线 PCB，不重建或移动封装。"""
+    """把 board_spec 的装配字段同步到已布线 PCB，不重建或移动封装。
+
+    值也要同步：board_spec 改了阻容值（例如缺货换料）而 PCB 还留着旧值时，
+    DRC 的原理图一致性检查会报差异，制造文件也会带着旧值出去。
+    """
     parts = {part.ref: part for part in board_spec.PARTS if part.fitted}
     for fp in board.GetFootprints():
         part = parts.get(fp.GetReference())
+        if part is not None and fp.GetValue() != part.value:
+            fp.SetValue(part.value)
         if part is not None and part.lcsc:
             fp.SetField("LCSC", part.lcsc)
             fp.GetField("LCSC").SetVisible(False)

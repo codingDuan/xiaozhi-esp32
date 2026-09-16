@@ -51,7 +51,7 @@ SOT23_5 = "Package_TO_SOT_SMD:SOT-23-5"
 TESTPAD = "TestPoint:TestPoint_Pad_D1.0mm"
 
 # 阻容料号，均已在产品页核对（设计方案 12.5 节）
-LCSC_R = {"0": "C17168", "33": "C25105", "100": "C25076", "1k": "C11702", "1.02k": "C226838",
+LCSC_R = {"0": "C17168", "33": "C25105", "100": "C25076", "1k": "C11702",
           "4.7k": "C25900",
           "5.1k": "C25905", "10k": "C25744", "22k": "C25768", "75k": "C25798", "100k": "C25741",
           "1M": "C26083"}
@@ -135,7 +135,11 @@ PARTS: list[Part] = [
                "5": "VBUS", "6": nc("U_EFUSE", "FLT"), "7": "EFUSE_ILM", "8": "GND", "9": "GND"}),
     cap("C_EFUSE_IN", "100nF", "VBUS_FUSED", "GND"),
     cap("C_EFUSE_DVDT", "3.3nF", "EFUSE_DVDT", "GND"),
-    res("R_EFUSE_ILM", "1.02k", "EFUSE_ILM", "GND"),
+    # 1kΩ 而非数据手册算出的 1.02kΩ：C226838 在 2026-09-16 下单时库存为 0，
+    # 而 1.02k 0402 的替代料要么封装是 0201、要么库存不够最小贴装量。
+    # 限流点由 1.9A 变 1.94A（差 2%），离逻辑域 1.5A 峰值仍有余量，
+    # 且更早动作的是 F_USB 自恢复保险丝（1.5A 保持）。
+    res("R_EFUSE_ILM", "1k", "EFUSE_ILM", "GND"),
     Part("D_USB_DP", "LESD8D3.3CAT5G", "Device:D_TVS", "Diode_SMD:D_SOD-882", "C172409",
          pins={"1": "USB_DP", "2": "GND"}),
     Part("D_USB_DN", "LESD8D3.3CAT5G", "Device:D_TVS", "Diode_SMD:D_SOD-882", "C172409",
