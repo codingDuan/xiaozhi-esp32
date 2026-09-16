@@ -23,7 +23,7 @@ import placement as pl
 import project_rules
 from post_route import PCB, Router, mm, vec
 
-REVIEW_SILK = {"电机/加热专用 5V", "VMOT 仅限 5V", "头部触摸 E0 / GND", "头部触摸\nE0 / GND"}
+REVIEW_SILK = {"电机/加热专用", "VMOT 仅限 5V", "头部触摸 E0 / GND", "头部触摸\nE0 / GND"}
 
 
 def near(point, target, tolerance=0.02) -> bool:

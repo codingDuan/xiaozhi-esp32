@@ -141,6 +141,8 @@ def add_silk_text(board: pcbnew.BOARD, text: str, x: float, y: float,
     silk.SetText(text)
     if justify == "right":
         silk.SetHorizJustify(pcbnew.GR_TEXT_H_ALIGN_RIGHT)
+    elif justify == "left":
+        silk.SetHorizJustify(pcbnew.GR_TEXT_H_ALIGN_LEFT)
     silk.SetPosition(v(x, y))
     silk.SetLayer(pcbnew.F_SilkS)
     silk.SetTextSize(v(SILK_HEIGHT, SILK_HEIGHT))

@@ -625,6 +625,10 @@
         "pattern": "+2V8"
       },
       {
+        "netclass": "Supply",
+        "pattern": "LCD_BL"
+      },
+      {
         "netclass": "CameraSupply",
         "pattern": "+1V5"
       }

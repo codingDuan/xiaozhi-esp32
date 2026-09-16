@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 import board_spec
 import config_pins
+import project_rules
 
 CONFIG_H = Path(__file__).resolve().parents[3] / "main/boards/plush-toy/config.h"
 
@@ -10,7 +11,7 @@ MACRO_TO_NET = {
     "AUDIO_I2S_MIC_GPIO_WS": "MIC_WS", "AUDIO_I2S_MIC_GPIO_SCK": "MIC_SCK",
     "AUDIO_I2S_MIC_GPIO_DIN": "MIC_SD", "AUDIO_I2S_SPK_GPIO_DOUT": "AMP_DIN",
     "AUDIO_I2S_SPK_GPIO_BCLK": "AMP_BCLK", "AUDIO_I2S_SPK_GPIO_LRCK": "AMP_LRCLK",
-    "BUILTIN_LED_GPIO": "LED_RGB", "BOOT_BUTTON_GPIO": "BOOT",
+    "DISPLAY_BACKLIGHT_PIN": "LCD_BL_PWM", "BOOT_BUTTON_GPIO": "BOOT",
     "CAMERA_PIN_D0": "CAM_Y2", "CAMERA_PIN_D1": "CAM_Y3", "CAMERA_PIN_D2": "CAM_Y4",
     "CAMERA_PIN_D3": "CAM_Y5", "CAMERA_PIN_D4": "CAM_Y6", "CAMERA_PIN_D5": "CAM_Y7",
     "CAMERA_PIN_D6": "CAM_Y8", "CAMERA_PIN_D7": "CAM_Y9", "CAMERA_PIN_XCLK": "CAM_XCLK",
@@ -110,13 +111,36 @@ class HardConstraintTest(unittest.TestCase):
         self.assertEqual(capacitor.footprint, "Capacitor_SMD:C_0402_1005Metric")
         self.assertEqual(capacitor.pins, {"1": "VBUS", "2": "GND"})
 
-    def test_revised_camera_touch_and_led_parts(self):
+    def test_revised_camera_touch_and_backlight_parts(self):
         self.assertTrue(part("R_SIOC").fitted)
         self.assertTrue(part("R_SIOD").fitted)
         self.assertNotIn("TP_E0", {item.ref for item in board_spec.PARTS})
         self.assertEqual(part("J_TOUCH").pins, {"1": "TOUCH_E0", "2": "GND"})
-        self.assertEqual(part("D_LED").value, "WS2812B-2020-V6")
-        self.assertEqual(part("D_LED").lcsc, "C52917434")
+        refs = {item.ref for item in board_spec.PARTS}
+        self.assertNotIn("D_LED", refs)
+        self.assertNotIn("C_LED", refs)
+        self.assertEqual(part("Q_LCD_BL").value, "AO3401A")
+        self.assertEqual(part("Q_LCD_BL").lcsc, "C15127")
+
+    def test_backlight_high_side_switch_defaults_off(self):
+        self.assertEqual(part("Q_LCD_BL").pins,
+                         {"1": "LCD_BL_GATE", "2": "+3V3", "3": "LCD_BL"})
+        self.assertEqual(part("R_LCD_BL_GATE").pins,
+                         {"1": "LCD_BL_PWM", "2": "LCD_BL_GATE"})
+        self.assertEqual(part("R_LCD_BL_GATE").value, "100")
+        self.assertEqual(part("R_LCD_BL_OFF").pins,
+                         {"1": "+3V3", "2": "LCD_BL_GATE"})
+        self.assertEqual(part("R_LCD_BL_OFF").value, "100k")
+
+    def test_both_eye_connectors_expose_switched_backlight_power(self):
+        common = {"1": "LCD_RST", "3": "LCD_DC", "4": "LCD_MOSI_S",
+                  "5": "LCD_CLK_S", "6": "GND", "7": "+3V3", "8": "LCD_BL"}
+        self.assertEqual(part("J_LCD_L").pins, {**common, "2": "LCD_CS_L"})
+        self.assertEqual(part("J_LCD_R").pins, {**common, "2": "LCD_CS_R"})
+        self.assertEqual(part("J_LCD_L").footprint,
+                         "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical")
+        self.assertEqual(part("J_LCD_R").footprint,
+                         "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical")
 
     def test_hand_installed_parts_are_owned_by_board_spec(self):
         expected = {"J_HEAT", "J_LCD_L", "J_LCD_R", "J_SERVO_L", "J_SERVO_R",
@@ -127,6 +151,11 @@ class HardConstraintTest(unittest.TestCase):
 
 
 class NetIntegrityTest(unittest.TestCase):
+    def test_switched_backlight_uses_supply_netclass(self):
+        assignments = {(item["netclass"], item["pattern"])
+                       for item in project_rules.PATTERNS}
+        self.assertIn(("Supply", "LCD_BL"), assignments)
+
     def test_no_single_pin_nets(self):
         for net, members in board_spec.nets().items():
             if net.startswith("NC_"):

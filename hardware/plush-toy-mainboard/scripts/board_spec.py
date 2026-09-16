@@ -27,7 +27,7 @@ GPIO_NET = {
     16: "CAM_Y9", 17: "CAM_Y8", 18: "CAM_Y7", 19: "USB_DN", 20: "USB_DP",
     21: "LCD_RST", 38: "LCD_CLK", 39: "AMP_DIN", 40: "AMP_BCLK", 41: "AMP_LRCLK",
     42: "MIC_SD", 43: "UART_TX", 44: "I2C_SDA", 45: "LCD_CS_L", 46: "LCD_CS_R",
-    47: "LCD_DC", 48: "LED_RGB", 0: "BOOT",
+    47: "LCD_DC", 48: "LCD_BL_PWM", 0: "BOOT",
 }
 
 # ESP32-S3-WROOM-1 模组焊盘号 → GPIO，出自 esp32-s3-wroom-1_wroom-1u_datasheet_en v1.8 表 3-1
@@ -101,11 +101,6 @@ PARTS: list[Part] = [
     Part("SW_BOOT", "TS-1187A-B-A-B", "lcsc:TS-1187A-B-A-B",
          "lcsc:SW-SMD_4P-L5.1-W5.1-P3.70-LS6.5-TL_H1.5", "C318884",
          pins={"1": "BOOT", "2": "BOOT", "3": "GND", "4": "GND"}),
-    # RGB 状态灯。VDD 取 3V3：5V 供电时 3.3V 数据线达不到 0.7×VDD（设计方案 12.5 节）
-    Part("D_LED", "WS2812B-2020-V6", "LED:WS2812B-2020", "LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm",
-         "C52917434", pins={"1": nc("D_LED", "DOUT"), "2": "GND", "3": "LED_RGB", "4": "+3V3"}),
-    cap("C_LED", "100nF", "+3V3", "GND"),
-
     # ── USB-C 与逻辑域 5V ──
     # 符号 Connector:USB_C_Receptacle_USB2.0_16P 引脚名与 HRO TYPE-C-31-M-12 封装焊盘名一一对应
     Part("J_USB", "TYPE-C-31-M-12", "Connector:USB_C_Receptacle_USB2.0_16P",
@@ -264,18 +259,23 @@ PARTS: list[Part] = [
     res("R_SIOC", "4.7k", "CAM_SIOC", "+2V8"),
     res("R_SIOD", "4.7k", "CAM_SIOD", "+2V8"),
 
-    # ── 双屏：7 针排针，顺序 RST CS DC SDA SCL GND VCC（与现有 GC9A01 模块一致）──
+    # ── 双屏：8 针排针，顺序 RST CS DC SDA SCL GND VCC BL ──
     # CLK 与 MOSI 在 ESP32 端串 33Ω，两屏共用这两根线（设计方案 6.5 节）
     res("R_LCD_CLK", "33", "LCD_CLK", "LCD_CLK_S"),
     res("R_LCD_MOSI", "33", "LCD_MOSI", "LCD_MOSI_S"),
-    Part("J_LCD_L", "LCD L", "Connector_Generic:Conn_01x07",
-         "Connector_PinHeader_2.54mm:PinHeader_1x07_P2.54mm_Vertical",
+    # GPIO48 低电平导通 AO3401A，为两块屏的 BL 脚提供受控 3.3V；100k 上拉保证上电默认关闭。
+    res("R_LCD_BL_GATE", "100", "LCD_BL_PWM", "LCD_BL_GATE"),
+    res("R_LCD_BL_OFF", "100k", "+3V3", "LCD_BL_GATE"),
+    Part("Q_LCD_BL", "AO3401A", "Transistor_FET:AO3401A", SOT23, "C15127",
+         pins={"1": "LCD_BL_GATE", "2": "+3V3", "3": "LCD_BL"}),
+    Part("J_LCD_L", "LCD L", "Connector_Generic:Conn_01x08",
+         "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical",
          pins={"1": "LCD_RST", "2": "LCD_CS_L", "3": "LCD_DC", "4": "LCD_MOSI_S", "5": "LCD_CLK_S",
-               "6": "GND", "7": "+3V3"}, assembly=False),
-    Part("J_LCD_R", "LCD R", "Connector_Generic:Conn_01x07",
-         "Connector_PinHeader_2.54mm:PinHeader_1x07_P2.54mm_Vertical",
+               "6": "GND", "7": "+3V3", "8": "LCD_BL"}, assembly=False),
+    Part("J_LCD_R", "LCD R", "Connector_Generic:Conn_01x08",
+         "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical",
          pins={"1": "LCD_RST", "2": "LCD_CS_R", "3": "LCD_DC", "4": "LCD_MOSI_S", "5": "LCD_CLK_S",
-               "6": "GND", "7": "+3V3"}, assembly=False),
+               "6": "GND", "7": "+3V3", "8": "LCD_BL"}, assembly=False),
     cap("C_LCD", "100nF", "+3V3", "GND"),
 
     # ── 麦克风：INMP441，引脚按 TDK DS-INMP441-00 表 6 ──

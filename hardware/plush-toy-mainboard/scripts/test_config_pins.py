@@ -14,11 +14,12 @@ class ConfigPinsTest(unittest.TestCase):
         self.assertEqual(self.pins["SERVO_I2C_SCL_PIN"], 3)
         self.assertEqual(self.pins["DISPLAY_CS_LEFT_PIN"], 45)
         self.assertEqual(self.pins["DISPLAY_CS_RIGHT_PIN"], 46)
+        self.assertEqual(self.pins["DISPLAY_BACKLIGHT_PIN"], 48)
         self.assertEqual(self.pins["CAMERA_PIN_XCLK"], 15)
 
     def test_nc_is_minus_one(self):
         self.assertEqual(self.pins["CAMERA_PIN_PWDN"], -1)
-        self.assertEqual(self.pins["DISPLAY_BACKLIGHT_PIN"], -1)
+        self.assertEqual(self.pins["BUILTIN_LED_GPIO"], -1)
 
     def test_comment_lines_ignored(self):
         self.assertNotIn("LAMP_GPIO", self.pins)

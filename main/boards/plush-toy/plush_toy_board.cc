@@ -8,13 +8,13 @@
 
 #include "ads1115.h"
 #include "application.h"
+#include "backlight.h"
 #include "button.h"
 #include "codecs/no_audio_codec.h"
 #include "config.h"
 #include "display/display.h"
 #include "esp32_camera.h"
 #include "eye_display.h"
-#include "led/single_led.h"
 #include "limb_controller.h"
 #include "mcp_server.h"
 #include "motion_controller.h"
@@ -596,6 +596,7 @@ public:
     PlushToyBoard() : boot_button_(BOOT_BUTTON_GPIO) {
         InitializeSpi();
         InitializeEyes();
+        GetBacklight()->RestoreBrightness();
         InitializeButtons();
         InitializeCamera();
         InitializeServoBus();  // 必须在摄像头之后：SCCB 先占掉它那个 I2C 端口
@@ -655,11 +656,6 @@ public:
             });
     }
 
-    virtual Led* GetLed() override {
-        static SingleLed led(BUILTIN_LED_GPIO);
-        return &led;
-    }
-
     virtual AudioCodec* GetAudioCodec() override {
 #ifdef AUDIO_I2S_METHOD_SIMPLEX
         static NoAudioCodecSimplex audio_codec(AUDIO_INPUT_SAMPLE_RATE, AUDIO_OUTPUT_SAMPLE_RATE,
@@ -680,6 +676,11 @@ public:
             return display_;
         static NoDisplay fallback;
         return &fallback;
+    }
+
+    virtual Backlight* GetBacklight() override {
+        static PwmBacklight backlight(DISPLAY_BACKLIGHT_PIN, DISPLAY_BACKLIGHT_OUTPUT_INVERT);
+        return &backlight;
     }
 
     virtual Camera* GetCamera() override { return camera_; }

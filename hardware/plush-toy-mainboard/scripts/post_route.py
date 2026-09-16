@@ -34,7 +34,8 @@ MIC_EXCLUSION = 0.20 + 0.25 + 0.30
 POWER_WIDTHS = {
     "VMOT": 1.0, "VMOT_IN": 1.0, "PGND": 1.0, "HEAT_LOW": 1.0,
     "VBUS": 0.5, "VBUS_IN": 0.5, "VBUS_FUSED": 0.5, "+3V3": 0.5, "GND": 0.5,
-    "BUCK_SW": 0.5, "SPK_P": 0.5, "SPK_N": 0.5, "+2V8": 0.5, "+1V5": 0.3,
+    "BUCK_SW": 0.5, "SPK_P": 0.5, "SPK_N": 0.5, "LCD_BL": 0.5,
+    "+2V8": 0.5, "+1V5": 0.3,
 }
 CRITICAL_NETS = {"BUCK_SW", "CAM_XCLK"}
 

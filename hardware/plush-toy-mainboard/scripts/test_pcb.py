@@ -79,8 +79,20 @@ class PcbTest(unittest.TestCase):
 
     def test_revised_parts_are_placed(self):
         required = {"U_EFUSE", "C_EFUSE_IN", "C_EFUSE_DVDT", "R_EFUSE_ILM", "C_BUCK_HF",
-                    "J_TOUCH", "R_SIOC", "R_SIOD"}
+                    "J_TOUCH", "R_SIOC", "R_SIOD", "Q_LCD_BL", "R_LCD_BL_GATE",
+                    "R_LCD_BL_OFF"}
         self.assertEqual(required - self.fps.keys(), set())
+
+    def test_eye_connectors_have_routed_backlight_pin(self):
+        for ref in ("J_LCD_L", "J_LCD_R"):
+            with self.subTest(ref=ref):
+                pads = {pad.GetNumber(): pad.GetNetname() for pad in self.fps[ref].Pads()}
+                self.assertEqual(pads.get("8"), "LCD_BL")
+                pin = self.fps[ref].FindPadByNumber("8").GetPosition()
+                self.assertTrue(any(track.GetStart() == pin or track.GetEnd() == pin
+                                    for track in self._tracks("LCD_BL")))
+        self.assertTrue(self._tracks("LCD_BL"))
+        self.assertTrue(all(mm(track.GetWidth()) >= 0.5 for track in self._tracks("LCD_BL")))
 
     def test_usb_shield_uses_solid_plane_connection(self):
         shields = [pad for pad in self.fps["J_USB"].Pads() if pad.GetNumber() == "SH"]
@@ -332,7 +344,7 @@ class PcbTest(unittest.TestCase):
     def test_required_safety_silkscreen_is_present(self):
         texts = {t.GetText() for t in self.board.GetDrawings()
                  if isinstance(t, pcbnew.PCB_TEXT) and t.GetLayer() == pcbnew.F_SilkS}
-        required = {"电机/加热专用 5V", "+", "-", "CH0 左", "CH1 右",
+        required = {"电机/加热专用", "+", "-", "CH0 左", "CH1 右",
                     "必须串 KSD9700 65度 常闭", "VMOT 仅限 5V", "头部触摸\nE0 / GND"}
         self.assertEqual(required - texts, set())
 
@@ -351,11 +363,12 @@ class PcbTest(unittest.TestCase):
 
     def test_power_input_labels_sit_at_vmot_terminal(self):
         # 2026-09-14 评审：两行 5V 标签排在圆屏排针末端，容易被读成屏幕座是 5V/电机电源。
-        # 标签必须贴着 J_VMOT，并远离两排 3.3V 屏幕排针。
+        # 标签必须贴着 J_VMOT，并远离两排 3.3V 屏幕排针。屏排针加到 8 针后 8 脚右移
+        # 2.54mm，第二行去掉重复的「5V」才放得下这 7mm 间距。
         terminal = self.fps["J_VMOT"].GetCourtyard(pcbnew.F_CrtYd).BBox()
         lcd_pads = [pad.GetBoundingBox() for ref in ("J_LCD_L", "J_LCD_R")
                     for pad in self.fps[ref].Pads()]
-        for text in ("电机/加热专用 5V", "VMOT 仅限 5V"):
+        for text in ("电机/加热专用", "VMOT 仅限 5V"):
             box = self._board_text(text).GetBoundingBox()
             with self.subTest(text=text):
                 self.assertLessEqual(self._box_gap(box, terminal), 4.0)
@@ -627,7 +640,8 @@ class PcbTest(unittest.TestCase):
             "VMOT": 1.0, "VMOT_IN": 1.0, "PGND": 1.0, "HEAT_LOW": 1.0,
             "VBUS": 0.5, "VBUS_IN": 0.5, "VBUS_FUSED": 0.5,
             "+3V3": 0.5, "GND": 0.5,
-            "BUCK_SW": 0.5, "SPK_P": 0.5, "SPK_N": 0.5, "+2V8": 0.5, "+1V5": 0.3,
+            "BUCK_SW": 0.5, "SPK_P": 0.5, "SPK_N": 0.5, "LCD_BL": 0.5,
+            "+2V8": 0.5, "+1V5": 0.3,
         }
         vias = {(item.GetNetname(), item.GetPosition().x, item.GetPosition().y)
                 for item in self.board.GetTracks() if item.GetClass() == "PCB_VIA"}

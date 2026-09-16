@@ -71,12 +71,12 @@ class RevisedPartLibraryTest(unittest.TestCase):
         self.assertEqual(test_part_pins.footprint_pads(
             "Package_SON:Texas_DSG0008A_WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm_ThermalVias"), expected)
 
-    def test_ws2812b_v6_uses_verified_pin_order_and_four_pad_footprint(self):
-        led = next(part for part in board_spec.PARTS if part.ref == "D_LED")
-        self.assertEqual(led.pins, {
-            "1": "NC_D_LED_DOUT", "2": "GND", "3": "LED_RGB", "4": "+3V3",
+    def test_backlight_pmos_uses_verified_ao3401a_pin_order(self):
+        switch = next(part for part in board_spec.PARTS if part.ref == "Q_LCD_BL")
+        self.assertEqual(switch.pins, {
+            "1": "LCD_BL_GATE", "2": "+3V3", "3": "LCD_BL",
         })
-        self.assertEqual(test_part_pins.footprint_pads(led.footprint), {"1", "2", "3", "4"})
+        self.assertEqual(test_part_pins.footprint_pads(switch.footprint), {"1", "2", "3"})
 
 
 if __name__ == "__main__":

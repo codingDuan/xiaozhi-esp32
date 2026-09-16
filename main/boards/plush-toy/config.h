@@ -17,7 +17,7 @@
 #define AUDIO_I2S_SPK_GPIO_BCLK GPIO_NUM_40
 #define AUDIO_I2S_SPK_GPIO_LRCK GPIO_NUM_41
 
-#define BUILTIN_LED_GPIO        GPIO_NUM_48
+#define BUILTIN_LED_GPIO        GPIO_NUM_NC
 #define BOOT_BUTTON_GPIO        GPIO_NUM_0
 #define TOUCH_BUTTON_GPIO       GPIO_NUM_NC
 #define VOLUME_UP_BUTTON_GPIO   GPIO_NUM_NC
@@ -44,9 +44,10 @@
 
 // ── 双眼屏（GC9A01 1.28" 240x240 ×2）──
 // MOSI/CLK 已从 GPIO20/19 迁走，把原生 USB 还给烧录与日志。
-// 实物模块 7 针 RST/CS/DC/SDA/SCL/GND/VCC，无 BL 引脚（背光内部常亮）。
+// 屏幕接口为 8 针 RST/CS/DC/SDA/SCL/GND/VCC/BL；两眼共用受控 BL 电源。
 // 模块丝印的 SDA/SCL 即 SPI 的 MOSI/CLK，不是 I2C。
-#define DISPLAY_BACKLIGHT_PIN GPIO_NUM_NC   // 模块无 BL 引脚
+#define DISPLAY_BACKLIGHT_PIN GPIO_NUM_48
+#define DISPLAY_BACKLIGHT_OUTPUT_INVERT true  // GPIO 低电平导通高边 P-MOS
 #define DISPLAY_MOSI_PIN      GPIO_NUM_14   // 屏丝印 SDA
 #define DISPLAY_CLK_PIN       GPIO_NUM_38   // 屏丝印 SCL
 #define DISPLAY_DC_PIN        GPIO_NUM_47
