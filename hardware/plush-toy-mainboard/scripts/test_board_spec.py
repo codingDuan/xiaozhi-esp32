@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 import board_spec
 import config_pins
+import export_wiring
 import project_rules
 
 CONFIG_H = Path(__file__).resolve().parents[3] / "main/boards/plush-toy/config.h"
@@ -143,11 +144,31 @@ class HardConstraintTest(unittest.TestCase):
                          "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical")
 
     def test_hand_installed_parts_are_owned_by_board_spec(self):
-        expected = {"J_HEAT", "J_LCD_L", "J_LCD_R", "J_SERVO_L", "J_SERVO_R",
+        expected = {"J_EXT", "J_HEAT", "J_LCD_L", "J_LCD_R", "J_SERVO_L", "J_SERVO_R",
                     "J_NTC", "J_SPK", "J_VMOT", "J_TOUCH"}
         actual = {item.ref for item in board_spec.PARTS
                   if item.fitted and not getattr(item, "assembly", True) and item.ref.startswith("J_")}
         self.assertEqual(actual, expected)
+
+
+class WiringTableTest(unittest.TestCase):
+    """对照表是给人拿着核实物的，和板子脱节就比没有更危险。"""
+
+    def test_table_covers_every_connector(self):
+        connectors = {part.ref for part in board_spec.PARTS if part.ref.startswith("J_")}
+        self.assertEqual(connectors, set(export_wiring.CONNECTORS))
+
+    def test_every_connector_pin_resolves_to_something_readable(self):
+        for ref in export_wiring.CONNECTORS:
+            spec = next(item for item in board_spec.PARTS if item.ref == ref)
+            for number, net in spec.pins.items():
+                with self.subTest(ref=ref, pin=number):
+                    self.assertNotEqual(export_wiring.describe(net), "—")
+
+    def test_committed_table_is_up_to_date(self):
+        self.assertEqual(
+            export_wiring.OUTPUT.read_text(encoding="utf-8"), export_wiring.render(),
+            "WIRING.md 已过期，请重跑 python3 scripts/export_wiring.py")
 
 
 class NetIntegrityTest(unittest.TestCase):

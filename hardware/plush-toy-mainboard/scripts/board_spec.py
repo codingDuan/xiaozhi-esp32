@@ -101,6 +101,18 @@ PARTS: list[Part] = [
     Part("SW_BOOT", "TS-1187A-B-A-B", "lcsc:TS-1187A-B-A-B",
          "lcsc:SW-SMD_4P-L5.1-W5.1-P3.70-LS6.5-TL_H1.5", "C318884",
          pins={"1": "BOOT", "2": "BOOT", "3": "GND", "4": "GND"}),
+    # 调试与外接按键口。装进玩偶后板载的 SW_RST/SW_BOOT 按不到，必须引出来；
+    # 拆解的成品机芯也是这么做的（板边一排 3V3/TX/RX/RST/GND）。
+    # 没有 RX：GPIO44（开发板丝印 RX）在本板是舵机 I2C 的 SDA。
+    # BOOT 引出即等于把固件的主功能键引出（config.h 的 BOOT_BUTTON_GPIO = GPIO0）。
+    #
+    # 用 SH 1.0mm 而不是板上其余连接器的 PH 2.0mm：PH 是通孔件，焊盘穿透所有层，
+    # 会撞上按键一带 B.Cu 的 LCD_CLK 和 USB_DP；贴片 PH 全板只剩一处放得下，
+    # 且离 EN/BOOT/TX 有 33~48mm。SH 全贴片、只占 8.9x5.3mm，能贴着两个按键放。
+    Part("J_EXT", "Debug / Keys", "Connector_Generic:Conn_01x05",
+         "Connector_JST:JST_SH_BM05B-SRSS-TB_1x05-1MP_P1.00mm_Vertical",
+         pins={"1": "+3V3", "2": "UART_TX", "3": "EN", "4": "BOOT", "5": "GND"},
+         assembly=False),
     # ── USB-C 与逻辑域 5V ──
     # 符号 Connector:USB_C_Receptacle_USB2.0_16P 引脚名与 HRO TYPE-C-31-M-12 封装焊盘名一一对应
     Part("J_USB", "TYPE-C-31-M-12", "Connector:USB_C_Receptacle_USB2.0_16P",
