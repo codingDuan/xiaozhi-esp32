@@ -1,7 +1,7 @@
 # 毛绒玩具项目 · 进度汇总
 
 **更新时间**：2026-09-28
-**分支**：`feat/plush-toy-design`（C1/C2 已本地提交 `5693891`，尚未推送）
+**分支**：`feat/plush-toy-design`（已推送到 fork）
 **板型**：`main/boards/plush-toy/`
 
 相关文档：
