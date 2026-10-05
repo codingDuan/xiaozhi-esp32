@@ -242,7 +242,8 @@ def body_box(fp) -> pcbnew.BOX2I:
     if fp.GetReference() == "U1":
         return pad_box(fp)
     fp.BuildCourtyardCaches()
-    court = fp.GetCourtyard(pcbnew.F_CrtYd)
+    layer = pcbnew.B_CrtYd if fp.GetLayer() == pcbnew.B_Cu else pcbnew.F_CrtYd
+    court = fp.GetCourtyard(layer)
     return court.BBox() if court.OutlineCount() else fp.GetBoundingBox(False)
 
 
@@ -352,14 +353,20 @@ def place_connector_labels(board, fps, reserved=()) -> list:
 def tidy_silkscreen(board, fitted, fps, reserved) -> int:
     """位号统一 1.0mm / 0.15mm，在器件四周找不压焊盘、不压其他文字、不出板的位置。
     阻容、背面测试点、接插件（已印功能名）不印位号；芯片放不下时隐藏。"""
-    blocked = list(reserved) + [body_box(fp) for fp in fps.values() if fp.GetLayer() == pcbnew.F_Cu]
+    blocked = {
+        pcbnew.F_Cu: list(reserved) + [body_box(fp) for fp in fps.values() if fp.GetLayer() == pcbnew.F_Cu],
+        pcbnew.B_Cu: [body_box(fp) for fp in fps.values() if fp.GetLayer() == pcbnew.B_Cu],
+    }
     for fp in fps.values():
+        side = fp.GetLayer()
+        silk_layer = pcbnew.B_SilkS if side == pcbnew.B_Cu else pcbnew.F_SilkS
         for p in fp.Pads():
-            if p.IsOnLayer(pcbnew.F_Cu):
+            if p.IsOnLayer(side):
                 box = p.GetBoundingBox()
                 box.Inflate(pcbnew.FromMM(SILK_PAD_CLEARANCE))
-                blocked.append(box)
-        blocked += [item.GetBoundingBox() for item in fp.GraphicalItems() if item.GetLayer() == pcbnew.F_SilkS]
+                blocked[side].append(box)
+        blocked[side] += [item.GetBoundingBox() for item in fp.GraphicalItems()
+                          if item.GetLayer() == silk_layer]
     board_box = pcbnew.BOX2I(v(0.3, 0.3), v(pl.W - 0.6, pl.H - 0.6))
     small = ("Device:R", "Device:C", "Device:L", "Device:D_TVS", "Device:Thermistor_NTC", "Device:Fuse")
     labelled = [p for p in fitted
@@ -374,7 +381,9 @@ def tidy_silkscreen(board, fitted, fps, reserved) -> int:
         fp = fps[part.ref]
         ref = fp.Reference()
         ref.SetVisible(True)
-        ref.SetLayer(pcbnew.F_SilkS)
+        side = fp.GetLayer()
+        ref.SetLayer(pcbnew.B_SilkS if side == pcbnew.B_Cu else pcbnew.F_SilkS)
+        ref.SetMirrored(side == pcbnew.B_Cu)
         ref.SetTextSize(v(SILK_HEIGHT, SILK_HEIGHT))
         ref.SetTextThickness(pcbnew.FromMM(SILK_STROKE))
         # U1 外形含板外天线区，按焊盘范围找位置
@@ -388,7 +397,7 @@ def tidy_silkscreen(board, fitted, fps, reserved) -> int:
             candidates += [(cx, t - d), (cx, b + d), (l - d - 1.5, cy), (r + d + 1.5, cy),
                            (l, t - d), (r, t - d), (l, b + d), (r, b + d)]
         candidates.append((cx, cy))
-        if not place_text(ref, candidates, blocked, board_box):
+        if not place_text(ref, candidates, blocked[side], board_box):
             ref.SetVisible(False)
             if must_label(part):
                 failed.append(part.ref)
@@ -411,20 +420,77 @@ def label_testpoints(board) -> list[str]:
                 box.Inflate(pcbnew.FromMM(SILK_PAD_CLEARANCE))
                 blocked.append(box)
     board_box = pcbnew.BOX2I(v(0.3, 0.3), v(pl.W - 0.6, pl.H - 0.6))
-    failed = []
+    def candidates_for(f):
+        x, y = f.GetPosition().x * TO_MM, f.GetPosition().y * TO_MM
+        return [(x, y + d) for d in (1.4, 2.0, 2.8, 3.6, 4.4, 5.2, 6.0)] \
+            + [(x, y - d) for d in (1.4, 2.0, 2.8, 3.6, 4.4, 5.2, 6.0)] \
+            + [(x + d, y) for d in (3.4, 4.0, 4.8, 5.6, 6.4, 7.2, 8.0)] \
+            + [(x - d, y) for d in (3.4, 4.0, 4.8, 5.6, 6.4, 7.2, 8.0)] \
+            + [(x + dx, y + dy) for dx in (-6.4, -4.8, 4.8, 6.4)
+               for dy in (-3.6, -2.0, 2.0, 3.6)]
+
+    def static_choices(f):
+        ref = f.Reference()
+        choices = []
+        seen = set()
+        for height in sorted({SILK_HEIGHT, SILK_MIN_HEIGHT}, reverse=True):
+            ref.SetTextSize(v(height, height))
+            for angle in (0, 90):
+                ref.SetTextAngleDegrees(angle)
+                for x, y in candidates_for(f):
+                    ref.SetPosition(v(x, y))
+                    bb = ref.GetBoundingBox()
+                    if board_box.Contains(bb.GetOrigin()) and board_box.Contains(bb.GetEnd()) \
+                            and not any(bb.Intersects(o) for o in blocked):
+                        box = (bb.GetX(), bb.GetY(), bb.GetRight(), bb.GetBottom())
+                        if box not in seen:
+                            choices.append((height, angle, x, y, box))
+                            seen.add(box)
+        return choices
+
+    options = {}
     for f in fps:
         ref = f.Reference()
         ref.SetVisible(True)
         ref.SetLayer(pcbnew.B_SilkS)
         ref.SetMirrored(True)
         ref.SetTextThickness(pcbnew.FromMM(SILK_STROKE))
-        x, y = f.GetPosition().x * TO_MM, f.GetPosition().y * TO_MM
-        candidates = [(x, y + d) for d in (1.4, 2.0)] + [(x, y - d) for d in (1.4, 2.0)] \
-            + [(x + d, y) for d in (3.4, 4.0)] + [(x - d, y) for d in (3.4, 4.0)]
-        if not place_text(ref, candidates, blocked, board_box):
-            ref.SetVisible(False)
-            failed.append(f.GetReference())
-    return failed
+        options[f.GetReference()] = static_choices(f)
+
+    # 全局分配而非贪心：密板上两个测试点可能只有互斥的唯一空位。
+    order = sorted(fps, key=lambda f: len(options[f.GetReference()]))
+    assigned = {}
+
+    def intersects(a, b):
+        return not (a[2] < b[0] or b[2] < a[0] or a[3] < b[1] or b[3] < a[1])
+
+    def solve(index):
+        if index == len(order):
+            return True
+        f = order[index]
+        ref = f.GetReference()
+        for choice in options[ref]:
+            if any(intersects(choice[4], other[4]) for other in assigned.values()):
+                continue
+            assigned[ref] = choice
+            if solve(index + 1):
+                return True
+            del assigned[ref]
+        return False
+
+    if not solve(0):
+        for f in fps:
+            f.Reference().SetVisible(False)
+        return [f.GetReference() for f in order if not options[f.GetReference()]] or \
+            [f.GetReference() for f in order]
+
+    for f in fps:
+        height, angle, x, y, _ = assigned[f.GetReference()]
+        ref = f.Reference()
+        ref.SetTextSize(v(height, height))
+        ref.SetTextAngleDegrees(angle)
+        ref.SetPosition(v(x, y))
+    return []
 
 
 def add_outline(board) -> None:
@@ -508,44 +574,61 @@ def main(ctx=None) -> Path:
             board.Add(pcbnew.NETINFO_ITEM(board, name))
 
     fitted = [p for p in CTX.parts if p.fitted]
+    back_parts = set(getattr(pl, "BACK_PARTS", set()))
     known = set(pl.ANCHORS) | set(pl.NEAR) | set(pl.EDGE_CONNECTORS) | set(pl.BACK_NEAR)
     missing = [p.ref for p in fitted if p.ref not in known]
     if missing:
         raise RuntimeError(f"placement 没有给出这些位号的位置：{missing}")
+    unknown_back = back_parts - {p.ref for p in fitted}
+    if unknown_back:
+        raise RuntimeError(f"BACK_PARTS 含不存在的位号：{sorted(unknown_back)}")
+    connector_back = back_parts & set(pl.EDGE_CONNECTORS)
+    if connector_back:
+        raise RuntimeError(f"出线座必须在正面：{sorted(connector_back)}")
 
     occupied: list = []
     occupied_back: list = []
+    back_reservations = list(getattr(pl, "BACK_RESERVATIONS", ()))
+    occupied_back.extend(back_reservations)
     where: dict[str, tuple[float, float, int]] = {}
     fps: dict[str, pcbnew.FOOTPRINT] = {}
 
-    def commit(part, fp, x, y, angle, rect, back=False):
+    def commit(part, fp, x, y, angle, rect, back=False, already_added=False):
         fp.SetPosition(v(x, y))
         fp.SetOrientationDegrees(angle)
-        board.Add(fp)
+        if not already_added:
+            board.Add(fp)
         if back:
             fp.Flip(fp.GetPosition(), pcbnew.FLIP_DIRECTION_TOP_BOTTOM)
         (occupied_back if back else occupied).append(rect)
         where[part.ref] = (x, y, angle)
         fps[part.ref] = fp
 
-    problems = []
     fixed = [(p, pl.EDGE_CONNECTORS.get(p.ref)) for p in fitted
              if p.ref in pl.ANCHORS or p.ref in pl.EDGE_CONNECTORS]
-    fixed_rects: dict[str, tuple] = {}
-    for part, edge in fixed:
-        fp = load(part)
-        local = local_rect(fp, part.ref)
-        x, y, angle = edge_position(local, *edge) if edge else pl.ANCHORS[part.ref]
-        rect = placed_rect(local, x, y, angle)
-        if part.ref != "U1" and not inside_board(rect):
-            problems.append(f"{part.ref} 超出板边 {tuple(round(c, 2) for c in rect)}")
-        for other, r in fixed_rects.items():
-            if overlaps(rect, r):
-                problems.append(f"{part.ref} 与 {other} 重叠")
-        fixed_rects[part.ref] = rect
-        commit(part, fp, x, y, angle, rect)
-    if problems:
-        raise RuntimeError("定点器件位置有误：\n  " + "\n  ".join(problems))
+
+    def place_fixed(parts, back=False):
+        problems = []
+        pool = occupied_back if back else occupied
+        fixed_rects: dict[str, tuple] = {}
+        for part, edge in parts:
+            fp = load(part)
+            local = local_rect(fp, part.ref)
+            x, y, angle = edge_position(local, *edge) if edge else pl.ANCHORS[part.ref]
+            rect = placed_rect(local, x, y, angle)
+            if part.ref != "U1" and not inside_board(rect):
+                problems.append(f"{part.ref} 超出板边 {tuple(round(c, 2) for c in rect)}")
+            for other, r in fixed_rects.items():
+                if overlaps(rect, r):
+                    problems.append(f"{part.ref} 与 {other} 重叠")
+            if any(overlaps(rect, r) for r in pool):
+                problems.append(f"{part.ref} 与该面的禁区重叠")
+            fixed_rects[part.ref] = rect
+            commit(part, fp, x, y, angle, rect, back=back)
+        if problems:
+            raise RuntimeError("定点器件位置有误：\n  " + "\n  ".join(problems))
+
+    place_fixed([(part, edge) for part, edge in fixed if part.ref not in back_parts])
 
     by_ref = {p.ref: p for p in fitted}
     decoupling = getattr(pl, "DECOUPLING", {})
@@ -563,6 +646,10 @@ def main(ctx=None) -> Path:
 
     def place_decoupling(part, fp, pool, back):
         """去耦件从所服务引脚处起找位置，四个方向都试，焊盘到引脚超距就继续找；找不到报错。"""
+        # KiCad 10 的 FOOTPRINT.Flip() 对尚未挂到 BOARD 的封装会原生崩溃；背面候选需要翻面后
+        # 才能按真实焊盘坐标测距，因此先挂板作探针，找到位置后由 commit 直接接管。
+        if back:
+            board.Add(fp)
         chip, net, limit, *ret = decoupling[part.ref]
         pins = net_pad_points(chip, fps[chip], net)
         if not pins:
@@ -579,9 +666,17 @@ def main(ctx=None) -> Path:
                         continue
                     fp.SetPosition(v(x, y))
                     fp.SetOrientationDegrees(angle)
-                    if all(close_and_same_side(part.ref, fp, chip, n, limit, cx, cy) for n in [net] + ret):
-                        commit(part, fp, x, y, angle, rect, back)
+                    if back:
+                        fp.Flip(fp.GetPosition(), pcbnew.FLIP_DIRECTION_TOP_BOTTOM)
+                    close = all(close_and_same_side(part.ref, fp, chip, n, limit, cx, cy)
+                                for n in [net] + ret)
+                    if back:
+                        fp.Flip(fp.GetPosition(), pcbnew.FLIP_DIRECTION_TOP_BOTTOM)
+                    if close:
+                        commit(part, fp, x, y, angle, rect, back, already_added=back)
                         return
+        if back:
+            board.Remove(fp)
         px, py = pins[0]
         near = [ref for ref, (x, y, _) in where.items() if math.dist((x, y), (px, py)) < limit + 6]
         raise RuntimeError(f"{part.ref} 放不进 {chip}.{net} 引脚 {limit}mm 以内；引脚附近已有：{near}；"
@@ -640,8 +735,8 @@ def main(ctx=None) -> Path:
 
     fixed_chip = [p for p in fitted if p.ref in decoupling and chip_fixed(p.ref)]
     late = getattr(pl, "DECOUPLING_AFTER_LEGENDS", set())
-    tier1 = [p for p in fixed_chip if p.ref not in late]
-    tier2 = [p for p in fixed_chip if p.ref in late]
+    tier1 = [p for p in fixed_chip if p.ref not in late and p.ref not in back_parts]
+    tier2 = [p for p in fixed_chip if p.ref in late and p.ref not in back_parts]
     try:
         auto_place(tier1, pl.NEAR, occupied)
         legend_boxes = place_legends(board, fps)
@@ -653,15 +748,28 @@ def main(ctx=None) -> Path:
         board.Save(str(CTX.build / "failed.kicad_pcb"))     # 排查用：看是谁挡住了谁
         raise
     label_boxes = legend_boxes + label_boxes
-    auto_place([p for p in fitted if p.ref in pl.NEAR and p not in fixed_chip], pl.NEAR, occupied)
-    # 背面还要避开正面器件穿到背面的通孔焊盘（散热过孔、USB 外壳脚、安装孔）：
-    # 首版把 TP_VUSB 放在 U_EFUSE 散热焊盘的过孔上，DRC 报短路
+    auto_place([p for p in fitted if p.ref in pl.NEAR and p not in fixed_chip and p.ref not in back_parts],
+               pl.NEAR, occupied)
+    # 背面还要避开正面器件穿到背面的通孔焊盘（USB 外壳脚、安装孔）。单面装配版本的
+    # 背面测试点还要避开正面大焊盘未来的散热过孔；双面版本正面只有模组、连接器和按键，
+    # 它们的大 SMT 焊盘不会打散热孔，不能把整片背面误判成禁区。
     for fp in fps.values():
         for pad in fp.Pads():
-            big = pad.GetSizeX() * pad.GetSizeY() * TO_MM * TO_MM >= 1.0   # 散热焊盘要在焊盘内打孔
+            big = not back_parts and pad.GetSizeX() * pad.GetSizeY() * TO_MM * TO_MM >= 1.0
             if pad.GetAttribute() in (pcbnew.PAD_ATTRIB_PTH, pcbnew.PAD_ATTRIB_NPTH) or big:
                 b = pad.GetBoundingBox()
                 occupied_back.append((b.GetX() * TO_MM, b.GetY() * TO_MM, b.GetRight() * TO_MM, b.GetBottom() * TO_MM))
+    # 正面全部完成后才放背面：背面须避开正面的通孔和未来散热过孔。
+    place_fixed([(part, edge) for part, edge in fixed if part.ref in back_parts], back=True)
+    back_tier1 = [p for p in fixed_chip if p.ref not in late and p.ref in back_parts]
+    back_tier2 = [p for p in fixed_chip if p.ref in late and p.ref in back_parts]
+    auto_place(back_tier1, pl.NEAR, occupied_back, back=True)
+    auto_place(back_tier2, pl.NEAR, occupied_back, back=True)
+    auto_place([p for p in fitted if p.ref in pl.NEAR and p not in fixed_chip and p.ref in back_parts],
+               pl.NEAR, occupied_back, back=True)
+    # 装配件已避开保留区；移除虚拟占位后，测试点可落入 placement 指定的背面测试带。
+    for reservation in back_reservations:
+        occupied_back.remove(reservation)
     auto_place([p for p in fitted if p.ref in pl.BACK_NEAR], pl.BACK_NEAR, occupied_back, back=True)
 
     # 自检：手工旋转公式必须与 KiCad 实际庭院层一致，否则所有重叠判断都不可信

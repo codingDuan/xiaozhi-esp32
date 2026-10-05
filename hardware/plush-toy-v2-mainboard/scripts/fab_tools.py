@@ -16,8 +16,27 @@ RAW_POSITION_FIELDS = {"Ref", "PosX", "PosY", "Rot", "Side"}
 REQUIRED_STACKUP = (0.035, 0.2104, 0.0152, 1.065, 0.0152, 0.2104, 0.035)
 
 
-# 九层（四层铜、双面阻焊、正面钢网、板框）+ 双面丝印（背面印测试点名）+ job + 两个钻孔 + 两张钻孔图
-GERBER_FILE_COUNT = 15
+BASE_GERBER_LAYERS = (
+    "F.Cu", "In1.Cu", "In2.Cu", "B.Cu", "F.Mask", "B.Mask",
+    "F.SilkS", "B.SilkS", "F.Paste", "Edge.Cuts",
+)
+
+
+def gerber_layers(ctx) -> tuple[str, ...]:
+    """制造层列表；双面贴片版本额外需要背面钢网。"""
+    if not ctx.variant.double_sided:
+        return BASE_GERBER_LAYERS
+    index = BASE_GERBER_LAYERS.index("Edge.Cuts")
+    return BASE_GERBER_LAYERS[:index] + ("B.Paste",) + BASE_GERBER_LAYERS[index:]
+
+
+def position_side(ctx) -> str:
+    return "both" if ctx.variant.double_sided else "front"
+
+
+def expected_gerber_file_count(ctx) -> int:
+    # 每增加一层多一份 Gerber；其余 job、钻孔与钻孔图数量不变。
+    return 15 + int(ctx.variant.double_sided)
 
 
 def expected_assembly_refs(ctx) -> set[str]:
@@ -106,8 +125,9 @@ def validate(ctx, fab: Path) -> None:
     position_refs = _position_refs(fab / "positions.csv")
     validate_assembly_sets(ctx, bom_refs, position_refs)
     gerbers = sorted(path for path in (fab / "gerber").iterdir() if path.is_file())
-    if len(gerbers) != GERBER_FILE_COUNT or any(path.stat().st_size == 0 for path in gerbers):
-        raise ValueError(f"Gerber/钻孔文件应为 {GERBER_FILE_COUNT} 个非空文件，实际 {len(gerbers)}")
+    expected_count = expected_gerber_file_count(ctx)
+    if len(gerbers) != expected_count or any(path.stat().st_size == 0 for path in gerbers):
+        raise ValueError(f"Gerber/钻孔文件应为 {expected_count} 个非空文件，实际 {len(gerbers)}")
     archive = fab / "gerber.zip"
     with zipfile.ZipFile(archive) as bundle:
         members = bundle.infolist()
@@ -121,9 +141,14 @@ def validate(ctx, fab: Path) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 5 and sys.argv[1] == "filter-positions":
+    if len(sys.argv) == 3 and sys.argv[1] == "gerber-layers":
+        print(",".join(gerber_layers(context.load(sys.argv[2]))))
+    elif len(sys.argv) == 3 and sys.argv[1] == "position-side":
+        print(position_side(context.load(sys.argv[2])))
+    elif len(sys.argv) == 5 and sys.argv[1] == "filter-positions":
         filter_positions(context.load(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4]))
     elif len(sys.argv) == 4 and sys.argv[1] == "validate":
         validate(context.load(sys.argv[2]), Path(sys.argv[3]))
     else:
-        raise SystemExit("usage: fab_tools.py filter-positions VARIANT INPUT OUTPUT | validate VARIANT FAB_DIR")
+        raise SystemExit("usage: fab_tools.py gerber-layers VARIANT | position-side VARIANT | "
+                         "filter-positions VARIANT INPUT OUTPUT | validate VARIANT FAB_DIR")

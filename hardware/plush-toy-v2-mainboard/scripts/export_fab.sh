@@ -22,10 +22,12 @@ mkdir -p "$TMP/fab/gerber" "$DIR/renders"
 cd "$ROOT/scripts"
 python3 -m unittest test_parts_db test_gpio test_core test_variants test_netlist
 "$KP" -m unittest "test_pcb_$V" "test_drc_$V"
+LAYERS="$(python3 fab_tools.py gerber-layers "$V")"
+POSITION_SIDE="$(python3 fab_tools.py position-side "$V")"
 
-# 四层铜 + 双面阻焊 + 双面丝印（背面印测试点名）+ 正面钢网（单面贴片）+ 板框
+# 四层铜 + 双面阻焊/丝印 + 单面或双面钢网 + 板框
 $KC pcb export gerbers \
-    --layers "F.Cu,In1.Cu,In2.Cu,B.Cu,F.Mask,B.Mask,F.SilkS,B.SilkS,F.Paste,Edge.Cuts" \
+    --layers "$LAYERS" \
     --subtract-soldermask --check-zones \
     -o "$TMP/fab/gerber/" "$PCB"
 $KC pcb export drill --format excellon --excellon-separate-th --generate-map --map-format gerberx2 \
@@ -34,8 +36,8 @@ $KC pcb export drill --format excellon --excellon-separate-th --generate-map --m
 
 python3 export_bom.py --variant "$V" --output "$TMP/fab/bom.csv"
 
-# 坐标文件：KiCad 原始 CSV 转为嘉立创 Designator/Mid X/Mid Y/Layer/Rotation，单位 mm
-$KC pcb export pos --format csv --units mm --side front --exclude-dnp -o "$TMP/raw-positions.csv" "$PCB"
+# 坐标文件：单面版本仅 front，双面版本 both；再转为嘉立创字段，单位 mm
+$KC pcb export pos --format csv --units mm --side "$POSITION_SIDE" --exclude-dnp -o "$TMP/raw-positions.csv" "$PCB"
 python3 fab_tools.py filter-positions "$V" "$TMP/raw-positions.csv" "$TMP/fab/positions.csv"
 
 python3 fab_tools.py validate "$V" "$TMP/fab"
