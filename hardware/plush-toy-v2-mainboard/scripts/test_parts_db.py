@@ -26,6 +26,12 @@ REQUIRED = {
     "INDUCTOR_BOOST": {"1", "2"},
     "INDUCTOR_BUCK": {"1", "2"},
     "NTC_0603_10K": {"1", "2"},
+    "CAM_FPC": {str(i) for i in range(1, 27)},
+    "LDO_2V8": {"VIN", "GND", "CE", "NC", "VOUT"},
+    "LDO_1V5": {"VIN", "GND", "CE", "NC", "VOUT"},
+    "MPR121": {"IRQ", "SCL", "SDA", "ADDR", "VREG", "VSS", "REXT", "VDD",
+               *{f"ELE{i}" for i in range(12)}},
+    "ADS1115": {"ADDR", "ALERT", "AIN0", "AIN1", "AIN2", "AIN3", "VDD", "GND", "SDA", "SCL"},
 }
 
 

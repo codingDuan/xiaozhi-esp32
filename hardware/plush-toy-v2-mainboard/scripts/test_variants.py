@@ -38,10 +38,11 @@ class VariantATests(unittest.TestCase):
     def test_no_camera_parts_in_a(self):
         self.assertFalse(any(p.ref.startswith(("J_CAM", "U_LDO", "U_TOUCH", "U_ADC")) for p in self.parts))
 
-    def test_camera_variants_not_built_yet(self):
+    def test_camera_variants_build_from_shared_camera_family(self):
         for name in ("C", "D"):
-            with self.assertRaises(NotImplementedError):
-                variants.parts(name)
+            with self.subTest(name=name):
+                refs = {p.ref for p in variants.parts(name)}
+                self.assertTrue({"J_CAM", "U_LDO28", "U_LDO15", "U_TOUCH", "U_ADC"} <= refs)
 
 
 if __name__ == "__main__":
