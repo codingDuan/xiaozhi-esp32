@@ -75,6 +75,10 @@ python3 -m unittest test_kicad_env test_config_pins test_board_spec test_part_pi
 
 静态检查通过后，按 [`TESTING.md`](TESTING.md) 完成下单前检查；收到首板后继续填写分域上电、接口、外设、热和压力测试的实测记录。
 
+## 已知设计错误
+
+- **J_CAM 引脚顺序反了**（2026-10-05 确认）：摄像头第 k 脚落在板上第 25−k 脚，接上即短路 +1V5，#1 因此损坏。**不要直接接摄像头**，详见 `TESTING.md` 事故记录。本板已生产，不改 `board_spec.py`；二期修正。
+
 ## 已知风险
 
 DRC 通过只证明连接与规则正确。天线、40MHz SPI、摄像头 DVP、USB 90Ω 的实际质量只能打样验证，第一版预计需要改版。详见设计方案第 10 节。
