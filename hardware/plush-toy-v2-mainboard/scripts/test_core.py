@@ -144,6 +144,7 @@ class McuPeripheralTests(unittest.TestCase):
         imu = by_ref(self.parts, "U_IMU")
         self.assertEqual(imu.pins["5"], "GND")
         self.assertEqual(imu.pins["2"], "+3V3")   # CS 高电平选 I2C
+        self.assertEqual(imu.pins["3"], "+3V3")   # SA0 高：地址 0x19（固件 plush-toy-v2 按此）
 
     def test_external_lines_have_esd(self):
         for ref in ("J_TOUCH", "J_KEY"):

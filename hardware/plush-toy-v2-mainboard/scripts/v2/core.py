@@ -48,9 +48,9 @@ def power_parts() -> list:
         db.part("NTC_0603_10K", "RT_BAT", {"1": "BAT_NTC_SENSE", "2": "GND"}),
 
         # ── 3V3 降压（同一期 SY8089，取 VSYS）：Vout = 0.6 × (1 + 100k/22k) ≈ 3.33V ──
-        db.part("SY8089", "U_BUCK", {"IN": "VSYS", "EN": "BUCK_EN", "SW": "BUCK_SW",
+        # EN 直接接输入（SY8089 手册允许）；一期的 100k 上拉在二期密板上是个难布的连接
+        db.part("SY8089", "U_BUCK", {"IN": "VSYS", "EN": "VSYS", "SW": "BUCK_SW",
                                      "FB": "BUCK_FB", "GND": "GND"}),
-        res("R_BUCK_EN", "100k", "VSYS", "BUCK_EN"),
         db.part("INDUCTOR_BUCK", "L_BUCK", {"1": "BUCK_SW", "2": "+3V3"}),
         res("R_FB1", "100k", "+3V3", "BUCK_FB"),
         res("R_FB2", "22k", "BUCK_FB", "GND"),
@@ -139,9 +139,11 @@ def peripheral_parts() -> list:
         cap22u("C_SERVO1", "VSYS", "GND"),
         cap22u("C_SERVO2", "VSYS", "GND"),
         cap22u("C_SERVO3", "VSYS", "GND"),
-        # 加速度计 LIS2DH12：I2C，CS 高电平选 I2C，SA0 接地（地址 0x18），Res 必须接地
+        # 加速度计 LIS2DH12：I2C，CS 高电平选 I2C，Res 必须接地。
+        # SA0 接 3V3（7 位地址 0x19）：它与 CS（2 脚）相邻，同网络一段短线即可；
+        # 接地时 0.5mm 间距的 LGA 里打不出孔，布线不通
         db.part("LIS2DH12", "U_IMU", {"VDD": "+3V3", "VDD_IO": "+3V3", "GND": "GND", "RES": "GND",
-                                      "SCL": "I2C_SCL", "SDA": "I2C_SDA", "SDO_SA0": "GND", "CS": "+3V3"}),
+                                      "SCL": "I2C_SCL", "SDA": "I2C_SDA", "SDO_SA0": "+3V3", "CS": "+3V3"}),
         cap("C_IMU", "100nF", "+3V3", "GND"),
         # 外接按键：电源键 → IP5306 KEY，收音键 → 版本相关的 KEY_MUTE 网络
         db.part("CONN_KEY3", "J_KEY", {"1": "KEY_PWR", "2": "KEY_MUTE", "3": "GND"}),

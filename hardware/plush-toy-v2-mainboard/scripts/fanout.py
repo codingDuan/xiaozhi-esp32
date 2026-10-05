@@ -15,7 +15,9 @@ import project_rules
 
 TO_MM = 1e-6
 VIA_D, VIA_DRILL = 0.6, 0.3
-CLEARANCE = 0.2           # 取各网络类间距的最大值（Power 类 0.2mm）；取 0.15 时 GND 过孔贴着 CHG_SW 焊盘报间距错误
+CLEARANCE = 0.15
+POWER_NETS = {"VUSB", "VSYS", "VBAT", "VBAT_PACK", "HEAT_LOW", "CHG_SW"}
+POWER_CLEARANCE = 0.2     # Power 类间距；统一用 0.15 时 GND 过孔贴着 CHG_SW 焊盘报间距错误
 HOLE_CLEARANCE = 0.3
 EDGE = 0.6
 MAX_TRACK_W = 0.4
@@ -59,8 +61,12 @@ class Fanout:
         self.vias: list[tuple[str, float, float]] = []
 
     def clear(self, net, check) -> bool:
-        return not any(n != net and check(ob, HOLE_CLEARANCE if npth else CLEARANCE)
-                       for n, ob, npth in self.obstacles)
+        """每对网络按两者中较严的间距规则检查（Power 类 0.2mm，其余 0.15mm）。"""
+        def gap(other, npth):
+            if npth:
+                return HOLE_CLEARANCE
+            return POWER_CLEARANCE if net in POWER_NETS or other in POWER_NETS else CLEARANCE
+        return not any(n != net and check(ob, gap(n, npth)) for n, ob, npth in self.obstacles)
 
     def add_layer_track(self, net_item, start, end, width, layer):
         t = pcbnew.PCB_TRACK(self.board)
@@ -100,6 +106,22 @@ class Fanout:
             return False
         return self.clear(net, lambda ob, c: circle_hits_box(x, y, VIA_D / 2 + c, ob))
 
+    def connect_to_own_pad(self, pad, fp, net: str, width: float) -> bool:
+        px, py = pad.GetPosition().x * TO_MM, pad.GetPosition().y * TO_MM
+        for other in fp.Pads():
+            if other is pad or other.GetNetname() != net or other.GetSizeX() * other.GetSizeY() * TO_MM * TO_MM < BIG_PAD_AREA:
+                continue
+            ex1, ey1, ex2, ey2 = box_mm(other.GetBoundingBox())
+            # 目标点：散热焊盘上离本焊盘最近的点，只在横向或纵向对齐时才取（保证是直线）
+            tx, ty = min(max(px, ex1), ex2), min(max(py, ey1), ey2)
+            if tx != px and ty != py:
+                continue
+            half = width / 2
+            if self.clear(net, lambda ob, c: segment_hits_box(px, py, tx, ty, half + c, ob)):
+                self.add_track(pad.GetNet(), pad.GetPosition(), v(tx, ty), width)
+                return True
+        return False
+
     def pad(self, ref: str, number: str):
         return self.board.FindFootprintByReference(ref).FindPadByNumber(number)
 
@@ -138,7 +160,12 @@ class Fanout:
             width = min(MAX_TRACK_W, w, h)
             half = width / 2
 
-            # 先试连到同器件同网络散热焊盘的过孔
+            # 先试沿引脚方向直线接到同器件同网络的散热焊盘：QFN 的 GND 脚与中心焊盘相对，
+            # 直线不会靠近相邻引脚（斜拉到中心过孔会，二期首跑 U_AMP 三个 GND 脚因此失败）
+            if self.connect_to_own_pad(pad, fp, net, width):
+                continue
+
+            # 再试连到同器件同网络散热焊盘的过孔
             if (ref, net) in ep_vias:
                 ex, ey = ep_vias[(ref, net)]
                 own = [o for o in self.obstacles if o[0] == net]

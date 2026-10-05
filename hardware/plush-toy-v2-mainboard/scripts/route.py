@@ -63,7 +63,7 @@ def main(ctx, passes: int = 30) -> None:
     result = subprocess.run(cmd, capture_output=True, text=True)
     tail = "\n".join((result.stdout + result.stderr).splitlines()[-15:])
     print(tail)
-    if result.returncode != 0 or not ses.exists():
+    if result.returncode != 0 or not ses.exists() or ses.stat().st_size == 0:
         raise RuntimeError(f"Freerouting 失败，退出码 {result.returncode}")
     board = pcbnew.LoadBoard(str(PCB))
     if not pcbnew.ImportSpecctraSES(board, str(ses)):
@@ -80,6 +80,9 @@ def main(ctx, passes: int = 30) -> None:
                            f"{counts(candidate_report)}；候选保留在 {candidate}")
     candidate.replace(PCB)
     project_rules.apply(ctx.pro)
+    # 快照：之后只改补线（post_route）时从这里开始，不必重跑 Freerouting（它每次剩下的开路都不同）
+    import shutil
+    shutil.copy2(PCB, BUILD / "routed-snapshot.kicad_pcb")
     print("布线完成并通过非回退检查：", PCB, post_route.summary(candidate_report))
 
 

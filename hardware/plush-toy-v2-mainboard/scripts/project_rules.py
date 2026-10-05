@@ -6,9 +6,11 @@ net_settings 与 board.design_settings.rules 两块，工程文件里的其他�
 
 取值依据：
 - 默认类 0.2mm 线宽 / 0.15mm 间距 / 0.6-0.3mm 过孔：远高于嘉立创四层板工艺下限，留良率余量
-- Power 类 1.0mm：VUSB、VSYS、VBAT、电池座与加热回路、升压开关节点。
-  加热约 1A + 充电最多 2.1A 走 VUSB；双舵机峰值时电池侧约 2.5A
-- Supply 类 0.5mm：USB 输入、+3V3、GND、降压开关节点、喇叭、背光
+- Power 类 0.6mm：VUSB、VSYS、VBAT、电池座与加热回路、升压开关节点。
+  与 IP5306 引脚同宽（0.6mm）：1.0mm 时 Freerouting 无法在细脚处收窄，电源线接不进引脚。
+  IPC-2152 估算 0.6mm / 1oz 外层短线 2A 温升约 20℃，VSYS 还有内层平面分担
+- Supply 类 0.4mm：USB 输入、+3V3、GND、降压开关节点、背光
+- Audio 类 0.3mm：喇叭两根线。MAX98357A 输出脚 0.25mm 宽、0.5mm 间距，峰值电流约 1A
 """
 import json
 from pathlib import Path
@@ -25,8 +27,9 @@ def _netclass(name: str, track: float, clearance: float, via_d: float, via_drill
 
 NETCLASSES = [
     _netclass("Default", 0.2, 0.15, 0.6, 0.3, 2147483647),
-    _netclass("Power", 1.0, 0.2, 0.8, 0.4, 0),
-    _netclass("Supply", 0.5, 0.15, 0.6, 0.3, 1),
+    _netclass("Power", 0.6, 0.2, 0.8, 0.4, 0),
+    _netclass("Supply", 0.4, 0.15, 0.6, 0.3, 1),
+    _netclass("Audio", 0.3, 0.15, 0.6, 0.3, 3),
     _netclass("CameraSupply", 0.3, 0.15, 0.6, 0.3, 2),
 ]
 
@@ -34,8 +37,8 @@ PATTERNS = (
     [{"netclass": "Power", "pattern": n}
      for n in ("VUSB", "VSYS", "VBAT", "VBAT_PACK", "HEAT_LOW", "CHG_SW")]
     + [{"netclass": "Supply", "pattern": n}
-       for n in ("VBUS_IN", "VBUS_FUSED", "+3V3", "GND", "BUCK_SW", "SPK_P", "SPK_N",
-                 "+2V8", "LCD_BL")]
+       for n in ("VBUS_IN", "VBUS_FUSED", "+3V3", "GND", "BUCK_SW", "+2V8", "LCD_BL")]
+    + [{"netclass": "Audio", "pattern": n} for n in ("SPK_P", "SPK_N")]
     + [{"netclass": "CameraSupply", "pattern": "+1V5"}]
 )
 

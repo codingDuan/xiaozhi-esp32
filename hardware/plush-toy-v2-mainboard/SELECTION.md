@@ -61,7 +61,7 @@
 - 接法同一期：SD_MODE 经 1MΩ 上拉到 VDD（(L+R)/2 模式），GAIN 悬空（9dB）。
 
 ### LIS2DH12（手册 Table 2）
-- 1 SCL、2 CS（接 VDD_IO 选 I2C）、3 SDO/SA0（接地，地址 0x18）、4 SDA、**5 Res 必须接地**、6/7/8 GND、9 VDD、10 VDD_IO、11 INT2、12 INT1。
+- 1 SCL、2 CS（接 VDD_IO 选 I2C）、3 SDO/SA0（接 3V3，7 位地址 0x19；布线原因见 core.py 注释）、4 SDA、**5 Res 必须接地**、6/7/8 GND、9 VDD、10 VDD_IO、11 INT2、12 INT1。
 
 ### 连接器
 - SH1.0 6P、3P 的 JST 原厂卧贴件嘉立创缺货（SM03B 库存 2），改用国产兼容件，封装取自该料号本身（easyeda2kicad），不套用 JST 官方封装。

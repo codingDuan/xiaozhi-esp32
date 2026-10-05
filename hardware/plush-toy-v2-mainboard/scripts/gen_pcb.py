@@ -413,9 +413,9 @@ def schematic_unconnected_nets() -> dict[tuple[str, str], str]:
 
 
 def rest_of_board(rect) -> list[tuple[float, float]]:
-    """整板减去一个贴着右上角的矩形，得到 L 形多边形（顺时针）。"""
-    x1, _, _, y2 = rect
-    return [(0, 0), (x1, 0), (x1, y2), (pl.W, y2), (pl.W, pl.H), (0, pl.H)]
+    """整板减去一个贴着右边的矩形，得到 3V3 平面的多边形（顺时针）。"""
+    x1, y1, _, y2 = rect
+    return [(0, 0), (pl.W, 0), (pl.W, y1), (x1, y1), (x1, y2), (pl.W, y2), (pl.W, pl.H), (0, pl.H)]
 
 
 def add_polygon_zone(board, net: str, layer: int, points) -> None:

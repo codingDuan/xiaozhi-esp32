@@ -12,9 +12,10 @@ W, H = 52.0, 46.0
 CORNER_R = 2.0
 EDGE_MARGIN = 0.5          # 器件占位与板边的最小距离（U1 除外）
 GAP = 0.2                  # 自动排布时器件占位之间额外留的间隙
-# In2 内层：VSYS 平面只占右上角这块矩形（舵机、降压输入、加热侧），其余整层是 +3V3。
+# In2 内层：VSYS 平面只占右侧这块矩形（舵机、降压输入、加热侧），其余整层是 +3V3。
 # 首轮 3V3 只铺左半边，右下角测温上拉等 3V3 小网络只能拉长线横穿全板
-VSYS_RECT = (36.0, 0.0, W, 34.0)
+# 第 3 轮收小：左边让出降压电感的 3V3 输出端，上边让出上沿出线座（麦克风 3V3 脚）
+VSYS_RECT = (37.5, 9.0, W, 34.0)
 
 # 出线座：位号 → (贴哪条边, 沿边坐标)。离板边的距离由 gen_pcb 按封装实际占位算，
 # 开口方向随边而定（这些封装 0° 时开口都朝 +y）：上 180°、右 90°、下 0°、左 270°。
@@ -67,7 +68,7 @@ NEAR = {
     "R_BATN_PD": "Q_BATN", "R_BATP_BYP": "Q_BATP",
     "R_VBAT_TOP": "J_BAT", "R_VBAT_BOT": "J_BAT", "C_VBAT_SENSE": "J_BAT",
     "RT_BAT": "J_BAT", "R_BAT_NTC": "RT_BAT", "C_BAT_NTC": "RT_BAT",
-    "L_BUCK": "U_BUCK", "R_BUCK_EN": "U_BUCK", "R_FB1": "U_BUCK",
+    "L_BUCK": "U_BUCK", "R_FB1": "U_BUCK",
     "R_FB2": "U_BUCK", "C_FF": "U_BUCK", "C_BUCK_IN": "U_BUCK", "C_BUCK_HF": "U_BUCK",
     "C_BUCK_OUT1": "U_BUCK", "C_BUCK_OUT2": "U_BUCK",
     "Q_HEAT": "J_HEAT", "R_GATE": "Q_HEAT", "R_GATE_PD": "Q_HEAT",
@@ -76,7 +77,8 @@ NEAR = {
     "R_LCD_BL_OFF": "Q_LCD_BL", "C_LCD": "J_LCD",
     "C_MIC": "J_MIC",
     "R_AMP_SD": "U_AMP", "C_AMP_BULK": "U_AMP", "C_AMP": "U_AMP",
-    "C_SERVO1": "J_ARM_L", "C_SERVO2": "J_ARM_R", "C_SERVO3": "J_ARM_R",
+    "C_SERVO1": (41.5, 13.5),   # 放在 VSYS 平面内，就近打孔接平面
+    "C_SERVO2": "J_ARM_R", "C_SERVO3": "J_ARM_R",
     "U_IMU": (28.0, 24.0), "C_IMU": "U_IMU",
     "D_ESD_PWR": "J_KEY", "D_ESD_MUTE": "J_KEY", "R_KEY_MUTE_PU": "J_KEY",
     "D_ESD_TOUCH": "J_TOUCH", "C_TOUCH_FILT": "J_TOUCH",
