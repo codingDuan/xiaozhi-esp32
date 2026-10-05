@@ -6,6 +6,8 @@ Freerouting 不会主动往 power 类型的内层打孔（一期教训），先�
 移植自一期 fanout.py 的通用部分；一期针对具体位号的预布线不搬。规则同一期：
 大焊盘（散热焊盘）焊盘内打孔；小焊盘先连同器件同网络散热焊盘的过孔，再在焊盘外由近到远找位置。
 """
+from __future__ import annotations
+
 import math
 
 import pcbnew

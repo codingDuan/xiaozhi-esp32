@@ -66,6 +66,11 @@ GRID_STEPS = ((1, 0), (-1, 0), (0, 1), (0, -1),
               (1, 1), (1, -1), (-1, 1), (-1, -1))
 
 
+def routing_grid_for(config, net: str) -> float:
+    """把统一或逐网络的布线网格配置解析为当前网络使用的数值。"""
+    return config.get(net, 0.10) if isinstance(config, dict) else config
+
+
 def net_class(net: str) -> dict:
     """按 project_rules 的网络类取线宽、间距与过孔尺寸。"""
     by_name = {c["name"]: c for c in project_rules.NETCLASSES}
@@ -616,7 +621,7 @@ def close_opens(ctx) -> list[str]:
     BOARD_W, BOARD_H = ctx.placement.W, ctx.placement.H
     routing_grid = getattr(ctx.placement, "ROUTING_GRID", 0.10)
     routing_margin = getattr(ctx.placement, "ROUTING_MARGIN", {})
-    GRID = routing_grid if isinstance(routing_grid, (int, float)) else 0.10
+    GRID = routing_grid_for(routing_grid, "")
     report = drc(ctx)
     if len(report["unconnected_items"]) > MAX_OPENS:
         raise RuntimeError(f"未连接 {len(report['unconnected_items'])} 个，超过 {MAX_OPENS}：板子像是还没自动布线，"
@@ -630,7 +635,7 @@ def close_opens(ctx) -> list[str]:
     for index, item in enumerate(items, start=1):
         a, b = item["items"]
         net = _net(a["description"])
-        GRID = routing_grid.get(net, 0.10) if isinstance(routing_grid, dict) else routing_grid
+        GRID = routing_grid_for(routing_grid, net)
         # 栅格尺寸是障碍缓存的隐含参数；逐网络新建 Router，避免细/粗栅格混用旧缓存。
         router = Router(board)
         start_layer, end_layer = _layer(a["description"]), _layer(b["description"])
@@ -727,11 +732,12 @@ def stitch_hot_loops(ctx) -> list[str]:
     写候选板，重新灌铜后 DRC 无错误、无未连接才替换正式板。返回补上的连线（登记用）。"""
     global BOARD_W, BOARD_H, GRID
     BOARD_W, BOARD_H = ctx.placement.W, ctx.placement.H
-    GRID = getattr(ctx.placement, "ROUTING_GRID", 0.10)
+    routing_grid = getattr(ctx.placement, "ROUTING_GRID", 0.10)
     board = pcbnew.LoadBoard(str(ctx.pcb))
     router = Router(board)
     done = []
     for net, (ra, na), (rb, nb), limit in getattr(ctx.placement, "HOT_LOOPS", []):
+        GRID = routing_grid_for(routing_grid, net)
         if surface_path(board, net, (ra, na), (rb, nb)) <= limit:
             continue                       # Freerouting 已直连
         fps = {f.GetReference(): f for f in board.GetFootprints()}
