@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 import context
-from v2 import gpio
+from v2 import cam, gpio
 
 POWER_NETS = {
     "+3V3": "3.3V（降压 SY8089 输出）",
@@ -22,7 +22,6 @@ POWER_NETS = {
 
 NET_NOTES = {
     "LCD_BL": "+3V3 经 Q_LCD_BL 高边开关，GPIO48 低电平点亮",
-    "HEAT_LOW": "Q_HEAT 漏极（低边开关，GPIO17 高电平加热）",
     "KEY_PWR": "IP5306 KEY 脚（短按开机，1 秒内连按两下关机）",
 }
 
@@ -47,6 +46,9 @@ CONNECTORS = {
               "**1 脚是 +**（丝印 +）。PH2.0 电池线各家极性不一，**插之前用万用表确认红线对 +**。"
               "板上有防反接，插反不会坏，但不会工作。"),
     "J_USB": ("USB-C：充电、烧录、日志", "要加热必须用 **5V/3A 的 C-C 充电头**；电脑口、A 转 C 线只充电不加热。"),
+    "J_CAM": ("AFC01-S24FCA-00 摄像头",
+              "**触点朝下**插入，镜头朝 PCB 外侧。PCB 焊盘号与摄像头脚号反序；"
+              "必须先完成 CAMERA_VERIFICATION.md 中的实物门禁。"),
 }
 
 # footprint 关键字 → (座子型号, 配套线, 要不要自己接)
@@ -59,6 +61,7 @@ HOUSINGS = [
     ("PH2.0-2PWT", "PH2.0 2P 卧贴", "电池自带 PH2.0 插头", "插上即可"),
     ("HDR-SMD_3P", "2.54mm 贴片排针 1×3 卧式", "舵机自带三线母头", "插上即可"),
     ("USB_C_Receptacle", "USB-C 16P", "USB-C 数据线", "插上即可"),
+    ("FPC-SMD_24P", "AFC01-S24FCA-00 24P 0.5mm 下接 FPC", "OV3660 摄像头自带排线", "门禁通过后插入"),
 ]
 
 # 外购件：(件, 规格, 搜索关键词, 收货怎么验)。数量按一只玩偶算。
@@ -105,6 +108,9 @@ def describe(ctx, net: str, seen: frozenset[str] = frozenset()) -> str:
         return "悬空"
     if net in NET_NOTES:
         return NET_NOTES[net]
+    if net == "HEAT_LOW":
+        control = "MPR121 GPIO 功能" if ctx.variant.camera else "GPIO17"
+        return f"Q_HEAT 漏极（低边开关，{control} 控制）"
     if net in net_gpio:
         return f"GPIO{net_gpio[net]}"
     if net in POWER_NETS:
@@ -148,6 +154,14 @@ def connector_table(ctx, ref: str) -> list[str]:
         lines += [f"> {caution}", ""]
     if ref == "J_USB":
         return lines
+    if ref == "J_CAM":
+        lines += ["| PCB 焊盘 | 摄像头脚 | 网络 | 连到 |", "|---|---|---|---|"]
+        for pad in range(1, 25):
+            camera_pin = cam.CAMERA_PAD_TO_PIN[str(pad)]
+            net = spec.pins[str(pad)]
+            lines.append(f"| PCB 焊盘 {pad} | 摄像头第 {camera_pin} 脚 | `{net}` | {describe(ctx, net)} |")
+        lines.append("")
+        return lines
     lines += ["| 针号 | 丝印 | 网络 | 连到 |", "|---|---|---|---|"]
     numbered = sorted((int(n), net) for n, net in spec.pins.items() if n.isdigit())
     for number, net in numbered:
@@ -170,14 +184,18 @@ def render(ctx) -> str:
         "板上全部是贴片插座，**不需要在板上焊任何东西**。需要动烙铁的只有板外：",
         "裸线器件（加热膜 + KSD9700、NTC、触摸电极、按键、不带插头的喇叭）接到单头线的裸线端。",
         "",
-        "## 一、出线座逐针表",
-        "",
     ]
-    for ref in CONNECTORS:
+    if ctx.variant.camera:
+        lines += ["> **当前禁止下单：** 必须先完成 [CAMERA_VERIFICATION.md](CAMERA_VERIFICATION.md) 的 spec §7.3 实物方向核验。",
+                  "> 首板到货后，spec §7.4 断电测量通过前仍 **禁止接摄像头上电**。", ""]
+    lines += ["## 一、出线座逐针表", ""]
+    connector_refs = [ref for ref in CONNECTORS if any(p.ref == ref for p in ctx.parts)]
+    for ref in connector_refs:
         lines += connector_table(ctx, ref)
     lines += ["---", "", "## 二、每个座子配什么线", "",
               "| 座子 | 接什么 | 座子型号 | 配套线 | 要不要自己接 |", "|---|---|---|---|---|"]
-    for ref, (what, _) in CONNECTORS.items():
+    for ref in connector_refs:
+        what, _ = CONNECTORS[ref]
         name, cable, effort = housing(ctx, ref)
         lines.append(f"| {ref} | {what.split('（')[0]} | {name} | {cable} | {effort} |")
     lines += ["", "**线材不通用**：SH1.0、XH2.54、PH2.0 间距都不同，插不进去时先看间距，别硬插。",
@@ -187,6 +205,9 @@ def render(ctx) -> str:
               "| 件 | 规格 | 搜索关键词 | 收货怎么验 | 已备 |", "|---|---|---|---|---|"]
     for name, spec, keyword, check in OFFBOARD:
         lines.append(f"| {name} | {spec} | {keyword} | {check} | ☐ |")
+    if ctx.variant.camera:
+        lines.append("| 摄像头 ×1 | AFC01-S24FCA-00 / OV3660，24P 0.5mm 排线 | `AFC01-S24FCA-00 OV3660` | "
+                     "排线触点朝下；先按 CAMERA_VERIFICATION.md 留存实物照片并核对 1/24 脚，门禁未通过不得下单。 | ☐ |")
     lines += ["", "---", "", "## 四、接完之后", "",
               "针序对上了只说明线接的是你想接的东西。上电顺序与每一步的通过标准见 [TESTING.md](TESTING.md)。", ""]
     return "\n".join(lines)

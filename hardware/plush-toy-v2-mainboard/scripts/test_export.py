@@ -5,6 +5,7 @@ from pathlib import Path
 
 import context
 import export_bom
+import export_wiring
 import fab_tools
 
 ctx = context.load("A")
@@ -37,6 +38,13 @@ class ExportA(unittest.TestCase):
 
 
 class ExportVariantConfiguration(unittest.TestCase):
+    def test_camera_wiring_includes_connector_mapping_and_order_gate(self):
+        text = export_wiring.render(context.load("C"))
+        self.assertIn("J_CAM", text)
+        self.assertIn("PCB 焊盘 24", text)
+        self.assertIn("摄像头第 1 脚", text)
+        self.assertIn("禁止下单", text)
+
     def test_camera_variants_fail_closed_before_production_export(self):
         script = (Path(__file__).parent / "export_fab.sh").read_text(encoding="utf-8")
         gate = 'python3 camera_gate.py "$DIR/CAMERA_VERIFICATION.md"'

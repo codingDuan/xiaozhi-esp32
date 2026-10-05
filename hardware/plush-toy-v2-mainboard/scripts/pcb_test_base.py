@@ -90,7 +90,11 @@ class PcbVariantTestsMixin:
         self.assertEqual(far, [])
 
     def test_every_edge_connector_has_function_label(self):
-        self.assertEqual(set(self.pl.EDGE_CONNECTORS) - set(self.pl.CONNECTOR_LABELS), set())
+        self.assertEqual(
+            set(self.pl.EDGE_CONNECTORS) - set(self.pl.CONNECTOR_LABELS)
+            - set(getattr(self.pl, "SELF_LABELLED_CONNECTORS", set())),
+            set(),
+        )
         silk = {t.GetText() for t in self.board.GetDrawings()
                 if isinstance(t, pcbnew.PCB_TEXT) and t.GetLayer() == pcbnew.F_SilkS}
         self.assertEqual({r for r, text in self.pl.CONNECTOR_LABELS.items() if text not in silk}, set())
@@ -110,7 +114,7 @@ class PcbVariantTestsMixin:
 
     def test_edge_connectors_horizontal_and_open_outward(self):
         # 委托方 2026-10-05：出线座一律卧式、开口朝板边，装壳后线从板边引出；不留竖向座
-        horizontal = ("Horizontal", "WT", "USB_C_Receptacle", "-H-")
+        horizontal = ("Horizontal", "WT", "USB_C_Receptacle", "-H-", "FPC-SMD")
         problems = []
         for ref, (side, _) in self.pl.EDGE_CONNECTORS.items():
             fp = self.fps[ref]

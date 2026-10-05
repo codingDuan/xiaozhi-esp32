@@ -539,6 +539,9 @@ def schematic_unconnected_nets() -> dict[tuple[str, str], str]:
     for net in ET.parse(out).getroot().iter("net"):
         name = net.get("name")
         if name.startswith("unconnected-"):
+            # KiCad PCB/DRC 用 {slash} 表示引脚名中的斜线；XML netlist 会还原成 /。
+            # 不转回占位符会产生虚假 schematic_parity 冲突。
+            name = name.replace("/", "{slash}")
             for node in net.iter("node"):
                 result[(node.get("ref"), node.get("pin"))] = name
     return result
@@ -768,7 +771,9 @@ def main(ctx=None) -> Path:
         board.Save(str(CTX.build / "failed.kicad_pcb"))     # 排查用：看是谁挡住了谁
         raise
     label_boxes = legend_boxes + label_boxes
-    auto_place([p for p in fitted if p.ref in pl.NEAR and p not in fixed_chip and p.ref not in back_parts],
+    auto_place([p for p in fitted if p.ref in pl.NEAR and p not in fixed_chip
+                and p.ref not in pl.ANCHORS and p.ref not in pl.EDGE_CONNECTORS
+                and p.ref not in back_parts],
                pl.NEAR, occupied)
     # 背面还要避开正面器件穿到背面的通孔焊盘（USB 外壳脚、安装孔）。单面装配版本的
     # 背面测试点还要避开正面大焊盘未来的散热过孔；双面版本正面只有模组、连接器和按键，
@@ -785,7 +790,9 @@ def main(ctx=None) -> Path:
     back_tier2 = [p for p in fixed_chip if p.ref in late and p.ref in back_parts]
     auto_place(back_tier1, pl.NEAR, occupied_back, back=True)
     auto_place(back_tier2, pl.NEAR, occupied_back, back=True)
-    auto_place([p for p in fitted if p.ref in pl.NEAR and p not in fixed_chip and p.ref in back_parts],
+    auto_place([p for p in fitted if p.ref in pl.NEAR and p not in fixed_chip
+                and p.ref not in pl.ANCHORS and p.ref not in pl.EDGE_CONNECTORS
+                and p.ref in back_parts],
                pl.NEAR, occupied_back, back=True)
     # 装配件已避开保留区；移除虚拟占位后，测试点可落入 placement 指定的背面测试带。
     for reservation in back_reservations:

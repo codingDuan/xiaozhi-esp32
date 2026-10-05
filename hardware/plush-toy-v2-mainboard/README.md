@@ -28,8 +28,8 @@ python3 export_wiring.py --variant A                    # 接线表与外购清�
 |---|---|---|
 | A 不带摄像头 · 单面 | 生产文件已出，待委托方决定是否打样 | 54×46mm |
 | B 不带摄像头 · 双面 | 生产文件已出，待首板实测 | 50×46mm |
-| C 带摄像头 · 单面 | 未开始（须先满足 spec 第 7 节） | — |
-| D 带摄像头 · 双面 | 未开始 | — |
+| C 带摄像头 · 单面 | 数字设计完成；缺 spec §7.3 实物证据，**禁止下单** | 65×55mm |
+| D 带摄像头 · 双面 | 未开始；同样受 spec §7.3 下单门禁 | — |
 
 ## 版本 A 尺寸迭代
 
@@ -60,3 +60,15 @@ python3 export_wiring.py --variant A                    # 接线表与外购清�
 
 固件需要配套改动（另立计划）：I2C 在 GPIO43/44，LIS2DH12 地址 0x19，开机后经 I2C 关掉 IP5306 轻载关机，
 按 CC 电压判定是否允许加热。
+
+## 版本 C 结果（2026-10-05）
+
+| 项 | 结果 |
+|---|---|
+| 尺寸 | 65×55mm，4 层，单面贴片 |
+| 装配 | 除背面测试点和安装孔外，所有器件均为正面 SMT；所有线束座为卧式、开口朝板外，板上无手焊件 |
+| 静态验收 | `test_pcb_C` 24/24，`test_drc_C` 5/5；重新灌铜后 0 DRC 错误、0 未连接、0 原理图一致性问题 |
+| 摄像头安全 | J_CAM 自动检查焊盘反序映射，丝印标出插入方向与“FPC 触点朝下”；物理方向尚未由实物照片验证 |
+| 生产文件 | **尚未生成**；`export_fab.sh C` 已验证会在 spec §7.3 证据缺失时失败关闭 |
+| 接线 / 验收 | [`variants/C/WIRING.md`](variants/C/WIRING.md)、[`variants/C/TESTING.md`](variants/C/TESTING.md)、[`variants/C/CAMERA_VERIFICATION.md`](variants/C/CAMERA_VERIFICATION.md) |
+| 渲染图 | `variants/C/renders/final_top.png`、`final_bottom.png` |

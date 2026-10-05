@@ -129,15 +129,17 @@ class Fanout:
     def pad(self, ref: str, number: str):
         return self.board.FindFootprintByReference(ref).FindPadByNumber(number)
 
-    def run(self) -> tuple[int, list[str]]:
+    def run(self, skip: set[tuple[str, str]] | None = None) -> tuple[int, list[str]]:
         added = 0
         skipped = []
+        skip = skip or set()
         pth = [(p.GetNetname(), p.GetPosition().x * TO_MM, p.GetPosition().y * TO_MM) for p in self.pads
                if p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH]
         # 大焊盘先处理：小引脚要连到它们的过孔上
         targets = [p for p in self.pads if p.GetNetname() in PLANES
                    and p.GetAttribute() == pcbnew.PAD_ATTRIB_SMD
-                   and (p.IsOnLayer(pcbnew.F_Cu) or p.IsOnLayer(pcbnew.B_Cu))]
+                   and (p.IsOnLayer(pcbnew.F_Cu) or p.IsOnLayer(pcbnew.B_Cu))
+                   and (p.GetParentFootprint().GetReference(), p.GetNumber()) not in skip]
         targets.sort(key=lambda p: -(p.GetSizeX() * p.GetSizeY()))
         ep_vias: dict[tuple[str, str], tuple[float, float]] = {}
 
@@ -230,7 +232,23 @@ def main(ctx=None) -> tuple[int, list[str]]:
     in_vsys = lambda x, y: inside_polygon(vsys, x, y)
     PLANES = {"GND": lambda x, y: True, "+3V3": lambda x, y: not in_vsys(x, y), "VSYS": in_vsys}
     board = pcbnew.LoadBoard(str(ctx.pcb))
-    added, skipped = Fanout(board).run()
+    fanout = Fanout(board)
+    anchored = 0
+    for (ref, number), (x, y) in getattr(pl, "FANOUT_ANCHORS", {}).items():
+        pad = fanout.pad(ref, number)
+        net = pad.GetNetname()
+        layer = pad.GetParentFootprint().GetLayer()
+        px, py = pad.GetPosition().x * TO_MM, pad.GetPosition().y * TO_MM
+        box = box_mm(pad.GetBoundingBox())
+        width = min(MAX_TRACK_W, box[2] - box[0], box[3] - box[1])
+        if net not in PLANES or not fanout.via_ok(net, x, y, PLANES[net]) \
+                or not fanout.clear(net, lambda ob, c: segment_hits_box(px, py, x, y, width / 2 + c, ob), layer):
+            raise RuntimeError(f"定点扇出不满足净距：{ref}.{number}[{net}] -> {(x, y)}")
+        fanout.add_via(pad.GetNet(), net, x, y)
+        fanout.add_track(pad.GetNet(), pad.GetPosition(), v(x, y), width, layer)
+        anchored += 1
+    added, skipped = fanout.run(set(getattr(pl, "FANOUT_ANCHORS", {})))
+    added += anchored
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     board.Save(str(ctx.pcb))
     project_rules.apply(ctx.pro)
