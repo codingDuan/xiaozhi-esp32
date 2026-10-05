@@ -20763,13 +20763,12 @@
 		(descr "SMD pad as test Point, diameter 1.0mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP_GND"
-			(at 0 1.448 180)
+			(at 0 2 0)
 			(layer "B.SilkS")
-			(hide yes)
 			(uuid "dd71f1e5-9dd9-4a06-886d-c4c8695cbb73")
 			(effects
 				(font
-					(size 1 1)
+					(size 0.8 0.8)
 					(thickness 0.15)
 				)
 				(justify mirror)
@@ -20868,13 +20867,12 @@
 		(descr "SMD pad as test Point, diameter 1.0mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP_CC"
-			(at 0 1.448 180)
+			(at 0 2 0)
 			(layer "B.SilkS")
-			(hide yes)
 			(uuid "12c2a8ba-5d91-46a6-9070-8d3a32f1e39c")
 			(effects
 				(font
-					(size 1 1)
+					(size 0.8 0.8)
 					(thickness 0.15)
 				)
 				(justify mirror)
@@ -20973,13 +20971,12 @@
 		(descr "SMD pad as test Point, diameter 1.0mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP_VUSB"
-			(at 0 1.448 180)
+			(at 0 -2 0)
 			(layer "B.SilkS")
-			(hide yes)
 			(uuid "319b7c3d-a52b-43cb-b853-1df65e402c2e")
 			(effects
 				(font
-					(size 1 1)
+					(size 0.8 0.8)
 					(thickness 0.15)
 				)
 				(justify mirror)
@@ -21078,13 +21075,12 @@
 		(descr "SMD pad as test Point, diameter 1.0mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP_VBAT"
-			(at 0 1.448 90)
+			(at 2 0 0)
 			(layer "B.SilkS")
-			(hide yes)
 			(uuid "530b933a-b1f8-467d-8faf-96502f7bb244")
 			(effects
 				(font
-					(size 1 1)
+					(size 0.8 0.8)
 					(thickness 0.15)
 				)
 				(justify mirror)
@@ -21183,13 +21179,12 @@
 		(descr "SMD pad as test Point, diameter 1.0mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP_VSYS"
-			(at 0 1.448 180)
+			(at 0 -2 0)
 			(layer "B.SilkS")
-			(hide yes)
 			(uuid "b9389fd7-c3fc-4dd5-a117-36667a91a45e")
 			(effects
 				(font
-					(size 1 1)
+					(size 0.8 0.8)
 					(thickness 0.15)
 				)
 				(justify mirror)
@@ -21288,13 +21283,12 @@
 		(descr "SMD pad as test Point, diameter 1.0mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP_3V3"
-			(at 0 1.448 180)
+			(at 0 -2 0)
 			(layer "B.SilkS")
-			(hide yes)
 			(uuid "81f1d2b8-3d32-49de-a14c-8dfa9e79830f")
 			(effects
 				(font
-					(size 1 1)
+					(size 0.8 0.8)
 					(thickness 0.15)
 				)
 				(justify mirror)
@@ -21393,13 +21387,12 @@
 		(descr "SMD pad as test Point, diameter 1.0mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP_EN"
-			(at 0 1.448 180)
+			(at 0 2 0)
 			(layer "B.SilkS")
-			(hide yes)
 			(uuid "8f3a883b-c93f-4f4a-a88b-90c105619c8e")
 			(effects
 				(font
-					(size 1 1)
+					(size 0.8 0.8)
 					(thickness 0.15)
 				)
 				(justify mirror)
@@ -21498,13 +21491,12 @@
 		(descr "SMD pad as test Point, diameter 1.0mm")
 		(tags "test point SMD pad")
 		(property "Reference" "TP_BOOT"
-			(at 0 1.448 180)
+			(at 0 2 0)
 			(layer "B.SilkS")
-			(hide yes)
 			(uuid "9736d679-fefc-4a1e-ba0b-96313dd8fde1")
 			(effects
 				(font
-					(size 1 1)
+					(size 0.8 0.8)
 					(thickness 0.15)
 				)
 				(justify mirror)

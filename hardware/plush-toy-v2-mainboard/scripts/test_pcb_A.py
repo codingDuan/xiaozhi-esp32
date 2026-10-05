@@ -33,6 +33,22 @@ class PcbATests(unittest.TestCase):
             if r.startswith("TP_"):
                 self.assertEqual(f.GetLayer(), pcbnew.B_Cu, r)
 
+    def test_testpoint_names_printed_on_back(self):
+        # 验收清单让人按丝印名找测试点（一期委托方曾找不到测试点）
+        edge = self.board.GetBoardEdgesBoundingBox()
+        back_pads = [p.GetBoundingBox() for f in self.fps.values() for p in f.Pads()
+                     if p.IsOnLayer(pcbnew.B_Cu)]
+        for r, f in self.fps.items():
+            if not r.startswith("TP_"):
+                continue
+            ref = f.Reference()
+            self.assertTrue(ref.IsVisible(), r)
+            self.assertEqual(ref.GetLayer(), pcbnew.B_SilkS, r)
+            self.assertTrue(ref.IsMirrored(), r)
+            bb = ref.GetBoundingBox()
+            self.assertTrue(edge.Contains(bb.GetOrigin()) and edge.Contains(bb.GetEnd()), r)
+            self.assertFalse(any(bb.Intersects(p) for p in back_pads), r)
+
     def test_pad_nets_match_spec(self):
         for part in ctx.parts:
             for pad in self.fps[part.ref].Pads():

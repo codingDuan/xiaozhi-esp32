@@ -361,6 +361,33 @@ def tidy_silkscreen(board, fitted, fps, reserved) -> int:
     return hidden + len(failed)
 
 
+def label_testpoints(board) -> list[str]:
+    """背面测试点的位号印在背面丝印（镜像），验收时按名字找点。返回放不下的位号。"""
+    fps = [f for f in board.GetFootprints() if f.GetReference().startswith("TP_")]
+    blocked = []
+    for f in board.GetFootprints():
+        for p in f.Pads():
+            if p.IsOnLayer(pcbnew.B_Cu):
+                box = p.GetBoundingBox()
+                box.Inflate(pcbnew.FromMM(SILK_PAD_CLEARANCE))
+                blocked.append(box)
+    board_box = pcbnew.BOX2I(v(0.3, 0.3), v(pl.W - 0.6, pl.H - 0.6))
+    failed = []
+    for f in fps:
+        ref = f.Reference()
+        ref.SetVisible(True)
+        ref.SetLayer(pcbnew.B_SilkS)
+        ref.SetMirrored(True)
+        ref.SetTextThickness(pcbnew.FromMM(SILK_STROKE))
+        x, y = f.GetPosition().x * TO_MM, f.GetPosition().y * TO_MM
+        candidates = [(x, y + d) for d in (1.4, 2.0)] + [(x, y - d) for d in (1.4, 2.0)] \
+            + [(x + d, y) for d in (3.4, 4.0)] + [(x - d, y) for d in (3.4, 4.0)]
+        if not place_text(ref, candidates, blocked, board_box):
+            ref.SetVisible(False)
+            failed.append(f.GetReference())
+    return failed
+
+
 def add_outline(board) -> None:
     """圆角矩形：4 段直线 + 4 段圆弧。"""
     W, H, r = pl.W, pl.H, pl.CORNER_R
@@ -565,6 +592,9 @@ def main(ctx=None) -> Path:
             pad.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
 
     hidden = tidy_silkscreen(board, fitted, fps, label_boxes)
+    unlabelled = label_testpoints(board)
+    if unlabelled:
+        raise SystemExit(f"背面测试点位号放不下：{unlabelled}")
     print(f"丝印：{hidden} 个位号找不到空位已隐藏")
 
     add_zone(board, "GND", pcbnew.In1_Cu, 0, 0, pl.W, pl.H)
