@@ -202,13 +202,25 @@ class Fanout:
         return added, skipped
 
 
+def inside_polygon(points, x: float, y: float) -> bool:
+    """射线法；落在边上的点算在内（与铺铜边界的取舍无关紧要，扇出过孔另有平面间距检查）。"""
+    inside = False
+    for (x1, y1), (x2, y2) in zip(points, points[1:] + points[:1]):
+        if min(x1, x2) <= x <= max(x1, x2) and min(y1, y2) <= y <= max(y1, y2) \
+                and abs((x2 - x1) * (y - y1) - (y2 - y1) * (x - x1)) < 1e-9:
+            return True
+        if (y1 > y) != (y2 > y) and x < x1 + (y - y1) * (x2 - x1) / (y2 - y1):
+            inside = not inside
+    return inside
+
+
 def main(ctx=None) -> tuple[int, list[str]]:
     global pl, PLANES
     ctx = ctx or context.from_argv()
     pl = ctx.placement
     # 网络 → 该点是否在平面覆盖范围内（与 gen_pcb 的内层铺铜一致）
-    vsys = pl.VSYS_RECT
-    in_vsys = lambda x, y: vsys[0] <= x <= vsys[2] and vsys[1] <= y <= vsys[3]
+    vsys = pl.VSYS_POLY
+    in_vsys = lambda x, y: inside_polygon(vsys, x, y)
     PLANES = {"GND": lambda x, y: True, "+3V3": lambda x, y: not in_vsys(x, y), "VSYS": in_vsys}
     board = pcbnew.LoadBoard(str(ctx.pcb))
     added, skipped = Fanout(board).run()

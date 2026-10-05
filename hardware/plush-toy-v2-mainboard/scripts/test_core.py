@@ -159,6 +159,10 @@ class McuPeripheralTests(unittest.TestCase):
         self.assertEqual(spk.lcsc, by_ref(self.parts, "J_NTC").lcsc)
         self.assertEqual(spk.footprint, by_ref(self.parts, "J_NTC").footprint)
 
+    def test_battery_connector_is_domestic_ph2(self):
+        # 委托方 2026-10-05：电池座换国产 PH2.0 兼容件（JST 原厂 $0.24 → 涵霞 $0.033）
+        self.assertEqual(by_ref(self.parts, "J_BAT").lcsc, "C22461285")
+
     def test_buttons_present_and_no_charge_leds(self):
         refs = {p.ref for p in self.parts}
         self.assertLessEqual({"SW_RST", "SW_BOOT"}, refs)

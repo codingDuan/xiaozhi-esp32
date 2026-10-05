@@ -25,8 +25,7 @@ def scaled(pl, base, w, h):
             anchors[r] = (x * sx, y * sy, a)
     pl.ANCHORS = anchors
     pl.NEAR = {r: (t if isinstance(t, str) else (t[0] * sx, t[1] * sy)) for r, t in base["NEAR"].items()}
-    x1, y1, _, y2 = base["VSYS"]
-    pl.VSYS_RECT = (x1 * sx, y1 * sy, w, y2 * sy)
+    pl.VSYS_POLY = [(w if x == base["W"] else x * sx, y * sy) for x, y in base["VSYS"]]
 
 
 def attempt(ctx) -> str:
@@ -46,7 +45,7 @@ def main():
     ctx = context.load(args.variant)
     pl = ctx.placement
     base = {"W": pl.W, "H": pl.H, "EDGE": dict(pl.EDGE_CONNECTORS), "ANCHORS": dict(pl.ANCHORS),
-            "NEAR": dict(pl.NEAR), "VSYS": pl.VSYS_RECT}
+            "NEAR": dict(pl.NEAR), "VSYS": list(pl.VSYS_POLY)}
     w, h = pl.W, pl.H
     print(f"起点 {w}x{h}: {attempt(ctx)}")
     for axis in ("W", "H", "W", "H"):

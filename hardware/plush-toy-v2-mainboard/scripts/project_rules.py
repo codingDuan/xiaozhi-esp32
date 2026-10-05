@@ -56,7 +56,8 @@ RULES = {
 }
 
 # 不全局屏蔽丝印板边告警：天线伸出板边的模组会产生已知告警，由 DRC 测试精确白名单。
-RULE_SEVERITIES = {"silk_edge_clearance": "warning"}
+# 孔距按错误处理：KiCad 默认只报警告，同网络两个过孔孔壁相距 0.02mm 也能过 DRC（2026-10-05 复查发现）
+RULE_SEVERITIES = {"silk_edge_clearance": "warning", "hole_to_hole": "error", "drill_out_of_range": "error"}
 
 
 def apply(path: Path) -> Path:

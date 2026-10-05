@@ -77,8 +77,8 @@ def placed_rect(rect, x: float, y: float, angle: int):
     return min(xs), min(ys), max(xs), max(ys)
 
 
-def overlaps(a, b) -> bool:
-    g = pl.GAP
+def overlaps(a, b, gap=None) -> bool:
+    g = pl.GAP if gap is None else gap
     return not (a[2] + g <= b[0] or b[2] + g <= a[0] or a[3] + g <= b[1] or b[3] + g <= a[1])
 
 
@@ -126,6 +126,8 @@ SILK_HEIGHT = 0.8          # 嘉立创字高下限 0.8mm（委托方 2026-10-05 
 SILK_STROKE = 0.15
 SILK_MIN_HEIGHT = 0.8      # 嘉立创字高绝对下限
 SILK_PAD_CLEARANCE = 0.25
+# 占位框含焊盘，大焊盘常贴着框边：间隙不能小于最大网络类间距（Power 0.2mm），否则焊盘间距不够（曾取 0.05 出错）
+DECOUPLING_GAP = 0.2
 
 STACKUP = '''\t\t(stackup
 \t\t\t(layer "F.SilkS" (type "Top Silk Screen"))
@@ -172,17 +174,36 @@ def add_silk_text(board, text: str, x: float, y: float, justify: str = "center")
     return silk
 
 
-def label_candidates(fp, side: str) -> list[tuple[float, float]]:
-    """出线座功能名的候选位置：朝板内一侧由近到远，每一圈再沿边左右错开。"""
+def label_candidates(fp, side: str, half: float = 2.0) -> list[tuple[float, float]]:
+    """出线座功能名的候选位置：朝板内一侧由近到远，每一圈再沿边左右错开。
+    half 为文字半宽：左右两边的座子按实际字宽往板内让，长标注不会被推得过远。"""
     bb = pad_box(fp)
     l, t, r, b = bb.GetX() * TO_MM, bb.GetY() * TO_MM, bb.GetRight() * TO_MM, bb.GetBottom() * TO_MM
     cx, cy = (l + r) / 2, (t + b) / 2
     out = []
-    for d in (2.6, 3.4, 4.2, 5.0, 6.0, 7.0):
-        for s in (0.0, -2.0, 2.0, -4.0, 4.0):
+    for d in (2.2, 2.6, 3.4, 4.2, 5.0, 6.0, 7.0, 8.0):
+        for s in (0.0, -1.0, 1.0, -2.0, 2.0, -3.0, 3.0, -4.0, 4.0, -5.0, 5.0, -6.0, 6.0, -7.0, 7.0, -8.0, 8.0):
             out.append({"top": (cx + s, b + d), "bottom": (cx + s, t - d),
-                        "right": (l - d - 2.0, cy + s), "left": (r + d + 2.0, cy + s)}[side])
+                        "right": (l - d - half, cy + s), "left": (r + d + half, cy + s)}[side])
     return out
+
+
+def edge_spans(fps) -> dict[str, tuple[str, float, float]]:
+    """出线座沿板边方向的焊盘范围：位号 → (边, 起, 止)。"""
+    spans = {}
+    for ref, (side, _) in pl.EDGE_CONNECTORS.items():
+        k = 1 if side in ("left", "right") else 0
+        coords = [(p.GetPosition().x, p.GetPosition().y)[k] * TO_MM for p in fps[ref].Pads()]
+        spans[ref] = (side, min(coords), max(coords))
+    return spans
+
+
+def label_belongs(ref: str, along: float, spans) -> bool:
+    """功能名沿板边的坐标离本座子比离同一条边上的其他座子都近，且离本座子不超过 4mm：
+    不会被看成邻座的标注（ARM R 曾印在左臂座 S 脚旁、HEAT 印在右臂座 S 脚旁）。"""
+    gap = lambda r: max(spans[r][1] - along, along - spans[r][2], 0.0)
+    side = spans[ref][0]
+    return gap(ref) <= 4.0 and all(gap(ref) < gap(o) for o in spans if o != ref and spans[o][0] == side)
 
 
 def pad_box(fp) -> pcbnew.BOX2I:
@@ -285,9 +306,7 @@ def place_pin_legends(board, fps, blocked, board_box) -> list:
     return boxes
 
 
-def place_connector_labels(board, fps) -> list:
-    """出线座一放好就排功能名（spec 4 节），只避让已放器件的焊盘与丝印；返回文字框，
-    自动排布的器件要避开这些位置。"""
+def _silk_blocked(fps) -> list:
     blocked = []
     for fp in fps.values():
         for p in fp.Pads():
@@ -295,14 +314,33 @@ def place_connector_labels(board, fps) -> list:
             box.Inflate(pcbnew.FromMM(SILK_PAD_CLEARANCE))
             blocked.append(box)
         blocked += [item.GetBoundingBox() for item in fp.GraphicalItems() if item.GetLayer() == pcbnew.F_SilkS]
+    return blocked
+
+
+def place_legends(board, fps) -> list:
+    """引脚标注紧贴焊盘，只避让已放器件的焊盘与丝印；返回文字框，之后放的器件要避开。"""
     board_box = pcbnew.BOX2I(v(0.3, 0.3), v(pl.W - 0.6, pl.H - 0.6))
-    legends = place_pin_legends(board, fps, blocked, board_box)
-    # 功能名不能印在器件本体底下（会被挡住）：已放器件的本体都避开
-    blocked += [body_box(fp) for fp in fps.values()]
-    boxes, failed = list(legends), []
-    for ref, text in pl.CONNECTOR_LABELS.items():
+    return place_pin_legends(board, fps, _silk_blocked(fps), board_box)
+
+
+def place_connector_labels(board, fps, reserved=()) -> list:
+    """出线座功能名（spec 4 节）：避让已放器件的焊盘、丝印、本体（印在本体底下会被挡住）和已排的引脚标注；
+    返回文字框，之后放的器件要避开。"""
+    board_box = pcbnew.BOX2I(v(0.3, 0.3), v(pl.W - 0.6, pl.H - 0.6))
+    blocked = _silk_blocked(fps) + list(reserved) + [body_box(fp) for fp in fps.values()]
+    boxes, failed = [], []
+    spans = edge_spans(fps)
+    # 长标注先排：候选位置少（HEAT 两行），短的（ARM R）到处都能放
+    for ref, text in sorted(pl.CONNECTOR_LABELS.items(), key=lambda kv: -len(kv[1])):
         label = add_silk_text(board, text, 0, 0)
-        if place_text(label, label_candidates(fps[ref], pl.EDGE_CONNECTORS[ref][0]), blocked, board_box):
+        # 横排按字宽、竖排按字高往板内让（place_text 两个方向都会试）
+        bb = label.GetBoundingBox()
+        side = pl.EDGE_CONNECTORS[ref][0]
+        k = 1 if side in ("left", "right") else 0
+        candidates = [c for c in label_candidates(fps[ref], side, bb.GetWidth() * TO_MM / 2)
+                      + label_candidates(fps[ref], side, bb.GetHeight() * TO_MM / 2)
+                      if label_belongs(ref, c[k], spans)]
+        if place_text(label, candidates, blocked, board_box):
             boxes.append(label.GetBoundingBox())
         else:
             failed.append(ref)
@@ -345,7 +383,8 @@ def tidy_silkscreen(board, fitted, fps, reserved) -> int:
         r, b = box.GetRight() * TO_MM, box.GetBottom() * TO_MM
         cx, cy = (l + r) / 2, (t + b) / 2
         candidates = []
-        for d in (0.8, 1.6, 2.6, 3.8):
+        # 最远一圈（3.8mm）去掉：位号飘到别的器件旁会误导返修（U_CHG 曾印在 7mm 外），放不下宁可隐藏
+        for d in (0.8, 1.6, 2.6):
             candidates += [(cx, t - d), (cx, b + d), (l - d - 1.5, cy), (r + d + 1.5, cy),
                            (l, t - d), (r, t - d), (l, b + d), (r, b + d)]
         candidates.append((cx, cy))
@@ -439,14 +478,9 @@ def schematic_unconnected_nets() -> dict[tuple[str, str], str]:
     return result
 
 
-def rest_of_board(rect) -> list[tuple[float, float]]:
-    """整板减去一个贴着右边的矩形，得到 3V3 平面的多边形（顺时针）。"""
-    x1, y1, _, y2 = rect
-    return [(0, 0), (pl.W, 0), (pl.W, y1), (x1, y1), (x1, y2), (pl.W, y2), (pl.W, pl.H), (0, pl.H)]
-
-
-def add_polygon_zone(board, net: str, layer: int, points) -> None:
+def add_polygon_zone(board, net: str, layer: int, points, priority: int = 0) -> None:
     zone = pcbnew.ZONE(board)
+    zone.SetAssignedPriority(priority)
     zone.SetLayer(layer)
     zone.SetNet(board.FindNet(net))
     outline = zone.Outline()
@@ -513,21 +547,70 @@ def main(ctx=None) -> Path:
     if problems:
         raise RuntimeError("定点器件位置有误：\n  " + "\n  ".join(problems))
 
+    by_ref = {p.ref: p for p in fitted}
+    decoupling = getattr(pl, "DECOUPLING", {})
+
+    def net_pad_points(ref, fp, net):
+        numbers = {n for n, name in by_ref[ref].pins.items() if name == net}
+        return [(p.GetPosition().x * TO_MM, p.GetPosition().y * TO_MM)
+                for p in fp.Pads() if p.GetNumber() in numbers]
+
+    def close_and_same_side(ref, fp, chip, net, limit, cx, cy):
+        """ref 的 net 焊盘到 chip 同网络最近引脚 ≤ limit，且在该引脚朝外一侧（隔着芯片的走线要绕）。"""
+        a, b = min(((a, b) for a in net_pad_points(ref, fp, net) for b in net_pad_points(chip, fps[chip], net)),
+                   key=lambda ab: math.dist(*ab))
+        return math.dist(a, b) <= limit and (b[0] - cx) * (a[0] - b[0]) + (b[1] - cy) * (a[1] - b[1]) >= 0
+
+    def place_decoupling(part, fp, pool, back):
+        """去耦件从所服务引脚处起找位置，四个方向都试，焊盘到引脚超距就继续找；找不到报错。"""
+        chip, net, limit, *ret = decoupling[part.ref]
+        pins = net_pad_points(chip, fps[chip], net)
+        if not pins:
+            raise RuntimeError(f"{chip} 没有 {net} 引脚（{part.ref}）")
+        local = local_rect(fp, part.ref)
+        cx, cy = fps[chip].GetPosition().x * TO_MM, fps[chip].GetPosition().y * TO_MM
+        for px, py in pins:
+            # 0.05mm 网格：引脚旁的空隙常常只比电容宽几十微米，0.25mm 网格落不进去
+            for x, y in spiral(px, py, step=0.1, max_r=limit + 2.0):
+                x, y = round(x * 20) / 20, round(y * 20) / 20
+                for angle in (0, 90, 180, 270):
+                    rect = placed_rect(local, x, y, angle)
+                    if not inside_board(rect) or any(overlaps(rect, r, DECOUPLING_GAP) for r in pool):
+                        continue
+                    fp.SetPosition(v(x, y))
+                    fp.SetOrientationDegrees(angle)
+                    if all(close_and_same_side(part.ref, fp, chip, n, limit, cx, cy) for n in [net] + ret):
+                        commit(part, fp, x, y, angle, rect, back)
+                        return
+        px, py = pins[0]
+        near = [ref for ref, (x, y, _) in where.items() if math.dist((x, y), (px, py)) < limit + 6]
+        raise RuntimeError(f"{part.ref} 放不进 {chip}.{net} 引脚 {limit}mm 以内；引脚附近已有：{near}；"
+                           f"占位框：{[tuple(round(c, 1) for c in r) for r in pool if overlaps(r, (px - 6, py - 6, px + 6, py + 6))]}")
+
     def auto_place(parts, targets, pool, back=False):
         loaded = {p.ref: load(p) for p in parts}
         size = {}
         for p in parts:
             r = local_rect(loaded[p.ref], p.ref)
             size[p.ref] = (r[2] - r[0]) * (r[3] - r[1])
-        pending = sorted(parts, key=lambda p: -size[p.ref])
+        order = list(decoupling)
+        # 去耦件按 DECOUPLING 的顺序最先放，抢在其他件之前占住引脚旁的位置
+        pending = sorted(parts, key=lambda p: (order.index(p.ref) if p.ref in decoupling else len(order),
+                                               -size[p.ref]))
         while pending:
             # 目标器件还没放的先跳过，等它放好再排（NEAR 可以指向自动排布的器件）
-            ready = [p for p in pending if not isinstance(targets[p.ref], str) or targets[p.ref] in where]
+            ready = [p for p in pending
+                     if (decoupling[p.ref][0] in where if p.ref in decoupling
+                         else not isinstance(targets[p.ref], str) or targets[p.ref] in where)]
             if not ready:
                 raise RuntimeError(f"NEAR 目标循环或缺失：{[p.ref for p in pending]}")
-            for part in ready:
+            # 一次只放一件：去耦件可能依赖刚放好的件（C_BUCK_OUT 依赖 L_BUCK）
+            for part in ready[:1]:
                 pending.remove(part)
                 fp = loaded[part.ref]
+                if part.ref in decoupling:
+                    place_decoupling(part, fp, pool, back)
+                    continue
                 target = targets[part.ref]
                 cx, cy = (where[target][0], where[target][1]) if isinstance(target, str) else target
                 local = local_rect(fp, part.ref)
@@ -545,10 +628,32 @@ def main(ctx=None) -> Path:
                 else:
                     raise RuntimeError(f"{part.ref} 在 {target} 附近找不到空位，板子太挤")
 
-    label_boxes = place_connector_labels(board, fps)
-    occupied += [(b.GetX() * TO_MM, b.GetY() * TO_MM, b.GetRight() * TO_MM, b.GetBottom() * TO_MM)
-                 for b in label_boxes]
-    auto_place([p for p in fitted if p.ref in pl.NEAR], pl.NEAR, occupied)
+    # 去耦件先于出线座功能名放：电气位置优先于丝印（首版功能名先占位，HEAT 标注挡住了降压电感）
+    def chip_fixed(ref):
+        chip = decoupling[ref][0]
+        return chip in pl.ANCHORS or (chip in decoupling and chip_fixed(chip))
+
+    # 放置顺序（电气优先，其次丝印必须贴着的位置，最后是有余地的）：
+    # 去耦件 → 引脚标注 → DECOUPLING_AFTER_LEGENDS → 出线座功能名 → 其余器件
+    def rects(boxes):
+        return [(b.GetX() * TO_MM, b.GetY() * TO_MM, b.GetRight() * TO_MM, b.GetBottom() * TO_MM) for b in boxes]
+
+    fixed_chip = [p for p in fitted if p.ref in decoupling and chip_fixed(p.ref)]
+    late = getattr(pl, "DECOUPLING_AFTER_LEGENDS", set())
+    tier1 = [p for p in fixed_chip if p.ref not in late]
+    tier2 = [p for p in fixed_chip if p.ref in late]
+    try:
+        auto_place(tier1, pl.NEAR, occupied)
+        legend_boxes = place_legends(board, fps)
+        occupied += rects(legend_boxes)
+        auto_place(tier2, pl.NEAR, occupied)
+        label_boxes = place_connector_labels(board, fps, legend_boxes)
+        occupied += rects(label_boxes)
+    except RuntimeError:
+        board.Save(str(CTX.build / "failed.kicad_pcb"))     # 排查用：看是谁挡住了谁
+        raise
+    label_boxes = legend_boxes + label_boxes
+    auto_place([p for p in fitted if p.ref in pl.NEAR and p not in fixed_chip], pl.NEAR, occupied)
     # 背面还要避开正面器件穿到背面的通孔焊盘（散热过孔、USB 外壳脚、安装孔）：
     # 首版把 TP_VUSB 放在 U_EFUSE 散热焊盘的过孔上，DRC 报短路
     for fp in fps.values():
@@ -598,9 +703,9 @@ def main(ctx=None) -> Path:
     print(f"丝印：{hidden} 个位号找不到空位已隐藏")
 
     add_zone(board, "GND", pcbnew.In1_Cu, 0, 0, pl.W, pl.H)
-    vx1, vy1, vx2, vy2 = pl.VSYS_RECT
-    add_zone(board, "VSYS", pcbnew.In2_Cu, vx1, vy1, vx2, vy2)
-    add_polygon_zone(board, "+3V3", pcbnew.In2_Cu, rest_of_board(pl.VSYS_RECT))
+    # In2：VSYS 多边形优先灌，3V3 铺整板、自动让开 VSYS（KiCad 铺铜优先级）
+    add_polygon_zone(board, "VSYS", pcbnew.In2_Cu, pl.VSYS_POLY, priority=1)
+    add_zone(board, "+3V3", pcbnew.In2_Cu, 0, 0, pl.W, pl.H)
 
     board.Save(str(tmp))
     apply_stackup(tmp)

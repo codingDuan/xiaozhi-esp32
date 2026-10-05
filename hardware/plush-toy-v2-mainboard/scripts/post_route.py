@@ -93,8 +93,10 @@ class Router:
     def __init__(self, board: pcbnew.BOARD):
         self.board = board
         self._blocked_cache: dict[tuple[str, int, float], set[tuple[int, int]]] = {}
+        self._holes: list[tuple[float, float, float]] | None = None
 
     def invalidate_obstacles(self, added_net: str | None = None) -> None:
+        self._holes = None      # 新过孔对所有网络都是钻孔障碍
         # 新增同网络铜不会成为该网络自己的障碍，可保留其昂贵的栅格结果。
         self._blocked_cache = {
             key: value for key, value in self._blocked_cache.items()
@@ -140,6 +142,26 @@ class Router:
                 if point_segment_distance(p, a, b) < mm(item.GetWidth()) / 2 + margin:
                     return True
         return False
+
+    def holes(self) -> list[tuple[float, float, float]]:
+        """板上所有钻孔 (x, y, 孔径)：任何网络的过孔、通孔焊盘、安装孔。"""
+        if self._holes is None:
+            self._holes = [(mm(t.GetPosition().x), mm(t.GetPosition().y), mm(t.GetDrillValue()))
+                           for t in self.board.GetTracks() if t.GetClass() == "PCB_VIA"]
+            for fp in self.board.GetFootprints():
+                for pad in fp.Pads():
+                    if pad.GetAttribute() in (pcbnew.PAD_ATTRIB_PTH, pcbnew.PAD_ATTRIB_NPTH):
+                        size = pad.GetDrillSize()
+                        self._holes.append((mm(pad.GetPosition().x), mm(pad.GetPosition().y),
+                                            mm(max(size.x, size.y))))
+        return self._holes
+
+    def hole_clear(self, net: str, p: tuple[float, float]) -> bool:
+        """新过孔与已有钻孔的孔壁距离 ≥ min_hole_to_hole。障碍栅格不看同网络过孔，孔距要单独查
+        （2026-10-05：补线器在同网络过孔旁 0.42mm 处又打一个，孔壁只剩 0.02mm）。"""
+        _, drill = self.via_size(net)
+        limit = project_rules.RULES["min_hole_to_hole"]
+        return all(math.dist(p, (x, y)) - (drill + d) / 2 >= limit for x, y, d in self.holes())
 
     def blocked_grid(self, net: str, layer: int, width: float | None = None) -> set[tuple[int, int]]:
         """一次性栅格化障碍物，避免 A* 每个节点遍历整块板。"""
@@ -246,7 +268,8 @@ class Router:
             if all((here[0] + dx, here[1] + dy) not in blocked[layer]
                    for layer in (pcbnew.F_Cu, pcbnew.B_Cu)
                    for dx in range(-via_cells, via_cells + 1)
-                   for dy in range(-via_cells, via_cells + 1)):
+                   for dy in range(-via_cells, via_cells + 1)) \
+                    and self.hole_clear(net, self.physical((here[0], here[1]))):
                 neighbors.append((here[0], here[1], other))
             for nxt in neighbors:
                 p = self.physical((nxt[0], nxt[1]))
@@ -349,7 +372,8 @@ class Router:
                             for layer in (pcbnew.F_Cu, pcbnew.B_Cu)
                             for dx in range(-via_cells, via_cells + 1)
                             for dy in range(-via_cells, via_cells + 1))
-            if here != source and via_clear and EDGE <= p[0] <= BOARD_W - EDGE and EDGE <= p[1] <= BOARD_H - EDGE:
+            if here != source and via_clear and self.hole_clear(net, p) \
+                    and EDGE <= p[0] <= BOARD_W - EDGE and EDGE <= p[1] <= BOARD_H - EDGE:
                 path = []
                 node = here
                 while node is not None:
@@ -505,6 +529,81 @@ def close_opens(ctx) -> list[str]:
     return fixed
 
 
+def _net_graph(board, net):
+    key = lambda p: (round(p.x / 1e3), round(p.y / 1e3))     # µm 网格
+    adj: dict = {}
+    for t in board.GetTracks():
+        if t.GetNetname() == net and t.GetClass() == "PCB_TRACK":
+            a, b, length = key(t.GetStart()), key(t.GetEnd()), t.GetLength() / 1e6
+            adj.setdefault(a, []).append((b, length))
+            adj.setdefault(b, []).append((a, length))
+    return adj, key
+
+
+def _pad_box(board, ref, number):
+    fp = next(f for f in board.GetFootprints() if f.GetReference() == ref)
+    box = next(p for p in fp.Pads() if p.GetNumber() == number).GetBoundingBox()
+    return lambda n: box.Contains(pcbnew.VECTOR2I(n[0] * 1000, n[1] * 1000))
+
+
+def surface_path(board, net: str, a, b) -> float:
+    """两个焊盘之间只沿表层线（不经内层平面）的最短长度 mm；不通为无穷大。"""
+    adj, _ = _net_graph(board, net)
+    in_a, in_b = _pad_box(board, *a), _pad_box(board, *b)
+    queue, seen = [(0.0, n) for n in adj if in_a(n)], set()
+    while queue:
+        d, n = heapq.heappop(queue)
+        if n in seen:
+            continue
+        seen.add(n)
+        if in_b(n):
+            return d
+        for m, length in adj.get(n, []):
+            heapq.heappush(queue, (d + length, m))
+    return float("inf")
+
+
+def stitch_hot_loops(ctx) -> list[str]:
+    """按 placement.HOT_LOOPS 在表层直连开关电源热回路的两端（同层寻路，先网络类线宽再 0.3mm）。
+    写候选板，重新灌铜后 DRC 无错误、无未连接才替换正式板。返回补上的连线（登记用）。"""
+    global BOARD_W, BOARD_H
+    BOARD_W, BOARD_H = ctx.placement.W, ctx.placement.H
+    board = pcbnew.LoadBoard(str(ctx.pcb))
+    router = Router(board)
+    done = []
+    for net, (ra, na), (rb, nb), limit in getattr(ctx.placement, "HOT_LOOPS", []):
+        if surface_path(board, net, (ra, na), (rb, nb)) <= limit:
+            continue                       # Freerouting 已直连
+        fps = {f.GetReference(): f for f in board.GetFootprints()}
+        pa = next(p for p in fps[ra].Pads() if p.GetNumber() == na).GetPosition()
+        pb = next(p for p in fps[rb].Pads() if p.GetNumber() == nb).GetPosition()
+        start, end = (mm(pa.x), mm(pa.y), pcbnew.F_Cu), (mm(pb.x), mm(pb.y), pcbnew.F_Cu)
+        for width in (router.track_width(net), 0.3):
+            try:
+                path = router.find_layer_path(net, start, end, width)
+            except RuntimeError:
+                continue
+            router.add_path(net, path, width)
+            done.append(f"{net}: {ra}.{na} → {rb}.{nb}（{width}mm）")
+            break
+        else:
+            print(f"热回路直连失败：{ra}.{na} → {rb}.{nb}")
+    if not done:
+        return done
+    candidate = ctx.build / "hot-loops-candidate.kicad_pcb"
+    board.Save(str(candidate))
+    project_rules.apply(ctx.pro)
+    refill_and_save(ctx, candidate)
+    after = drc(ctx, candidate)
+    errors = [v for v in after["violations"] if v.get("severity") == "error"]
+    if errors or after["unconnected_items"]:
+        raise RuntimeError(f"热回路直连后 DRC 不过（错误 {len(errors)}，未连接 {len(after['unconnected_items'])}），"
+                           f"候选在 {candidate}")
+    candidate.replace(ctx.pcb)
+    project_rules.apply(ctx.pro)
+    return done
+
+
 if __name__ == "__main__":
     import argparse
     import context
@@ -516,5 +615,8 @@ if __name__ == "__main__":
     ctx = context.load(args.variant)
     if args.from_snapshot:
         shutil.copy2(ctx.build / "routed-snapshot.kicad_pcb", ctx.pcb)
-    for line in close_opens(ctx):
-        print("补线：", line)
+    if drc(ctx)["unconnected_items"]:
+        for line in close_opens(ctx):
+            print("补线：", line)
+    for line in stitch_hot_loops(ctx):
+        print("热回路：", line)
