@@ -1,0 +1,3 @@
+# easyeda2kicad 生成的 STEP 模型体积大且封装未引用（只用 .wrl）
+lib/plushv2.3dshapes/*.step
+variants/*/build/
