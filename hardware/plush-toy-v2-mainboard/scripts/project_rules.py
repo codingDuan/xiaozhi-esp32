@@ -48,7 +48,7 @@ RULES = {
     "min_copper_edge_clearance": 0.3,
     "min_hole_clearance": 0.25,
     "min_hole_to_hole": 0.25,
-    "min_text_height": 1.0,
+    "min_text_height": 0.8,          # 委托方 2026-10-05：丝印字号小一点，取嘉立创下限
     "min_text_thickness": 0.15,
 }
 

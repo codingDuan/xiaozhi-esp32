@@ -12,8 +12,9 @@ W, H = 52.0, 46.0
 CORNER_R = 2.0
 EDGE_MARGIN = 0.5          # 器件占位与板边的最小距离（U1 除外）
 GAP = 0.2                  # 自动排布时器件占位之间额外留的间隙
-# In2 内层：x < VSYS_PLANE_X 为 +3V3 平面（模组与逻辑），x ≥ 为 VSYS 平面（舵机、功放、充放电）
-VSYS_PLANE_X = 30.0
+# In2 内层：VSYS 平面只占右上角这块矩形（舵机、降压输入、加热侧），其余整层是 +3V3。
+# 首轮 3V3 只铺左半边，右下角测温上拉等 3V3 小网络只能拉长线横穿全板
+VSYS_RECT = (36.0, 0.0, W, 34.0)
 
 # 出线座：位号 → (贴哪条边, 沿边坐标)。离板边的距离由 gen_pcb 按封装实际占位算，
 # 开口方向随边而定（这些封装 0° 时开口都朝 +y）：上 180°、右 90°、下 0°、左 270°。
@@ -40,6 +41,17 @@ ANCHORS = {
     "H2": (3.5, H - 3.5, 0),
     "SW_RST": (23.5, 14.5, 0),
     "SW_BOOT": (23.5, 19.0, 0),
+    # 电源链按电流走向排成一串，避免宽电源线绕板（首轮布线 12 处开路多为电源线绕不过来）：
+    # USB 座 → F_USB → U_EFUSE（USB 正上方）→ U_CHG + L_CHG（再往上）→ 电池保护 → 电池座（左下）
+    "F_USB": (28.6, 34.3, 0),
+    "U_EFUSE": (32.8, 34.3, 0),
+    "U_CHG": (31.0, 29.0, 0),
+    # 电感在芯片正上方：IP5306 的 SW(7)、BAT(6) 都在芯片上沿，电感两端正对这两脚
+    "L_CHG": (31.0, 22.0, 0),
+    "Q_BATP": (23.5, 33.5, 0),
+    # 降压在 VSYS 平面一侧（x ≥ 36）取电，输出一小段线回到 3V3 区；功放贴着喇叭座
+    "U_BUCK": (38.5, 22.5, 0),
+    "U_AMP": (36.6, 33.0, 0),
 }
 
 # 其余器件放在所连主器件附近（gen_pcb 从目标点螺旋向外找空位）
@@ -47,16 +59,15 @@ NEAR = {
     "C_U1_BULK": "U1", "C_U1": "U1", "R_EN": "SW_RST", "C_EN": "SW_RST", "R_BOOT": "SW_BOOT",
     "R_SCL": "U_IMU", "R_SDA": "U_IMU", "R_SERVO_R_PD": "J_ARM_R",
     "R_CC1": "J_USB", "R_CC2": "J_USB", "R_CC_SUM1": "J_USB", "R_CC_SUM2": "J_USB",
-    "C_CC_SENSE": "J_USB", "D_USB_DP": "J_USB", "D_USB_DN": "J_USB", "F_USB": "J_USB",
-    "U_EFUSE": "F_USB", "C_EFUSE_IN": "U_EFUSE", "C_EFUSE_DVDT": "U_EFUSE",
+    "C_CC_SENSE": "J_USB", "D_USB_DP": "J_USB", "D_USB_DN": "J_USB",     "C_EFUSE_IN": "U_EFUSE", "C_EFUSE_DVDT": "U_EFUSE",
     "R_EFUSE_ILM": "U_EFUSE", "C_VUSB": "U_EFUSE",
-    "U_CHG": (34.0, 34.0), "L_CHG": "U_CHG", "C_CHG_VIN": "U_CHG", "C_CHG_BAT": "U_CHG",
+    "C_CHG_VIN": "U_CHG", "C_CHG_BAT": "U_CHG",
     "C_VSYS1": "U_CHG", "C_VSYS2": "U_CHG",
-    "Q_BATP": "J_BAT", "R_BATP_PU": "Q_BATP", "Q_BATN": "Q_BATP", "R_BATN_G": "Q_BATN",
+    "R_BATP_PU": "Q_BATP", "Q_BATN": "Q_BATP", "R_BATN_G": "Q_BATN",
     "R_BATN_PD": "Q_BATN", "R_BATP_BYP": "Q_BATP",
     "R_VBAT_TOP": "J_BAT", "R_VBAT_BOT": "J_BAT", "C_VBAT_SENSE": "J_BAT",
     "RT_BAT": "J_BAT", "R_BAT_NTC": "RT_BAT", "C_BAT_NTC": "RT_BAT",
-    "U_BUCK": (26.0, 26.0), "L_BUCK": "U_BUCK", "R_BUCK_EN": "U_BUCK", "R_FB1": "U_BUCK",
+    "L_BUCK": "U_BUCK", "R_BUCK_EN": "U_BUCK", "R_FB1": "U_BUCK",
     "R_FB2": "U_BUCK", "C_FF": "U_BUCK", "C_BUCK_IN": "U_BUCK", "C_BUCK_HF": "U_BUCK",
     "C_BUCK_OUT1": "U_BUCK", "C_BUCK_OUT2": "U_BUCK",
     "Q_HEAT": "J_HEAT", "R_GATE": "Q_HEAT", "R_GATE_PD": "Q_HEAT",
@@ -64,7 +75,7 @@ NEAR = {
     "R_LCD_MOSI": "J_LCD", "R_LCD_CLK": "J_LCD", "Q_LCD_BL": "J_LCD", "R_LCD_BL_GATE": "Q_LCD_BL",
     "R_LCD_BL_OFF": "Q_LCD_BL", "C_LCD": "J_LCD",
     "C_MIC": "J_MIC",
-    "U_AMP": "J_SPK", "R_AMP_SD": "U_AMP", "C_AMP_BULK": "U_AMP", "C_AMP": "U_AMP",
+    "R_AMP_SD": "U_AMP", "C_AMP_BULK": "U_AMP", "C_AMP": "U_AMP",
     "C_SERVO1": "J_ARM_L", "C_SERVO2": "J_ARM_R", "C_SERVO3": "J_ARM_R",
     "U_IMU": (28.0, 24.0), "C_IMU": "U_IMU",
     "D_ESD_PWR": "J_KEY", "D_ESD_MUTE": "J_KEY", "R_KEY_MUTE_PU": "J_KEY",
@@ -87,7 +98,7 @@ PIN_LEGEND = {
     "J_KEY": ["PW", "MU", "G"],
     "J_ARM_L": ["S", "5V", "G"],
     "J_ARM_R": ["S", "5V", "G"],
-    "J_HEAT": ["5V", "OUT"],
+    "J_HEAT": ["+", "-"],      # 1 脚接 VUSB 5V，2 脚接加热开关管
     "J_BAT": ["+", "-"],
     "J_SPK": ["+", "-"],
     "J_NTC": ["NT", "G"],

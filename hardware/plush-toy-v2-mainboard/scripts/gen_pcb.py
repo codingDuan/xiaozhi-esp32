@@ -396,6 +396,39 @@ def add_zone(board, net: str, layer: int, x1: float, y1: float, x2: float, y2: f
     board.Add(zone)
 
 
+def schematic_unconnected_nets() -> dict[tuple[str, str], str]:
+    """从原理图导出网表，取 KiCad 给悬空引脚起的 unconnected-(…) 网络名。"""
+    import subprocess
+    import xml.etree.ElementTree as ET
+    out = CTX.build / "netlist.xml"
+    subprocess.run([kicad_env.KICAD_CLI, "sch", "export", "netlist", "--format", "kicadxml",
+                    "-o", str(out), str(CTX.sch)], check=True, capture_output=True)
+    result = {}
+    for net in ET.parse(out).getroot().iter("net"):
+        name = net.get("name")
+        if name.startswith("unconnected-"):
+            for node in net.iter("node"):
+                result[(node.get("ref"), node.get("pin"))] = name
+    return result
+
+
+def rest_of_board(rect) -> list[tuple[float, float]]:
+    """整板减去一个贴着右上角的矩形，得到 L 形多边形（顺时针）。"""
+    x1, _, _, y2 = rect
+    return [(0, 0), (x1, 0), (x1, y2), (pl.W, y2), (pl.W, pl.H), (0, pl.H)]
+
+
+def add_polygon_zone(board, net: str, layer: int, points) -> None:
+    zone = pcbnew.ZONE(board)
+    zone.SetLayer(layer)
+    zone.SetNet(board.FindNet(net))
+    outline = zone.Outline()
+    outline.NewOutline()
+    for x, y in points:
+        outline.Append(pcbnew.FromMM(x), pcbnew.FromMM(y))
+    board.Add(zone)
+
+
 def main(ctx=None) -> Path:
     global CTX, pl
     CTX = ctx or context.from_argv()
@@ -489,6 +522,14 @@ def main(ctx=None) -> Path:
     occupied += [(b.GetX() * TO_MM, b.GetY() * TO_MM, b.GetRight() * TO_MM, b.GetBottom() * TO_MM)
                  for b in label_boxes]
     auto_place([p for p in fitted if p.ref in pl.NEAR], pl.NEAR, occupied)
+    # 背面还要避开正面器件穿到背面的通孔焊盘（散热过孔、USB 外壳脚、安装孔）：
+    # 首版把 TP_VUSB 放在 U_EFUSE 散热焊盘的过孔上，DRC 报短路
+    for fp in fps.values():
+        for pad in fp.Pads():
+            big = pad.GetSizeX() * pad.GetSizeY() * TO_MM * TO_MM >= 1.0   # 散热焊盘要在焊盘内打孔
+            if pad.GetAttribute() in (pcbnew.PAD_ATTRIB_PTH, pcbnew.PAD_ATTRIB_NPTH) or big:
+                b = pad.GetBoundingBox()
+                occupied_back.append((b.GetX() * TO_MM, b.GetY() * TO_MM, b.GetRight() * TO_MM, b.GetBottom() * TO_MM))
     auto_place([p for p in fitted if p.ref in pl.BACK_NEAR], pl.BACK_NEAR, occupied_back, back=True)
 
     # 自检：手工旋转公式必须与 KiCad 实际庭院层一致，否则所有重叠判断都不可信
@@ -507,11 +548,17 @@ def main(ctx=None) -> Path:
                 or any(abs(a - b) > 0.15 for a, b in zip(size(mine), size(kicad)))):
             raise RuntimeError(f"{ref} 旋转换算与 KiCad 不一致：{mine} vs {kicad}")
 
+    # 悬空引脚在原理图里有 KiCad 自动命名的 unconnected-(…) 网络，PCB 必须一致，否则一致性检查报错
+    unconnected = schematic_unconnected_nets()
+    for name in set(unconnected.values()):
+        board.Add(pcbnew.NETINFO_ITEM(board, name))
     for part in fitted:
         for pad in fps[part.ref].Pads():
             net = part.pins.get(pad.GetNumber())
             if net and not net.startswith("NC_"):
                 pad.SetNet(board.FindNet(net))
+            elif (part.ref, pad.GetNumber()) in unconnected:
+                pad.SetNet(board.FindNet(unconnected[(part.ref, pad.GetNumber())]))
     # USB 外壳脚只承担屏蔽接地；内层整面地用实连，避免细长热焊盘辐条被截断
     for pad in fps["J_USB"].Pads():
         if pad.GetNumber() == "SH":
@@ -521,8 +568,9 @@ def main(ctx=None) -> Path:
     print(f"丝印：{hidden} 个位号找不到空位已隐藏")
 
     add_zone(board, "GND", pcbnew.In1_Cu, 0, 0, pl.W, pl.H)
-    add_zone(board, "+3V3", pcbnew.In2_Cu, 0, 0, pl.VSYS_PLANE_X, pl.H)
-    add_zone(board, "VSYS", pcbnew.In2_Cu, pl.VSYS_PLANE_X, 0, pl.W, pl.H)
+    vx1, vy1, vx2, vy2 = pl.VSYS_RECT
+    add_zone(board, "VSYS", pcbnew.In2_Cu, vx1, vy1, vx2, vy2)
+    add_polygon_zone(board, "+3V3", pcbnew.In2_Cu, rest_of_board(pl.VSYS_RECT))
 
     board.Save(str(tmp))
     apply_stackup(tmp)
