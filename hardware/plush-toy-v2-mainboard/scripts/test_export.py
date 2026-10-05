@@ -37,6 +37,12 @@ class ExportA(unittest.TestCase):
 
 
 class ExportVariantConfiguration(unittest.TestCase):
+    def test_camera_variants_fail_closed_before_production_export(self):
+        script = (Path(__file__).parent / "export_fab.sh").read_text(encoding="utf-8")
+        gate = 'python3 camera_gate.py "$DIR/CAMERA_VERIFICATION.md"'
+        self.assertIn(gate, script)
+        self.assertLess(script.index(gate), script.index("$KC pcb export gerbers"))
+
     def test_paste_layers_follow_assembly_side_count(self):
         # 若双面版本漏导 B.Paste，或单面版本多交一张空钢网，本测试必须失败。
         for name, expected in {

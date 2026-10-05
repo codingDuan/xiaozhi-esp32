@@ -20,6 +20,10 @@ trap cleanup EXIT
 mkdir -p "$TMP/fab/gerber" "$DIR/renders"
 
 cd "$ROOT/scripts"
+if [[ "$V" == "C" || "$V" == "D" ]]; then
+    # spec §7.3：摄像头方向/针脚必须由实物与照片确认，不能由 CAD 推断后直接投产。
+    python3 camera_gate.py "$DIR/CAMERA_VERIFICATION.md"
+fi
 python3 -m unittest test_parts_db test_gpio test_core test_variants test_netlist
 "$KP" -m unittest "test_pcb_$V" "test_drc_$V"
 LAYERS="$(python3 fab_tools.py gerber-layers "$V")"
