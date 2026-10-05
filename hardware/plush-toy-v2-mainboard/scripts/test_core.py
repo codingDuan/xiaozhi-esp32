@@ -153,6 +153,12 @@ class McuPeripheralTests(unittest.TestCase):
                 esd = [p for p in self.parts if p.ref.startswith("D_ESD") and net in p.pins.values()]
                 self.assertTrue(esd, f"{ref} 的 {net} 没有 ESD")
 
+    def test_speaker_uses_same_sh2_connector_as_ntc(self):
+        # 委托方 2026-10-05：喇叭座与测温、触摸统一为 SH1.0 2P，少一种线
+        spk = by_ref(self.parts, "J_SPK")
+        self.assertEqual(spk.lcsc, by_ref(self.parts, "J_NTC").lcsc)
+        self.assertEqual(spk.footprint, by_ref(self.parts, "J_NTC").footprint)
+
     def test_buttons_present_and_no_charge_leds(self):
         refs = {p.ref for p in self.parts}
         self.assertLessEqual({"SW_RST", "SW_BOOT"}, refs)

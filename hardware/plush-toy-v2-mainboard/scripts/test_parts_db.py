@@ -18,7 +18,6 @@ REQUIRED = {
     "CONN_BAT": {"+", "-"},
     "CONN_LCD8": {str(i) for i in range(1, 9)},
     "CONN_MIC6": {str(i) for i in range(1, 7)},
-    "CONN_SPK2": {"1", "2"},
     "CONN_HEAT2": {"1", "2"},
     "CONN_SH2": {"1", "2"},
     "CONN_KEY3": {"1", "2", "3"},

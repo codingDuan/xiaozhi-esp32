@@ -132,7 +132,7 @@ def peripheral_parts() -> list:
         res("R_AMP_SD", "1M", "VSYS", "AMP_SD"),
         cap10u("C_AMP_BULK", "VSYS", "GND"),
         cap("C_AMP", "100nF", "VSYS", "GND"),
-        db.part("CONN_SPK2", "J_SPK", {"1": "SPK_P", "2": "SPK_N"}),
+        db.part("CONN_SH2", "J_SPK", {"1": "SPK_P", "2": "SPK_N"}),
         # 舵机：VSYS 直供，贴片电容储能
         db.part("HDR_SERVO3", "J_ARM_L", {"1": "SERVO_L_PWM", "2": "VSYS", "3": "GND"}),
         db.part("HDR_SERVO3", "J_ARM_R", {"1": "SERVO_R_PWM", "2": "VSYS", "3": "GND"}),

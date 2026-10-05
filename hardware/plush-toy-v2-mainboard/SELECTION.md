@@ -29,7 +29,6 @@
 | CONN_BAT | C295747 | JST S2B-PH-SM4-TB | 扩展 | 17981 | KiCad 官方 |
 | CONN_LCD8 | C160407 | JST SM08B-SRSS-TB | 扩展 | 122870 | KiCad 官方 |
 | CONN_MIC6 | C2845365 | HCTL HC-1.0-6PWT（SH1.0 兼容） | 扩展 | 157664 | easyeda2kicad |
-| CONN_SPK2 | C177225 | Molex 532610271（MX1.25） | 扩展 | 52091 | KiCad 官方 |
 | CONN_HEAT2 | C7429671 | ZX-XH2.54-2PWT（3A） | 扩展 | 139414 | easyeda2kicad |
 | CONN_SH2 | C160402 | JST SM02B-SRSS-TB | 扩展 | 36375 | KiCad 官方 |
 | CONN_KEY3 | C7430445 | ZX-SH1.0-3PWT | 扩展 | 90756 | easyeda2kicad |
@@ -67,4 +66,5 @@
 - SH1.0 6P、3P 的 JST 原厂卧贴件嘉立创缺货（SM03B 库存 2），改用国产兼容件，封装取自该料号本身（easyeda2kicad），不套用 JST 官方封装。
 - 舵机座选卧贴（WT）：插头从板边水平插入，与其它出线座「开口朝外」一致。
 - USB-C 保留一期 TYPE-C-31-M-12：16P 座子受接口标准限制宽度都在 9mm 左右，换型号省不出面积，而这颗一期已验证、库存 42 万。
+- 喇叭座原为 MX1.25（C177225），2026-10-05 委托方要求统一为 SH1.0 2P（与测温、触摸同料号 C160402），少一种线、少一种扩展库料号。SH1.0 与 MX1.25 触点额定都是 1A，MAX98357A 输出在此范围内。
 - 电池座 1 脚为「+」。PH2.0 电池线各家极性不一，由板上防反接（`BATTERY_PROTECTION.md`）兜底，丝印大字标注。
