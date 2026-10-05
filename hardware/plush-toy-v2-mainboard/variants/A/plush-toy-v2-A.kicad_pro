@@ -1,0 +1,172 @@
+{
+  "net_settings": {
+    "classes": [
+      {
+        "bus_width": 12,
+        "clearance": 0.15,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "Default",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 2147483647,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.2,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "Power",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 0,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 1.0,
+        "via_diameter": 0.8,
+        "via_drill": 0.4,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.15,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "Supply",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 1,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.5,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.15,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "CameraSupply",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 2,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.3,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      }
+    ],
+    "netclass_patterns": [
+      {
+        "netclass": "Power",
+        "pattern": "VUSB"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "VSYS"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "VBAT"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "VBAT_PACK"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "HEAT_LOW"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "CHG_SW"
+      },
+      {
+        "netclass": "Supply",
+        "pattern": "VBUS_IN"
+      },
+      {
+        "netclass": "Supply",
+        "pattern": "VBUS_FUSED"
+      },
+      {
+        "netclass": "Supply",
+        "pattern": "+3V3"
+      },
+      {
+        "netclass": "Supply",
+        "pattern": "GND"
+      },
+      {
+        "netclass": "Supply",
+        "pattern": "BUCK_SW"
+      },
+      {
+        "netclass": "Supply",
+        "pattern": "SPK_P"
+      },
+      {
+        "netclass": "Supply",
+        "pattern": "SPK_N"
+      },
+      {
+        "netclass": "Supply",
+        "pattern": "+2V8"
+      },
+      {
+        "netclass": "Supply",
+        "pattern": "LCD_BL"
+      },
+      {
+        "netclass": "CameraSupply",
+        "pattern": "+1V5"
+      }
+    ],
+    "meta": {
+      "version": 4
+    },
+    "net_colors": null,
+    "netclass_assignments": null
+  },
+  "board": {
+    "design_settings": {
+      "rules": {
+        "min_clearance": 0.127,
+        "min_track_width": 0.127,
+        "min_via_diameter": 0.45,
+        "min_through_hole_diameter": 0.2,
+        "min_via_annular_width": 0.1,
+        "min_copper_edge_clearance": 0.3,
+        "min_hole_clearance": 0.25,
+        "min_hole_to_hole": 0.25,
+        "min_text_height": 1.0,
+        "min_text_thickness": 0.15
+      },
+      "rule_severities": {
+        "silk_edge_clearance": "warning"
+      }
+    }
+  },
+  "meta": {
+    "filename": "plush-toy-v2-A.kicad_pro",
+    "version": 3
+  }
+}
