@@ -28,7 +28,7 @@
 	(fp_line (start 2.67 -1.60) (end 2.67 2.70) (layer F.CrtYd) (width 0.05))
 	(fp_line (start 2.67 2.70) (end -2.67 2.70) (layer F.CrtYd) (width 0.05))
 	(fp_poly (pts (xy -1.777873 -2.208022) (xy -2.031873 -1.827022) (xy -2.031873 -1.827022) (xy -1.523873 -1.827022) (xy -1.777873 -2.208022)) (stroke (width 0) (type solid)) (fill solid) (layer "F.SilkS"))
-	(model "plushv2.3dshapes/CONN-SMD_3P-P1.00_MEGASTAR_ZX-SH1.0-3PWT.wrl"
+	(model "${KIPRJMOD}/../../lib/plushv2.3dshapes/CONN-SMD_3P-P1.00_MEGASTAR_ZX-SH1.0-3PWT.wrl"
 		(offset (xyz 0.000 0.000 0.000))
 		(scale (xyz 1 1 1))
 		(rotate (xyz 0 0 0))

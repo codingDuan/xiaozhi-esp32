@@ -30,7 +30,7 @@
 	(fp_line (start -4.15 -1.42) (end 4.15 -1.42) (layer F.CrtYd) (width 0.05))
 	(fp_line (start 4.15 -1.42) (end 4.15 2.89) (layer F.CrtYd) (width 0.05))
 	(fp_line (start 4.15 2.89) (end -4.15 2.89) (layer F.CrtYd) (width 0.05))
-	(model "plushv2.3dshapes/CONN-SMD_HCTL_HC-1.0-6PWT.wrl"
+	(model "${KIPRJMOD}/../../lib/plushv2.3dshapes/CONN-SMD_HCTL_HC-1.0-6PWT.wrl"
 		(offset (xyz 0.000 0.000 0.000))
 		(scale (xyz 1 1 1))
 		(rotate (xyz 0 0 0))

@@ -19,7 +19,7 @@
 	(fp_line (start 2.50 -2.50) (end 2.50 2.50) (layer F.CrtYd) (width 0.05))
 	(fp_line (start 2.50 2.50) (end -2.50 2.50) (layer F.CrtYd) (width 0.05))
 	(fp_line (start -2.50 2.50) (end -2.50 -2.50) (layer F.CrtYd) (width 0.05))
-	(model "plushv2.3dshapes/IND-SMD_L5.0-W5.0-H1.2_SMNR5030.wrl"
+	(model "${KIPRJMOD}/../../lib/plushv2.3dshapes/IND-SMD_L5.0-W5.0-H1.2_SMNR5030.wrl"
 		(offset (xyz 0.000 0.000 0.000))
 		(scale (xyz 1 1 1))
 		(rotate (xyz 0 0 270))
