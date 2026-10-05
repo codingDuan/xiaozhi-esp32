@@ -10,7 +10,7 @@ class PcbBTests(PcbVariantTestsMixin, unittest.TestCase):
     VARIANT = "B"
 
     def test_target_dimensions(self):
-        self.assertEqual((self.pl.W, self.pl.H), (45.0, 43.0))
+        self.assertEqual((self.pl.W, self.pl.H), (50.0, 46.0))
 
     def test_only_module_local_decoupling_connectors_and_buttons_are_front_assembly(self):
         front = {

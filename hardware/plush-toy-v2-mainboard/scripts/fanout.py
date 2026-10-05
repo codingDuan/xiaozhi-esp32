@@ -52,21 +52,22 @@ class Fanout:
     def __init__(self, board: pcbnew.BOARD):
         self.board = board
         self.pads = [p for fp in board.GetFootprints() for p in fp.Pads()]
-        # (网络, 包围盒, 是否非金属化孔)
+        # (网络, 包围盒, 是否非金属化孔, 所在铜层集合)
         # 只有带铜的焊盘才是障碍：QFN 散热焊盘上叠的纯钢网小焊盘没有网络，
         # 算进去会挡住散热焊盘内打孔（二期首跑 U_AMP.17、U_CHG.9 因此失败）
         self.obstacles = [(p.GetNetname(), box_mm(p.GetBoundingBox()),
-                           p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH) for p in self.pads
+                           p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH, p.GetLayerSet()) for p in self.pads
                           if p.IsOnCopperLayer() or p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH]
         self.vias: list[tuple[str, float, float]] = []
 
-    def clear(self, net, check) -> bool:
+    def clear(self, net, check, layer=None) -> bool:
         """每对网络按两者中较严的间距规则检查（Power 类 0.2mm，其余 0.15mm）。"""
         def gap(other, npth):
             if npth:
                 return HOLE_CLEARANCE
             return POWER_CLEARANCE if net in POWER_NETS or other in POWER_NETS else CLEARANCE
-        return not any(n != net and check(ob, gap(n, npth)) for n, ob, npth in self.obstacles)
+        return not any(n != net and (layer is None or npth or layers.Contains(layer))
+                       and check(ob, gap(n, npth)) for n, ob, npth, layers in self.obstacles)
 
     def add_layer_track(self, net_item, start, end, width, layer):
         t = pcbnew.PCB_TRACK(self.board)
@@ -76,16 +77,17 @@ class Fanout:
         t.SetLayer(layer)
         t.SetNet(net_item)
         self.board.Add(t)
-        if layer == pcbnew.F_Cu:
-            x1, x2 = sorted((start.x * TO_MM, end.x * TO_MM))
-            y1, y2 = sorted((start.y * TO_MM, end.y * TO_MM))
-            self.obstacles.append((net_item.GetNetname(),
-                                   (x1 - width / 2, y1 - width / 2,
-                                    x2 + width / 2, y2 + width / 2), False))
+        x1, x2 = sorted((start.x * TO_MM, end.x * TO_MM))
+        y1, y2 = sorted((start.y * TO_MM, end.y * TO_MM))
+        layers = pcbnew.LSET()
+        layers.AddLayer(layer)
+        self.obstacles.append((net_item.GetNetname(),
+                               (x1 - width / 2, y1 - width / 2,
+                                x2 + width / 2, y2 + width / 2), False, layers))
         return t
 
-    def add_track(self, net_item, start, end, width):
-        return self.add_layer_track(net_item, start, end, width, pcbnew.F_Cu)
+    def add_track(self, net_item, start, end, width, layer):
+        return self.add_layer_track(net_item, start, end, width, layer)
 
     def add_via(self, net_item, net, x, y, diameter=VIA_D, drill=VIA_DRILL):
         via = pcbnew.PCB_VIA(self.board)
@@ -96,7 +98,8 @@ class Fanout:
         self.board.Add(via)
         self.vias.append((net, x, y))
         self.obstacles.append((net, (x - diameter / 2, y - diameter / 2,
-                                     x + diameter / 2, y + diameter / 2), False))
+                                     x + diameter / 2, y + diameter / 2), False,
+                               pcbnew.LSET.AllCuMask()))
         return via
 
     def via_ok(self, net, x, y, plane) -> bool:
@@ -117,8 +120,9 @@ class Fanout:
             if tx != px and ty != py:
                 continue
             half = width / 2
-            if self.clear(net, lambda ob, c: segment_hits_box(px, py, tx, ty, half + c, ob)):
-                self.add_track(pad.GetNet(), pad.GetPosition(), v(tx, ty), width)
+            layer = fp.GetLayer()
+            if self.clear(net, lambda ob, c: segment_hits_box(px, py, tx, ty, half + c, ob), layer):
+                self.add_track(pad.GetNet(), pad.GetPosition(), v(tx, ty), width, layer)
                 return True
         return False
 
@@ -131,14 +135,16 @@ class Fanout:
         pth = [(p.GetNetname(), p.GetPosition().x * TO_MM, p.GetPosition().y * TO_MM) for p in self.pads
                if p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH]
         # 大焊盘先处理：小引脚要连到它们的过孔上
-        targets = [p for p in self.pads
-                   if p.GetNetname() in PLANES and p.GetAttribute() == pcbnew.PAD_ATTRIB_SMD and p.IsOnLayer(pcbnew.F_Cu)]
+        targets = [p for p in self.pads if p.GetNetname() in PLANES
+                   and p.GetAttribute() == pcbnew.PAD_ATTRIB_SMD
+                   and (p.IsOnLayer(pcbnew.F_Cu) or p.IsOnLayer(pcbnew.B_Cu))]
         targets.sort(key=lambda p: -(p.GetSizeX() * p.GetSizeY()))
         ep_vias: dict[tuple[str, str], tuple[float, float]] = {}
 
         for pad in targets:
             net = pad.GetNetname()
             fp = pad.GetParentFootprint()
+            surface_layer = fp.GetLayer()
             ref = fp.GetReference()
             px, py = pad.GetPosition().x * TO_MM, pad.GetPosition().y * TO_MM
             plane = PLANES[net]
@@ -168,10 +174,10 @@ class Fanout:
             # 再试连到同器件同网络散热焊盘的过孔
             if (ref, net) in ep_vias:
                 ex, ey = ep_vias[(ref, net)]
-                own = [o for o in self.obstacles if o[0] == net]
                 if math.hypot(ex - px, ey - py) <= 3.0 and \
-                        self.clear(net, lambda ob, c: segment_hits_box(px, py, ex, ey, half + c, ob)):
-                    self.add_track(pad.GetNet(), pad.GetPosition(), v(ex, ey), width)
+                        self.clear(net, lambda ob, c: segment_hits_box(px, py, ex, ey, half + c, ob),
+                                   surface_layer):
+                    self.add_track(pad.GetNet(), pad.GetPosition(), v(ex, ey), width, surface_layer)
                     continue
 
             cx, cy = fp.GetPosition().x * TO_MM, fp.GetPosition().y * TO_MM
@@ -188,10 +194,11 @@ class Fanout:
                     vx, vy = px + reach * dx, py + reach * dy
                     if not self.via_ok(net, vx, vy, plane):
                         continue
-                    if not self.clear(net, lambda ob, c: segment_hits_box(px, py, vx, vy, half + c, ob)):
+                    if not self.clear(net, lambda ob, c: segment_hits_box(px, py, vx, vy, half + c, ob),
+                                      surface_layer):
                         continue
                     self.add_via(pad.GetNet(), net, vx, vy)
-                    self.add_track(pad.GetNet(), pad.GetPosition(), v(vx, vy), width)
+                    self.add_track(pad.GetNet(), pad.GetPosition(), v(vx, vy), width, surface_layer)
                     added += 1
                     placed = True
                     break

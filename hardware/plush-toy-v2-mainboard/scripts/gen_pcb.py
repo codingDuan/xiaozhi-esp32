@@ -656,6 +656,26 @@ def main(ctx=None) -> Path:
             raise RuntimeError(f"{chip} 没有 {net} 引脚（{part.ref}）")
         local = local_rect(fp, part.ref)
         cx, cy = fps[chip].GetPosition().x * TO_MM, fps[chip].GetPosition().y * TO_MM
+        hint = getattr(pl, "DECOUPLING_ANCHORS", {}).get(part.ref)
+        if hint:
+            x, y, angle = hint
+            rect = placed_rect(local, x, y, angle)
+            clashes = [r for r in pool if overlaps(rect, r, DECOUPLING_GAP)]
+            if not inside_board(rect) or clashes:
+                raise RuntimeError(f"{part.ref} 的 DECOUPLING_ANCHORS 位置被占用：{hint}；冲突："
+                                   f"{[tuple(round(c, 2) for c in r) for r in clashes]}")
+            fp.SetPosition(v(x, y))
+            fp.SetOrientationDegrees(angle)
+            if back:
+                fp.Flip(fp.GetPosition(), pcbnew.FLIP_DIRECTION_TOP_BOTTOM)
+            close = all(close_and_same_side(part.ref, fp, chip, n, limit, cx, cy)
+                        for n in [net] + ret)
+            if back:
+                fp.Flip(fp.GetPosition(), pcbnew.FLIP_DIRECTION_TOP_BOTTOM)
+            if not close:
+                raise RuntimeError(f"{part.ref} 的 DECOUPLING_ANCHORS 不满足同面/距离约束：{hint}")
+            commit(part, fp, x, y, angle, rect, back, already_added=back)
+            return
         for px, py in pins:
             # 0.05mm 网格：引脚旁的空隙常常只比电容宽几十微米，0.25mm 网格落不进去
             for x, y in spiral(px, py, step=0.1, max_r=limit + 2.0):

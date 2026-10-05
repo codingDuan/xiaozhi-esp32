@@ -8,10 +8,12 @@
 正面只放模组、出线座和按键；电源、功放、IMU 及所属阻容全部放背面。
 起步采用 spec 给 B 的 42×34 mm 目标；首轮因 U1 与上下沿连接器、右侧三座的实际庭院层
 无法同时满足 0.2 mm 间隙；39.5 mm 第二轮又无法容纳连接器引脚丝印；42×43 mm
-第三轮的右上角引脚丝印互撞，因此最终起布尺寸调整为 45×43 mm。该迭代只属于 B，不回写 A。
+第三轮的右上角引脚丝印互撞，因此布局先调整为 45×43 mm。首轮完整布线在该尺寸稳定停在
+8 个开路（局部功放/电源与两条跨板音频线没有可制造通道），故制造版放宽到 50×46 mm；
+右、下边连接器随板边外移，释放布线走廊。该迭代只属于 B，不回写 A。
 """
 
-W, H = 45.0, 43.0
+W, H = 50.0, 46.0
 CORNER_R = 2.0
 EDGE_MARGIN = 0.5          # 器件占位与板边的最小距离（U1 除外）
 GAP = 0.2                  # 自动排布时器件占位之间额外留的间隙
@@ -49,23 +51,35 @@ ANCHORS = {
     "H2": (23.0, 27.0, 0),
     "SW_RST": (23.3, 16.0, 0),
     "SW_BOOT": (29.2, 16.0, 0),
+    # R_EN 原先由 NEAR 放在正面复位键正下方，背面被 U_IMU/按键焊盘围死，无法扇出到 3V3 平面。
+    "R_EN": (24.5, 10.0, 0),
+    "R_BOOT": (27.0, 9.0, 0),
+    # I2C 上拉离开正面按键正下方的拥挤区，保留到 IMU 的短支路和 3V3 扇出空间。
+    "R_SCL": (22.0, 12.0, 0),
+    "R_SDA": (18.0, 12.0, 0),
+    # 电池电压采样与 NTC 网络分区，避免两组微弱模拟信号在电池座旁互相封死。
+    "R_VBAT_TOP": (17.5, 34.0, 0),
+    "R_VBAT_BOT": (17.5, 36.0, 0),
+    "C_VBAT_SENSE": (19.5, 36.0, 90),
     # 电源链按电流走向排成一串，避免宽电源线绕板（首轮布线 12 处开路多为电源线绕不过来）：
     # USB 座 → F_USB → U_EFUSE（USB 正上方）→ U_CHG + L_CHG（再往上）→ 电池保护 → 电池座（左下）
     "F_USB": (33.0, 30.0, 0),
     "U_EFUSE": (38.0, 30.0, 0),
-    "U_CHG": (25.0, 21.0, 0),
-    # 电感在芯片正上方：IP5306 的 SW(7)、BAT(6) 都在芯片上沿，电感两端正对这两脚
+    # 旋转 180° 后 SW(7)、BAT(6) 朝上，正对上方电感；0° 时这两脚实际朝下，会被去耦件封死。
+    "U_CHG": (25.0, 21.0, 180),
+    # 电感在芯片正上方，开关节点不再绕过芯片和去耦网络。
     "L_CHG": (30.0, 13.0, 0),
     "Q_BATP": (23.0, 35.0, 0),
     # 降压在 VSYS 平面一侧（x ≥ 36）取电，输出一小段线回到 3V3 区；功放贴着喇叭座
     "U_BUCK": (40.0, 17.0, 90),
-    "U_AMP": (40.0, 25.0, 0),
+    # 靠近底边扬声器座，缩短大电流差分输出并释放右上电源通道。
+    "U_AMP": (34.0, 25.0, 0),
 }
 
 # 其余器件放在所连主器件附近（gen_pcb 从目标点螺旋向外找空位）
 NEAR = {
-    "C_U1_BULK": "U1", "C_U1": "U1", "R_EN": "SW_RST", "C_EN": "SW_RST", "R_BOOT": "SW_BOOT",
-    "R_SCL": "U_IMU", "R_SDA": "U_IMU", "R_SERVO_R_PD": "J_ARM_R",
+    "C_U1_BULK": "U1", "C_U1": "U1", "C_EN": "SW_RST",
+    "R_SERVO_R_PD": "J_ARM_R",
     "R_CC1": "J_USB", "R_CC2": "J_USB", "R_CC_SUM1": "J_USB", "R_CC_SUM2": "J_USB",
     "C_CC_SENSE": "J_USB", "D_USB_DP": "J_USB", "D_USB_DN": "J_USB",     "C_EFUSE_IN": "U_EFUSE", "C_EFUSE_DVDT": "U_EFUSE",
     "R_EFUSE_ILM": "U_EFUSE", "C_VUSB": "U_EFUSE",
@@ -73,7 +87,6 @@ NEAR = {
     "C_VSYS1": "U_CHG", "C_VSYS2": "U_CHG",
     "R_BATP_PU": "Q_BATP", "Q_BATN": "Q_BATP", "R_BATN_G": "Q_BATN",
     "R_BATN_PD": "Q_BATN", "R_BATP_BYP": "Q_BATP",
-    "R_VBAT_TOP": "J_BAT", "R_VBAT_BOT": "J_BAT", "C_VBAT_SENSE": "J_BAT",
     "RT_BAT": "J_BAT", "R_BAT_NTC": "RT_BAT", "C_BAT_NTC": "RT_BAT",
     "L_BUCK": "U_BUCK", "R_FB1": "U_BUCK",
     "R_FB2": "U_BUCK", "C_FF": "U_BUCK", "C_BUCK_IN": "U_BUCK", "C_BUCK_HF": "U_BUCK",
@@ -96,6 +109,7 @@ NEAR = {
 # 测试点和安装孔不属于装配件，仍分别由 BACK_NEAR 与 ANCHORS 管理，不列入 BACK_PARTS。
 BACK_PARTS = (set(NEAR) | {
     "F_USB", "U_EFUSE", "U_CHG", "L_CHG", "Q_BATP", "U_BUCK", "U_AMP",
+    "R_EN", "R_BOOT", "R_SCL", "R_SDA", "R_VBAT_TOP", "R_VBAT_BOT", "C_VBAT_SENSE",
 }) - {"C_U1", "C_U1_BULK"}
 
 # 去耦电容、反馈网络：位号 → (所服务的器件, 网络, 焊盘到该器件同网络引脚的最大距离 mm[, 回流网络])。
@@ -121,6 +135,13 @@ DECOUPLING = {
     "C_IMU": ("U_IMU", "+3V3", 3.0),
 }
 
+# 自动螺旋搜索只验证距离与同侧；旋转 U_CHG 后，C_CHG_BAT 若落在 VBAT 脚斜侧会跨过相邻焊盘。
+# 定点放到 6 脚正上方，保留短而宽的充电回路。
+DECOUPLING_ANCHORS = {
+    "C_VSYS2": (31.5, 18.1, 90),
+    "C_CHG_BAT": (24.36, 15.55, 270),
+}
+
 # 这些储能电容在引脚标注之后再放：先放会占住喇叭座引脚标注的位置（余量大，晚放也能满足距离）
 DECOUPLING_AFTER_LEGENDS = {"C_AMP_BULK", "C_BUCK_OUT1", "C_BUCK_OUT2"}
 
@@ -129,6 +150,9 @@ DECOUPLING_AFTER_LEGENDS = {"C_AMP_BULK", "C_BUCK_OUT1", "C_BUCK_OUT2"}
 HOT_LOOPS = [
     ("GND", ("U_BUCK", "2"), ("C_BUCK_HF", "2"), 4.0),
 ]
+
+# 若确定性路由结果需要经 DRC 验证的微调，在此登记；route.py 会同步移动相连线端。
+ROUTING_ECO_VIA_MOVES = []
 
 # 测试点放背面：位号 → 背面目标点（在正面所连器件附近，方便对照）
 # 背面上沿预留测试带，装配件排布时把整条带当成禁区；测试点最后按网络链路顺序落入。

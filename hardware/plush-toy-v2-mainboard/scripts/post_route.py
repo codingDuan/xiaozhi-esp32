@@ -62,6 +62,8 @@ GRID = 0.10
 EDGE = 0.60
 BOARD_W, BOARD_H = 0.0, 0.0      # close_opens() 按当前版本设置
 MAX_OPENS = 30                    # 补线只收尾；开路太多说明还没自动布线
+GRID_STEPS = ((1, 0), (-1, 0), (0, 1), (0, -1),
+              (1, 1), (1, -1), (-1, 1), (-1, -1))
 
 
 def net_class(net: str) -> dict:
@@ -71,6 +73,13 @@ def net_class(net: str) -> dict:
         if pattern["pattern"] == net:
             return by_name[pattern["netclass"]]
     return by_name["Default"]
+
+
+def fallback_widths(net: str):
+    """信号可退到制造下限逃逸；功率网络禁止用长细线伪装成已连接。"""
+    if net_class(net)["track_width"] >= 0.6:
+        return (None, 0.2)
+    return (None, 0.2, project_rules.RULES["min_track_width"])
 
 
 def mm(value: int) -> float:
@@ -231,7 +240,7 @@ class Router:
                 path.reverse()
                 path[0] = start
                 return self.compress(path)
-            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            for dx, dy in GRID_STEPS:
                 nxt = (here[0] + dx, here[1] + dy)
                 if nxt in parent or nxt in narrow or math.dist(source, nxt) * GRID > radius:
                     continue
@@ -259,8 +268,10 @@ class Router:
             _, here = heapq.heappop(queue)
             if here == target:
                 break
+            # PCB 走线允许 45°。只走四邻域会把元件密集区里实际合法的斜向通道误判为无路；
+            # 候选最终仍须通过 KiCad DRC，不能靠斜跨障碍蒙混过关。
             neighbors = [(here[0] + dx, here[1] + dy, here[2])
-                         for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))]
+                         for dx, dy in GRID_STEPS]
             other = pcbnew.B_Cu if here[2] == pcbnew.F_Cu else pcbnew.F_Cu
             # 过孔直径比走线宽 0.4mm；换层点周围额外两格必须在两层都空闲。
             via_diameter, _ = self.via_size(net)
@@ -277,7 +288,8 @@ class Router:
                     continue
                 if nxt != target and (nxt[0], nxt[1]) in blocked[nxt[2]]:
                     continue
-                new_cost = cost[here] + (20 if nxt[2] != here[2] else 1)
+                diagonal = nxt[2] == here[2] and nxt[0] != here[0] and nxt[1] != here[1]
+                new_cost = cost[here] + (20 if nxt[2] != here[2] else math.sqrt(2) if diagonal else 1)
                 if new_cost >= cost.get(nxt, math.inf):
                     continue
                 cost[nxt] = new_cost
@@ -331,14 +343,14 @@ class Router:
             _, here = heapq.heappop(queue)
             if here == target:
                 break
-            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            for dx, dy in GRID_STEPS:
                 nxt = (here[0] + dx, here[1] + dy)
                 p = self.physical(nxt)
                 if not (EDGE <= p[0] <= BOARD_W - EDGE and EDGE <= p[1] <= BOARD_H - EDGE):
                     continue
                 if nxt != target and nxt in blocked:
                     continue
-                new_cost = cost[here] + 1
+                new_cost = cost[here] + (math.sqrt(2) if dx and dy else 1)
                 if new_cost >= cost.get(nxt, math.inf):
                     continue
                 cost[nxt] = new_cost
@@ -356,9 +368,11 @@ class Router:
         path[0], path[-1] = start, end
         return self.compress(path)
 
-    def find_via_path(self, net: str, start: tuple[float, float], radius: float = 3.0,
+    def find_via_path(self, net: str, start: tuple[float, float, int], radius: float = 3.0,
                       width: float | None = None):
-        source = self.grid_point(start)
+        """从指定铜层的端点找一条短线和安全的通孔位置。"""
+        source = self.grid_point(start[:2])
+        source_layer = start[2]
         width = self.track_width(net) if width is None else width
         blocked = {layer: self.blocked_grid(net, layer, width)
                    for layer in (pcbnew.F_Cu, pcbnew.B_Cu)}
@@ -377,15 +391,15 @@ class Router:
                 path = []
                 node = here
                 while node is not None:
-                    path.append((*self.physical(node), pcbnew.F_Cu))
+                    path.append((*self.physical(node), source_layer))
                     node = parent[node]
                 path.reverse()
-                path[0] = (*start, pcbnew.F_Cu)
+                path[0] = start
                 return self.compress(path), p
-            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            for dx, dy in GRID_STEPS:
                 nxt = (here[0] + dx, here[1] + dy)
                 q = self.physical(nxt)
-                if nxt in parent or math.dist(start, q) > radius or nxt in blocked[pcbnew.F_Cu]:
+                if nxt in parent or math.dist(start[:2], q) > radius or nxt in blocked[source_layer]:
                     continue
                 parent[nxt] = here
                 queue.append(nxt)
@@ -466,9 +480,8 @@ def connect_to_nearest(router, board, net: str, source, tries: int = 25) -> bool
     """孤立端点按距离由近到远，试着连到同网络已有铜的各点（跳过紧贴自身的点）。"""
     for target in sorted((p for p in net_points(board, net) if math.dist(p[:2], source[:2]) > 0.3),
                          key=lambda p: math.dist(p[:2], source[:2]))[:tries]:
-        for width in (None, 0.2):
+        for width in fallback_widths(net):
             router.width_override = {} if width is None else {net: width}
-            router.invalidate_obstacles()
             try:
                 router.add_path(net, router.find_path(net, source, target), width)
                 return True
@@ -490,16 +503,17 @@ def close_opens(ctx) -> list[str]:
     board = pcbnew.LoadBoard(str(ctx.pcb))
     router = Router(board)
     fixed, failed = [], []
-    for item in report["unconnected_items"]:
+    total = len(report["unconnected_items"])
+    for index, item in enumerate(report["unconnected_items"], start=1):
         a, b = item["items"]
         net = _net(a["description"])
         start = (a["pos"]["x"], a["pos"]["y"], _layer(a["description"]))
         end = (b["pos"]["x"], b["pos"]["y"], _layer(b["description"]))
         label = f"{net}: {a['description'][:40]} → {b['description'][:40]}"
-        for width in (None, 0.2):
+        print(f"补线 {index}/{total}: {label}", flush=True)
+        for width in fallback_widths(net):
             try:
                 router.width_override = {} if width is None else {net: width}
-                router.invalidate_obstacles()
                 path = router.find_path(net, start, end)
                 router.add_path(net, path, width)
                 fixed.append(label + ("" if width is None else "（0.2mm 窄线）"))
@@ -512,7 +526,6 @@ def close_opens(ctx) -> list[str]:
             else:
                 failed.append(label)
         router.width_override = {}
-        router.invalidate_obstacles()
     candidate = ctx.build / "close-opens-candidate.kicad_pcb"
     board.Save(str(candidate))
     project_rules.apply(ctx.pro)
@@ -529,11 +542,12 @@ def close_opens(ctx) -> list[str]:
     return fixed
 
 
-def _net_graph(board, net):
+def _net_graph(board, net, layer=None):
     key = lambda p: (round(p.x / 1e3), round(p.y / 1e3))     # µm 网格
     adj: dict = {}
     for t in board.GetTracks():
-        if t.GetNetname() == net and t.GetClass() == "PCB_TRACK":
+        if t.GetNetname() == net and t.GetClass() == "PCB_TRACK" \
+                and (layer is None or t.GetLayer() == layer):
             a, b, length = key(t.GetStart()), key(t.GetEnd()), t.GetLength() / 1e6
             adj.setdefault(a, []).append((b, length))
             adj.setdefault(b, []).append((a, length))
@@ -548,7 +562,11 @@ def _pad_box(board, ref, number):
 
 def surface_path(board, net: str, a, b) -> float:
     """两个焊盘之间只沿表层线（不经内层平面）的最短长度 mm；不通为无穷大。"""
-    adj, _ = _net_graph(board, net)
+    fps = {f.GetReference(): f for f in board.GetFootprints()}
+    layer = fps[a[0]].GetLayer()
+    if fps[b[0]].GetLayer() != layer:
+        return float("inf")
+    adj, _ = _net_graph(board, net, layer)
     in_a, in_b = _pad_box(board, *a), _pad_box(board, *b)
     queue, seen = [(0.0, n) for n in adj if in_a(n)], set()
     while queue:
@@ -577,7 +595,10 @@ def stitch_hot_loops(ctx) -> list[str]:
         fps = {f.GetReference(): f for f in board.GetFootprints()}
         pa = next(p for p in fps[ra].Pads() if p.GetNumber() == na).GetPosition()
         pb = next(p for p in fps[rb].Pads() if p.GetNumber() == nb).GetPosition()
-        start, end = (mm(pa.x), mm(pa.y), pcbnew.F_Cu), (mm(pb.x), mm(pb.y), pcbnew.F_Cu)
+        layer = fps[ra].GetLayer()
+        if fps[rb].GetLayer() != layer:
+            raise RuntimeError(f"热回路两端不在同一铜层：{ra} / {rb}")
+        start, end = (mm(pa.x), mm(pa.y), layer), (mm(pb.x), mm(pb.y), layer)
         for width in (router.track_width(net), 0.3):
             try:
                 path = router.find_layer_path(net, start, end, width)

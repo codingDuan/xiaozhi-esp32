@@ -9,6 +9,7 @@ import argparse
 import csv
 import json
 import re
+import ssl
 import sys
 import urllib.request
 from collections import defaultdict
@@ -20,6 +21,15 @@ FIELDS = ("Designator", "Comment", "Footprint", "LCSC Part #", "Quantity")
 MIN_STOCK = 20
 JLC_SEARCH = ("https://jlcpcb.com/api/overseas-pcb-order/v1/shoppingCart/smtGood/"
               "selectSmtComponentList")
+
+
+def tls_context() -> ssl.SSLContext:
+    """优先使用 certifi，兼容 python.org macOS Python 未安装系统根证书的环境。"""
+    try:
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        return ssl.create_default_context()
 
 
 def natural_ref(ref: str) -> tuple:
@@ -62,7 +72,7 @@ def lookup(lcsc: str) -> dict:
     body = json.dumps({"keyword": lcsc, "currentPage": 1, "pageSize": 10}).encode()
     request = urllib.request.Request(JLC_SEARCH, body, {"Content-Type": "application/json",
                                                         "User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(request, timeout=30) as response:
+    with urllib.request.urlopen(request, timeout=30, context=tls_context()) as response:
         data = json.load(response)
     for item in (data.get("data") or {}).get("componentPageInfo", {}).get("list") or []:
         if item.get("componentCode") == lcsc:
