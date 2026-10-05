@@ -20,10 +20,10 @@
 | PTC_USB | C883132 | BSMD1206-150-6V | 扩展 | 31086 | $0.05 | KiCad 官方 |
 | ESD_LINE | C172409 | LESD8D3.3CAT5G | 扩展 | 1721919 | $0.01 | KiCad 官方 |
 | NTC_0603_10K | C13564 | NCP18XH103F03RB（B=3380） | 扩展 | 244491 | $0.05 | KiCad 官方 |
-| LDO_2V8 | C53099 | ME6211C28M5G-N | 扩展 | 下单前重查 | — | KiCad 官方 |
-| LDO_1V5 | C53100 | ME6211C15M5G-N | 扩展 | 下单前重查 | — | KiCad 官方 |
-| MPR121 | C91322 | MPR121QR2 | 扩展 | 下单前重查 | — | KiCad 官方 |
-| ADS1115 | C37593 | ADS1115IDGSR | 扩展 | 下单前重查 | — | KiCad 官方 |
+| LDO_2V8 | C53099 | ME6211C28M5G-N | 扩展 | 32375 | — | KiCad 官方 |
+| LDO_1V5 | C53100 | ME6211C15M5G-N | 扩展 | 13287 | — | KiCad 官方 |
+| MPR121 | C91322 | MPR121QR2 | 扩展 | 3565 | — | KiCad 官方 |
+| ADS1115 | C37593 | ADS1115IDGSR | 扩展 | 24466 | — | KiCad 官方 |
 
 ## 连接器与按键
 
@@ -38,7 +38,7 @@
 | CONN_KEY3 | C7430445 | ZX-SH1.0-3PWT | 扩展 | 90756 | easyeda2kicad |
 | HDR_SERVO3 | C46061676 | HX PZ2.54-1x3P WT（卧贴） | 扩展 | 21801 | easyeda2kicad |
 | SW_TACT | C720477 | TS-1088-AR02016（4×3mm） | **基础** | 778201 | easyeda2kicad |
-| CAM_FPC | C262669 | AFC01-S24FCA-00（24P、0.5mm、下接） | 扩展 | 下单前重查 | 一期同型号封装复制并加方向丝印 |
+| CAM_FPC | C262669 | AFC01-S24FCA-00（24P、0.5mm、下接） | 扩展 | 48307 | 一期同型号封装复制并加方向丝印 |
 
 阻容沿用一期料号，全部在库；除 75k、2.2nF、3.3nF 外均为基础库。
 
@@ -68,6 +68,7 @@
 - 1 SCL、2 CS（接 VDD_IO 选 I2C）、3 SDO/SA0（接 3V3，7 位地址 0x19；布线原因见 core.py 注释）、4 SDA、**5 Res 必须接地**、6/7/8 GND、9 VDD、10 VDD_IO、11 INT2、12 INT1。
 
 ### 摄像头族（仅 C/D）
+- 上表摄像头族库存于 2026-10-05 的 C/D 完整导出冒烟测试中重新查询；正式下单仍由导出脚本再次实时检查，库存不足会使整次导出失败。
 - FPC 沿用一期实物核对过的 AFC01-S24FCA-00 下接座与同一封装。排线触点朝下时，实测关系为“摄像头第 k 脚 → 板上焊盘第 25−k 脚”；`v2/cam.py` 用 `CAMERA_PIN_SIGNALS` 与 `CAMERA_PAD_TO_PIN` 两级表表达，禁止把参考针表直接当焊盘号。
 - 摄像头脚 4 DOVDD、10 DVDD、11 AVDD、2 AGND、15 DGND 分别落在反序后的焊盘 21、15、14、23、10；自动测试同时禁止电源脚落入 ESP32 GPIO 网络。
 - 两路 LDO 沿用一期 ME6211C28M5G-N / ME6211C15M5G-N；MPR121 与 ADS1115 沿用一期已核对引脚表。C/D 下单前仍须重新检查库存和贴片库类型。

@@ -10,6 +10,10 @@
 
 **Spec:** `docs/superpowers/specs/2026-10-05-plush-toy-v2-hardware-design.md`
 
+**实施状态（2026-10-05）：** B 已完成并发布正式生产包；C/D 的数字设计、布线、
+DRC、BOM/CPL 交叉校验和隔离导出冒烟测试均已完成。C/D 正式生产包仍由 spec §7.3
+真实照片门禁锁住，收到实物证据前不得把模拟导出物复制进版本目录或用于下单。
+
 ## Global Constraints
 
 - 一期目录 `hardware/plush-toy-mainboard` 只读；只允许复制已核对的摄像头封装/符号作为二期本地库输入。
@@ -47,24 +51,24 @@
 - Produces: `cam.CAMERA_PIN_SIGNALS: dict[int, str]`（摄像头脚号到信号）、`cam.CAMERA_PAD_TO_PIN: dict[str, int]`（FPC 焊盘到摄像头脚号）、`cam.camera_parts() -> list[Part]`。
 - Camera parts: `J_CAM`、`U_LDO28`、`U_LDO15`、`U_TOUCH`（MPR121）、`U_ADC`（ADS1115）及各自去耦/配置阻容；不加入 PCA9685。
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
   `test_camera.py` 固定断言 `CAMERA_PAD_TO_PIN[str(n)] == 25 - n`（1..24）；摄像头脚 4/10/11/2/15 分别映射 DOVDD/DVDD/AVDD/AGND/DGND 对应电源/地网络；这些焊盘网络不属于 `gpio.CAM.values()`。同时断言 ADS1115 AIN0..3 依次连接 `NTC_SENSE/VBAT_SENSE/CC_SENSE/BAT_NTC_SENSE`，MPR121 ELE0/可作 GPIO 的两个电极分别连接 `TOUCH_E0/HEAT_GATE_DRV/KEY_MUTE`。
 
-- [ ] **Step 2: 运行并确认失败**
+- [x] **Step 2: 运行并确认失败**
 
   Run: `cd hardware/plush-toy-v2-mainboard/scripts && python3 -m unittest test_parts_db test_variants test_camera -v`
   Expected: FAIL，`camera_parts()` 仍抛 `NotImplementedError` 或缺少映射常量。
 
-- [ ] **Step 3: 增加已定料号与本地库**
+- [x] **Step 3: 增加已定料号与本地库**
 
   在 `parts_db.DB` 增加 `CAM_FPC=C262669`、`LDO_2V8=C53099`、`LDO_1V5=C53100`、`MPR121=C91322`、`ADS1115=C37593`；逐个声明语义焊盘。FPC 封装从一期已实测使用的同型号封装复制到 `plushv2` 库，并在 F.SilkS 明确画插入方向与“触点朝下”。
 
-- [ ] **Step 4: 实现 `camera_parts()`**
+- [x] **Step 4: 实现 `camera_parts()`**
 
   用两级映射生成 `J_CAM.pins`；保留 PWDN 10k 下拉、RESET 10k 上拉与 100nF 延时、SCCB 4.7k 上拉、两路 LDO 输入/输出去耦。MPR121 复位时 HEAT 输出为高阻，既有 `R_GATE_PD=100k` 保证加热关闭。
 
-- [ ] **Step 5: 运行主机与 KiCad 封装测试**
+- [x] **Step 5: 运行主机与 KiCad 封装测试**
 
   Run: `python3 -m unittest test_parts_db test_gpio test_core test_variants test_camera -v`
   Run: `/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3 -m unittest test_parts_db -v`
@@ -85,24 +89,24 @@
 **Interfaces:**
 - Produces: `PcbVariantTestsMixin`、`DrcVariantTestsMixin`；placement 新增 `BACK_PARTS`（背面贴片件位号集合）和 `BACK_NEAR`（背面自动放置目标），A 的 `BACK_PARTS` 为空。
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
   覆盖：单/双面器件约束、连接器均在正面、去耦与所服务 IC 同面、双面坐标包含两面、B/D Gerber 含 `B.Paste`、A/C 不含装配用背面钢网输出。
 
-- [ ] **Step 2: 运行并确认失败**
+- [x] **Step 2: 运行并确认失败**
 
   Run: `python3 -m unittest test_export -v`
   Expected: FAIL，当前导出只导 `F.Paste` 且 positions 只取 front。
 
-- [ ] **Step 3: 泛化放置与测试**
+- [x] **Step 3: 泛化放置与测试**
 
   `gen_pcb.py` 按 `BACK_PARTS` 翻面并在独立占位池排布；通孔/大焊盘跨面避让保持不变。把 A 的结构、去耦、丝印、网络、板边、平面层和功率线测试迁到 mixin，A 测试只绑定 `VARIANT="A"`。
 
-- [ ] **Step 4: 泛化制造导出**
+- [x] **Step 4: 泛化制造导出**
 
   单面版本导出 F.Paste 与 front positions；双面版本导出 F.Paste+B.Paste，并合并 front/back positions，保留正确 Layer/Rotation。`fab_tools validate` 按当前变体核对装配器件数而非写死 A。
 
-- [ ] **Step 5: 验证 A 不回退**
+- [x] **Step 5: 验证 A 不回退**
 
   Run: `python3 -m unittest test_parts_db test_gpio test_core test_variants test_camera test_netlist test_export -v`
   Run: `KP=/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3; $KP -m unittest test_pcb_A test_drc_A -v`
@@ -119,16 +123,16 @@
 - Consumes: Task 2 的 `BACK_PARTS` 与通用 PCB 测试。
 - Produces: B 的原理图和未布线 PCB；所有连接器/按键/U1 正面，电源、功放、IMU 与所属阻容背面。
 
-- [ ] **Step 1: 写 `test_pcb_B.py` 并确认缺文件失败**
+- [x] **Step 1: 写 `test_pcb_B.py` 并确认缺文件失败**
 
   断言双面规则、目标起步尺寸 42×34mm（允许按 A 同样方式记录迭代后调整）、天线伸板边、连接器开口朝外、同面去耦与无同面庭院重叠。
 
-- [ ] **Step 2: 写 `placement_B.py` 并生成原理图/PCB**
+- [x] **Step 2: 写 `placement_B.py` 并生成原理图/PCB**
 
   Run: `python3 gen_schematic.py --variant B`
   Run: `$KP gen_pcb.py --variant B`
 
-- [ ] **Step 3: 运行布局测试并逐轮收缩**
+- [x] **Step 3: 运行布局测试并逐轮收缩**
 
   Run: `$KP -m unittest test_pcb_B -v`
   Run: `$KP shrink.py --variant B`
@@ -142,11 +146,11 @@
 - Create: `hardware/plush-toy-v2-mainboard/variants/B/TESTING.md`
 - Create: `hardware/plush-toy-v2-mainboard/variants/B/fab/`
 
-- [ ] **Step 1: 先写 DRC/生产资料失败测试**
-- [ ] **Step 2: 运行 `fanout.py --variant B`、`route.py --variant B`、`post_route.py --variant B --from-snapshot`，只接受未连接和 DRC error 不回退的候选**
-- [ ] **Step 3: 重新灌铜并运行 `$KP -m unittest test_pcb_B test_drc_B -v`**
-- [ ] **Step 4: 生成 `WIRING.md`、`TESTING.md`，运行 `bash export_fab.sh B`**
-- [ ] **Step 5: 分别记录 unconnected/violations/schematic_parity、BOM/坐标数量、双面钢网与仍需实物验证项**
+- [x] **Step 1: 先写 DRC/生产资料失败测试**
+- [x] **Step 2: 运行 `fanout.py --variant B`、`route.py --variant B`、`post_route.py --variant B --from-snapshot`，只接受未连接和 DRC error 不回退的候选**
+- [x] **Step 3: 重新灌铜并运行 `$KP -m unittest test_pcb_B test_drc_B -v`**
+- [x] **Step 4: 生成 `WIRING.md`、`TESTING.md`，运行 `bash export_fab.sh B`**
+- [x] **Step 5: 分别记录 unconnected/violations/schematic_parity、BOM/坐标数量、双面钢网与仍需实物验证项**
 
 ### Task 5: 版本 C 单面摄像头布局
 
@@ -155,12 +159,12 @@
 - Create: `hardware/plush-toy-v2-mainboard/scripts/test_pcb_C.py`
 - Create: `hardware/plush-toy-v2-mainboard/variants/C/`
 
-- [ ] **Step 1: 写 C 的布局与摄像头丝印失败测试**
+- [x] **Step 1: 写 C 的布局与摄像头丝印失败测试**
 
   除通用单面规则外，断言 J_CAM 在板边、F.SilkS 同时包含排线方向箭头和“触点朝下”、两路 LDO 靠近 J_CAM、摄像头数据/时钟线串联电阻若采用则全部一致。
 
-- [ ] **Step 2: 以 60×45mm 为起点实现 `placement_C.py`，生成原理图/PCB**
-- [ ] **Step 3: 运行 `$KP -m unittest test_pcb_C -v` 并逐轮收缩，记录最终尺寸**
+- [x] **Step 2: 以 60×45mm 为起点实现 `placement_C.py`，生成原理图/PCB**
+- [x] **Step 3: 运行 `$KP -m unittest test_pcb_C -v` 并逐轮收缩，记录最终尺寸**
 
 ### Task 6: 版本 C 布线、DRC 与受门禁保护的生产资料
 
@@ -175,10 +179,13 @@
 **Interfaces:**
 - Produces: `camera_gate.validate_for_order(path: Path) -> list[str]`（§7.3）与 `camera_gate.validate_for_camera_power(path: Path) -> list[str]`（§7.3+§7.4）；C/D production export 只以前者为发布门禁，测试文档以后者为摄像头上电门禁。
 
-- [ ] **Step 1: TDD 实现 fail-closed 的摄像头物理门禁**
-- [ ] **Step 2: 完成 C 扇出、布线、重新灌铜、DRC 与原理图一致性**
-- [ ] **Step 3: 生成接线和测试文档；§7.3 未有真实证据时标红“禁止下单”，§7.4 未通过时标红“禁止接摄像头上电”**
+- [x] **Step 1: TDD 实现 fail-closed 的摄像头物理门禁**
+- [x] **Step 2: 完成 C 扇出、布线、重新灌铜、DRC 与原理图一致性**
+- [x] **Step 3: 生成接线和测试文档；§7.3 未有真实证据时标红“禁止下单”，§7.4 未通过时标红“禁止接摄像头上电”**
 - [ ] **Step 4: 运行 `export_fab.sh C`，确认缺 §7.3 证据时拒绝发布；§7.3 齐全后允许生成首板 fab，但仍保留 §7.4 上电门禁**
+
+  当前：缺证据时已验证拒绝发布；在隔离的提交快照中用明确标注的模拟证据跑通了
+  Gerber/BOM/CPL/库存/渲染全链路。剩余动作仅能在真实 §7.3 照片及核验记录到位后完成。
 
 ### Task 7: 版本 D 双面摄像头布局、布线与生产资料
 
@@ -188,11 +195,14 @@
 - Create: `hardware/plush-toy-v2-mainboard/scripts/test_drc_D.py`
 - Create: `hardware/plush-toy-v2-mainboard/variants/D/`
 
-- [ ] **Step 1: 写 D 的双面布局、同面去耦、J_CAM 丝印与双面导出失败测试**
-- [ ] **Step 2: 以 46×38mm 为起点实现布局，生成原理图/PCB并逐轮收缩**
-- [ ] **Step 3: 完成扇出、布线、重新灌铜、DRC 与原理图一致性**
-- [ ] **Step 4: 生成 WIRING/TESTING/CAMERA_VERIFICATION；按 §7.3/§7.4 分别保持禁止下单/禁止摄像头上电状态**
+- [x] **Step 1: 写 D 的双面布局、同面去耦、J_CAM 丝印与双面导出失败测试**
+- [x] **Step 2: 以 46×38mm 为起点实现布局，生成原理图/PCB并逐轮收缩**
+- [x] **Step 3: 完成扇出、布线、重新灌铜、DRC 与原理图一致性**
+- [x] **Step 4: 生成 WIRING/TESTING/CAMERA_VERIFICATION；按 §7.3/§7.4 分别保持禁止下单/禁止摄像头上电状态**
 - [ ] **Step 5: §7.3 证据齐全后运行 `bash export_fab.sh D`，核对 B.Paste 与双面坐标；§7.4 留待首板断电测量**
+
+  当前：隔离冒烟导出已确认 `B.Paste`、Top 19 + Bottom 88 坐标及 44 行 BOM；
+  正式导出仍等待真实 §7.3 证据。
 
 ### Task 8: 四版本完成审计与文档同步
 
@@ -201,7 +211,44 @@
 - Modify: `hardware/plush-toy-v2-mainboard/SELECTION.md`
 - Modify: `docs/superpowers/specs/2026-10-05-plush-toy-v2-hardware-design.md`（只同步已经发生的尺寸/料号事实，不改原始要求）
 
-- [ ] **Step 1: 运行全部主机测试与 A/B/C/D KiCad 测试**
-- [ ] **Step 2: 对四个版本逐一列出尺寸、面别、器件数、BOM 行数、扩展库种类、库存、DRC 三分类与 fab 文件清单**
-- [ ] **Step 3: 核对 README 状态不把缺物理证据的 C/D 写成可下单或已硬件验证**
-- [ ] **Step 4: 明确报告仍需真实板完成的摄像头断电测量、首次上电、续航、3A 加热、双眼 40MHz 等项目**
+- [x] **Step 1: 运行全部主机测试与 A/B/C/D KiCad 测试**
+- [x] **Step 2: 对四个版本逐一列出尺寸、面别、器件数、BOM 行数、扩展库种类、库存、DRC 三分类与 fab 文件清单**
+- [x] **Step 3: 核对 README 状态不把缺物理证据的 C/D 写成可下单或已硬件验证**
+- [x] **Step 4: 明确报告仍需真实板完成的摄像头断电测量、首次上电、续航、3A 加热、双眼 40MHz 等项目**
+
+## 实际改动与完成审计（2026-10-05）
+
+| 版本 | 实际尺寸 / 贴片 | 工厂贴装坐标 | BOM / 扩展库 | 静态结果 | 正式生产包 |
+|---|---|---:|---:|---|---|
+| A | 54×46mm / 单面 | Top 88 | 38 行 / 20 种扩展 | 22 项 KiCad 测试通过，DRC 0/0/0 | 已有；本计划未修改 A |
+| B | 50×46mm / 双面 | Top 16 + Bottom 72 | 38 行 / 20 种扩展 | DRC 0/0/0 | 已提交 Gerber/BOM/CPL/库存报告 |
+| C | 65×55mm / 单面 | Top 107 | 44 行 / 26 种扩展 | 29 项 KiCad 测试通过，DRC 0/0/0 | 等待 §7.3 真实证据 |
+| D | 65×55mm / 双面 | Top 19 + Bottom 88 | 44 行 / 26 种扩展 | 32 项 KiCad 测试通过，DRC 0/0/0 | 等待 §7.3 真实证据 |
+
+库存快照四版均为全部料号 ≥20。C 隔离导出包含 15 个 Gerber/钻孔文件；D 包含
+16 个并额外具有 `B.Paste`。两者的 `fab_tools validate` 均核对 BOM 与坐标总数一致。
+
+### 与初始估算的偏差
+
+- B 的 42×34mm、C 的 60×45mm、D 的 46×38mm 都是布局前估算。实测连接器庭院、
+  必须保留的逐针丝印、M2 孔和净距无法在估算板框内同时成立，因此采用上表首个可制造尺寸。
+- D 保留与 C 相同的 65×55mm 板框，以确保摄像头细间距逃逸和双面装配可重复生成，
+  不用手工 GUI 补线换取表面上的尺寸缩减。
+
+### 踩坑记录
+
+- 背面翻转会交换竖放 0402 电阻的上下焊盘；D 的 `R_SIOC` 必须预旋转 180°，否则
+  CAM_SIOC 焊盘会堵住 J_CAM pin 21 的 +2V8 合法逃逸通道。
+- 按网络配置 `ROUTING_GRID` 后，热回路收尾不能把整个字典当浮点网格；现由
+  `routing_grid_for()` 逐网络解析，并有 D 回归测试。
+- C/D 正式导出必须 fail closed。完整生产链路只能在隔离快照中用显式模拟证据冒烟，
+  模拟产物不得进入正式版本目录。
+
+### 最终验证记录
+
+- 主机测试：67 项通过，1 项按设计跳过。
+- B/C/D KiCad 回归：89 项通过。
+- A 在隔离提交快照中运行 `test_pcb_A test_drc_A`：22 项通过，未触碰工作区 A。
+- C/D 隔离 `export_fab.sh`：测试、Gerber、钻孔、BOM、CPL、库存、渲染全部成功。
+- 仍需真实硬件：§7.3 摄像头方向照片；首板 §7.4 断电测量、首次上电、续航、
+  5V/3A 加热、双眼 40MHz、音频/舵机及温升验证。
