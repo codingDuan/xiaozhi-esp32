@@ -48,10 +48,10 @@ python3 export_wiring.py --variant A                    # 接线表与外购清�
 | 项 | 结果 |
 |---|---|
 | 尺寸 | 52×46mm，4 层，面积 2392mm²，**一期的 44%** |
-| 器件 | 88 颗全部贴片（单面），BOM 39 行；另有 8 个背面测试点、2 个安装孔，**板上无手焊件** |
-| 扩展库 | 21 种（每种每单一笔换料费），库存全部 ≥ 20，见 `variants/A/fab/parts_report.txt` |
+| 器件 | 88 颗全部贴片（单面），BOM 38 行；另有 8 个背面测试点、2 个安装孔，**板上无手焊件** |
+| 扩展库 | 20 种（每种每单一笔换料费），库存全部 ≥ 20，见 `variants/A/fab/parts_report.txt` |
 | 单板器件费 | 约 $13.3（嘉立创 1–49 片档；ESP32 模组 $5.14 占四成，其次 MAX98357A $1.32、LIS2DH12 $0.93、eFuse $0.87） |
-| DRC（重新灌铜后） | 0 错误、0 未连接、原理图一致性 0；警告 15 条均为丝印：舵机排针外形伸出板边（设计如此）、模组天线外形、两颗电感外框相碰 |
+| DRC（重新灌铜后） | 0 错误、0 未连接、原理图一致性 0；警告 16 条均为丝印：舵机排针外形伸出板边（设计如此）、模组天线外形、两颗电感外框相碰、IP5306 的 1 脚圆点压到相邻电阻焊盘（导出时自动裁掉） |
 | 生产文件 | `variants/A/fab/`：`gerber.zip`、`bom.csv`、`positions.csv` |
 | 接线 / 验收 | [`variants/A/WIRING.md`](variants/A/WIRING.md)、[`variants/A/TESTING.md`](variants/A/TESTING.md) |
 | 渲染图 | `variants/A/renders/final_top.png`、`final_bottom.png` |
