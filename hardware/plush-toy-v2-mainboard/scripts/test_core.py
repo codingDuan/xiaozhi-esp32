@@ -99,3 +99,60 @@ class PowerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+from v2 import gpio  # noqa: E402
+
+
+class McuPeripheralTests(unittest.TestCase):
+    def setUp(self):
+        self.parts = core.core_parts(camera=False)
+
+    def test_module_pads_follow_gpio_table(self):
+        u1 = by_ref(self.parts, "U1")
+        table = gpio.for_family(False)
+        for pad, g in gpio.WROOM_PAD_GPIO.items():
+            if g in table:
+                self.assertEqual(u1.pins[pad], table[g], f"GPIO{g}")
+        self.assertEqual({u1.pins[p] for p in ("1", "40", "41")}, {"GND"})
+        self.assertTrue(all(u1.pins[p].startswith("NC_") for p in ("28", "29", "30")))
+
+    def test_strapping_pins_have_safe_defaults(self):
+        self.assertEqual(set(by_ref(self.parts, "R_SERVO_R_PD").pins.values()), {"SERVO_R_PWM", "GND"})
+        self.assertEqual(set(by_ref(self.parts, "R_BOOT").pins.values()), {"BOOT", "+3V3"})
+        pullups_46 = [p for p in self.parts if set(p.pins.values()) == {"SERVO_R_PWM", "+3V3"}]
+        self.assertEqual(pullups_46, [])
+
+    def test_single_pullup_per_i2c_line(self):
+        for net in ("I2C_SCL", "I2C_SDA"):
+            ups = [p for p in self.parts if p.symbol == "Device:R" and set(p.pins.values()) == {net, "+3V3"}]
+            self.assertEqual(len(ups), 1, net)
+
+    def test_lcd_connector_shared_cs(self):
+        lcd = by_ref(self.parts, "J_LCD")
+        self.assertEqual(set(lcd.pins.values()) - {v for v in lcd.pins.values() if v.startswith("NC_")},
+                         {"LCD_RST", "LCD_CS", "LCD_DC", "LCD_MOSI_S", "LCD_CLK_S", "GND", "+3V3", "LCD_BL"})
+
+    def test_servos_and_amp_on_vsys(self):
+        for ref in ("J_ARM_L", "J_ARM_R"):
+            self.assertIn("VSYS", by_ref(self.parts, ref).pins.values())
+        amp = by_ref(self.parts, "U_AMP")
+        self.assertEqual((amp.pins["7"], amp.pins["8"]), ("VSYS", "VSYS"))
+        self.assertEqual(set(by_ref(self.parts, "R_AMP_SD").pins.values()), {"VSYS", "AMP_SD"})
+
+    def test_imu_reserved_pin_grounded(self):
+        imu = by_ref(self.parts, "U_IMU")
+        self.assertEqual(imu.pins["5"], "GND")
+        self.assertEqual(imu.pins["2"], "+3V3")   # CS 高电平选 I2C
+
+    def test_external_lines_have_esd(self):
+        for ref in ("J_TOUCH", "J_KEY"):
+            j = by_ref(self.parts, ref)
+            for net in {v for v in j.pins.values() if v != "GND" and not v.startswith("NC_")}:
+                esd = [p for p in self.parts if p.ref.startswith("D_ESD") and net in p.pins.values()]
+                self.assertTrue(esd, f"{ref} 的 {net} 没有 ESD")
+
+    def test_buttons_present_and_no_charge_leds(self):
+        refs = {p.ref for p in self.parts}
+        self.assertLessEqual({"SW_RST", "SW_BOOT"}, refs)
+        self.assertFalse(any(r.startswith("LED") for r in refs))   # IP5306-I2C 无指示灯脚

@@ -1,6 +1,7 @@
 """四个版本共用的电路。只写连接，料号与焊盘号全部来自 parts_db。"""
+from v2 import gpio
 from v2 import parts_db as db
-from v2.part import cap, cap10u, cap22u, res, testpoint
+from v2.part import Part, cap, cap10u, cap22u, res, testpoint
 
 
 def power_parts() -> list:
@@ -85,3 +86,75 @@ def battery_protection() -> list:
         # 过放电池被保护板切断后，经此涓流把电池端抬起来，保护板恢复后再走 Q_BATP
         res("R_BATP_BYP", "10k", "VBAT", "VBAT_PACK"),
     ]
+
+
+def mcu_parts(camera: bool) -> list:
+    table = gpio.for_family(camera)
+    u1 = db.part("WROOM", "U1", {"GND": "GND", "3V3": "+3V3", "EN": "EN"})
+    for pad, g in gpio.WROOM_PAD_GPIO.items():
+        u1.pins[pad] = table.get(g, f"NC_U1_IO{g}")
+    return [
+        u1,
+        cap10u("C_U1_BULK", "+3V3", "GND"),
+        cap("C_U1", "100nF", "+3V3", "GND"),
+        res("R_EN", "10k", "+3V3", "EN"),
+        cap("C_EN", "1uF", "EN", "GND"),
+        res("R_BOOT", "10k", "+3V3", "BOOT"),
+        db.part("SW_TACT", "SW_RST", {"A": "EN", "B": "GND"}),
+        db.part("SW_TACT", "SW_BOOT", {"A": "BOOT", "B": "GND"}),
+        res("R_SCL", "4.7k", "I2C_SCL", "+3V3"),
+        res("R_SDA", "4.7k", "I2C_SDA", "+3V3"),
+        # GPIO46 是启动配置脚，舵机信号默认拉低（spec 5.1）
+        res("R_SERVO_R_PD", "10k", "SERVO_R_PWM", "GND"),
+        testpoint("TP_EN", "EN"), testpoint("TP_BOOT", "BOOT"),
+    ]
+
+
+def peripheral_parts() -> list:
+    return [
+        # 眼睛：共片选；背光高边开关同一期，不串限流电阻（spec 4 节，屏模块自带限流）
+        db.part("CONN_LCD8", "J_LCD", {"1": "LCD_RST", "2": "LCD_CS", "3": "LCD_DC", "4": "LCD_MOSI_S",
+                                       "5": "LCD_CLK_S", "6": "GND", "7": "+3V3", "8": "LCD_BL"}),
+        res("R_LCD_MOSI", "33", "LCD_MOSI", "LCD_MOSI_S"),
+        res("R_LCD_CLK", "33", "LCD_CLK", "LCD_CLK_S"),
+        db.part("AO3401A", "Q_LCD_BL", {"G": "LCD_BL_GATE", "S": "+3V3", "D": "LCD_BL"}),
+        res("R_LCD_BL_GATE", "100", "LCD_BL_PWM", "LCD_BL_GATE"),
+        res("R_LCD_BL_OFF", "100k", "+3V3", "LCD_BL_GATE"),
+        cap("C_LCD", "100nF", "+3V3", "GND"),
+        # 麦克风：针序同一期 J_MIC
+        db.part("CONN_MIC6", "J_MIC", {"1": "+3V3", "2": "GND", "3": "MIC_SD", "4": "MIC_WS",
+                                       "5": "MIC_SCK", "6": "GND"}),
+        cap("C_MIC", "100nF", "+3V3", "GND"),
+        # 功放 MAX98357A（SELECTION.md §功放），接法同一期：SD_MODE 1M 上拉选 (L+R)/2，GAIN 悬空 9dB
+        db.part("MAX98357A", "U_AMP", {"VDD": "VSYS", "GND": "GND", "DIN": "AMP_DIN", "BCLK": "AMP_BCLK",
+                                       "LRCLK": "AMP_LRCLK", "SD_MODE": "AMP_SD",
+                                       "OUTP": "SPK_P", "OUTN": "SPK_N"}),
+        res("R_AMP_SD", "1M", "VSYS", "AMP_SD"),
+        cap10u("C_AMP_BULK", "VSYS", "GND"),
+        cap("C_AMP", "100nF", "VSYS", "GND"),
+        db.part("CONN_SPK2", "J_SPK", {"1": "SPK_P", "2": "SPK_N"}),
+        # 舵机：VSYS 直供，贴片电容储能
+        db.part("HDR_SERVO3", "J_ARM_L", {"1": "SERVO_L_PWM", "2": "VSYS", "3": "GND"}),
+        db.part("HDR_SERVO3", "J_ARM_R", {"1": "SERVO_R_PWM", "2": "VSYS", "3": "GND"}),
+        cap22u("C_SERVO1", "VSYS", "GND"),
+        cap22u("C_SERVO2", "VSYS", "GND"),
+        cap22u("C_SERVO3", "VSYS", "GND"),
+        # 加速度计 LIS2DH12：I2C，CS 高电平选 I2C，SA0 接地（地址 0x18），Res 必须接地
+        db.part("LIS2DH12", "U_IMU", {"VDD": "+3V3", "VDD_IO": "+3V3", "GND": "GND", "RES": "GND",
+                                      "SCL": "I2C_SCL", "SDA": "I2C_SDA", "SDO_SA0": "GND", "CS": "+3V3"}),
+        cap("C_IMU", "100nF", "+3V3", "GND"),
+        # 外接按键：电源键 → IP5306 KEY，收音键 → 版本相关的 KEY_MUTE 网络
+        db.part("CONN_KEY3", "J_KEY", {"1": "KEY_PWR", "2": "KEY_MUTE", "3": "GND"}),
+        db.part("ESD_LINE", "D_ESD_PWR", {"IO": "KEY_PWR", "GND": "GND"}),
+        db.part("ESD_LINE", "D_ESD_MUTE", {"IO": "KEY_MUTE", "GND": "GND"}),
+        res("R_KEY_MUTE_PU", "10k", "+3V3", "KEY_MUTE"),
+        db.part("CONN_SH2", "J_TOUCH", {"1": "TOUCH_E0", "2": "GND"}),
+        db.part("ESD_LINE", "D_ESD_TOUCH", {"IO": "TOUCH_E0", "GND": "GND"}),
+        # 安装孔 M2 ×2
+        *[Part(f"H{i}", "M2", "Mechanical:MountingHole", "MountingHole:MountingHole_2.2mm_M2",
+               assembly=False) for i in (1, 2)],
+    ]
+
+
+def core_parts(camera: bool) -> list:
+    return power_parts() + mcu_parts(camera) + peripheral_parts()
