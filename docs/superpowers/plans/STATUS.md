@@ -63,6 +63,19 @@
 
 ---
 
+## 〇b、二期主板（plush-toy-v2）
+
+设计 `docs/superpowers/specs/2026-10-05-plush-toy-v2-hardware-design.md`，计划 `docs/superpowers/plans/2026-10-05-plush-toy-v2-hardware.md`，
+产物 `hardware/plush-toy-v2-mainboard/`。
+
+| 版本 | 状态 |
+|---|---|
+| A 不带摄像头 · 单面 | **检查点 A（2026-10-05）**：52×46mm（一期 44%），DRC 0/0/0，生产文件已出，单板器件费约 $13.3。**待委托方在嘉立创下单页试算报价并决定是否打样** |
+| B / C / D | 待检查点 A 决定是否继续；各自另写计划 |
+| 固件 plush-toy-v2 | 未开始（I2C GPIO43/44、IMU 0x19、IP5306 关轻载关机、CC 判定加热） |
+
+检查点 A 记录（委托方填）：5 片 PCB 价 ＿＿、贴 2 片 SMT 总价 ＿＿、单板器件费 ＿＿；决定 ＿＿。
+
 ## 一、当前完成度
 
 | 模块 | 状态 | 验证方式 |
