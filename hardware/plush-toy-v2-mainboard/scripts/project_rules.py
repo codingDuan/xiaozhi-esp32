@@ -2,7 +2,7 @@
 
 KiCad 10 的网络类与最小规则存在工程文件里（不在 .kicad_pcb）。本脚本只合并
 net_settings 与 board.design_settings.rules 两块，工程文件里的其他键原样保留。
-格式照 KiCad 10 自带 template 的 .kicad_pro（net_settings.meta.version = 4）。
+格式照 KiCad 10.0.6 保存的 .kicad_pro（net_settings.meta.version = 5）。
 
 取值依据：
 - 默认类 0.2mm 线宽 / 0.15mm 间距 / 0.6-0.3mm 过孔：远高于嘉立创四层板工艺下限，留良率余量
@@ -21,16 +21,16 @@ def _netclass(name: str, track: float, clearance: float, via_d: float, via_drill
         "diff_pair_width": 0.2, "line_style": 0, "microvia_diameter": 0.3, "microvia_drill": 0.1,
         "name": name, "pcb_color": "rgba(0, 0, 0, 0.000)", "priority": priority,
         "schematic_color": "rgba(0, 0, 0, 0.000)", "track_width": track,
-        "via_diameter": via_d, "via_drill": via_drill, "wire_width": 6,
+        "tuning_profile": "", "via_diameter": via_d, "via_drill": via_drill, "wire_width": 6,
     }
 
 
 NETCLASSES = [
     _netclass("Default", 0.2, 0.15, 0.6, 0.3, 2147483647),
-    _netclass("Power", 0.6, 0.2, 0.8, 0.4, 0),
-    _netclass("Supply", 0.4, 0.15, 0.6, 0.3, 1),
     _netclass("Audio", 0.3, 0.15, 0.6, 0.3, 3),
     _netclass("CameraSupply", 0.3, 0.15, 0.6, 0.3, 2),
+    _netclass("Power", 0.6, 0.2, 0.8, 0.4, 0),
+    _netclass("Supply", 0.4, 0.15, 0.6, 0.3, 1),
 ]
 
 PATTERNS = (
@@ -65,7 +65,7 @@ def apply(path: Path) -> Path:
     ns = data.setdefault("net_settings", {})
     ns["classes"] = NETCLASSES
     ns["netclass_patterns"] = PATTERNS
-    ns.setdefault("meta", {"version": 4})
+    ns.setdefault("meta", {"version": 5})
     ns.setdefault("net_colors", None)
     ns.setdefault("netclass_assignments", None)
     rules = data.setdefault("board", {}).setdefault("design_settings", {}).setdefault("rules", {})
