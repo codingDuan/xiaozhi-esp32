@@ -29,8 +29,8 @@ $KP export_camera_check.py --variant C                  # C/D：1:1 摄像头实
 |---|---|---|
 | A 不带摄像头 · 单面 | 生产文件已出，待委托方决定是否打样 | 54×46mm |
 | B 不带摄像头 · 双面 | 生产文件已出，待首板实测 | 50×46mm |
-| C 带摄像头 · 单面 | 数字设计完成；缺 spec §7.3 实物证据，**禁止下单** | 65×55mm |
-| D 带摄像头 · 双面 | 数字设计完成；缺 spec §7.3 实物证据，**禁止下单** | 65×55mm |
+| C 带摄像头 · 单面 | 生产文件已出，待首板断电测量与实测 | 65×55mm |
+| D 带摄像头 · 双面 | 生产文件已出，待首板断电测量与实测 | 65×55mm |
 
 ## 版本 A 尺寸迭代
 
@@ -69,7 +69,19 @@ $KP export_camera_check.py --variant C                  # C/D：1:1 摄像头实
 | 尺寸 | 65×55mm，4 层，单面贴片 |
 | 装配 | 除背面测试点和安装孔外，所有器件均为正面 SMT；所有线束座为卧式、开口朝板外，板上无手焊件 |
 | 静态验收 | `test_pcb_C` 24/24，`test_drc_C` 5/5；重新灌铜后 0 DRC 错误、0 未连接、0 原理图一致性问题 |
-| 摄像头安全 | J_CAM 自动检查焊盘反序映射，丝印标出插入方向与“FPC 触点朝下”；物理方向尚未由实物照片验证 |
-| 生产文件 | **尚未生成**；`export_fab.sh C` 已验证会在 spec §7.3 证据缺失时失败关闭 |
+| 摄像头安全 | J_CAM 自动检查焊盘反序映射；实物照片与一期 2 号板断电导通记录交叉确认：触点朝下、镜头朝板外、摄像头 pin 1 → PCB pad 24；首板上电前仍须通过 spec §7.4 断电测量 |
+| 生产文件 | `variants/C/fab/`：`gerber.zip`、44 行 `bom.csv`、Top 107 项 `positions.csv`、库存报告；全部料号库存 ≥20 |
 | 接线 / 验收 | [`variants/C/WIRING.md`](variants/C/WIRING.md)、[`variants/C/TESTING.md`](variants/C/TESTING.md)、[`variants/C/CAMERA_VERIFICATION.md`](variants/C/CAMERA_VERIFICATION.md) |
 | 渲染图 | `variants/C/renders/final_top.png`、`final_bottom.png` |
+
+## 版本 D 结果（2026-10-05）
+
+| 项 | 结果 |
+|---|---|
+| 尺寸 | 65×55mm，4 层，双面贴片 |
+| 装配 | 107 个工厂贴装坐标：Top 19 + Bottom 88；所有线束座为卧式、开口朝板外，板上无手焊件 |
+| 静态验收 | `test_pcb_D` 26/26，`test_drc_D` 6/6；重新灌铜后 0 DRC 错误、0 未连接、0 原理图一致性问题 |
+| 摄像头安全 | 与 C 相同的反序映射和实物方向证据；首板上电前仍须通过 spec §7.4 断电测量 |
+| 生产文件 | `variants/D/fab/`：`gerber.zip`（含 `F.Paste`、`B.Paste`）、44 行 `bom.csv`、Top 19 + Bottom 88 项 `positions.csv`、库存报告；全部料号库存 ≥20 |
+| 接线 / 验收 | [`variants/D/WIRING.md`](variants/D/WIRING.md)、[`variants/D/TESTING.md`](variants/D/TESTING.md)、[`variants/D/CAMERA_VERIFICATION.md`](variants/D/CAMERA_VERIFICATION.md) |
+| 渲染图 | `variants/D/renders/final_top.png`、`final_bottom.png` |
