@@ -10,7 +10,7 @@
 
 ## 一、下单前硬门禁
 
-1. 使用一期 2 号板或 1:1 打印封装图，配 AFC01-S24FCA-00 实物排线拍照。
+1. 使用一期 2 号板或 `CAMERA_1TO1_CHECK_ONLY.pdf`（100% 实际大小），配 AFC01-S24FCA-00 实物排线拍照。
 2. 确认触点朝下、摄像头 pin 1 → PCB pad 24、pin 24 → PCB pad 1、镜头朝 PCB 外。
 3. 将原始照片放入本目录，计算 SHA256，在 `CAMERA_VERIFICATION.md` 记录核验人和日期。
 4. `python3 camera_gate.py ../variants/D/CAMERA_VERIFICATION.md` 必须返回“摄像头物理门禁通过”。
@@ -58,7 +58,7 @@
 cd hardware/plush-toy-v2-mainboard/scripts
 python3 -m unittest test_parts_db test_gpio test_core test_variants test_camera test_netlist test_export test_camera_gate -v
 /Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3 \
-  -m unittest test_pcb_D test_drc_D -v
+  -m unittest test_pcb_D test_drc_D test_camera_print -v
 bash export_fab.sh D   # 没有 spec §7.3 实物证据时必须失败
 ```
 

@@ -20,6 +20,7 @@ $KP fanout.py --variant A && $KP route.py --variant A   # 扇出 + Freerouting�
 $KP post_route.py --variant A --from-snapshot           # 网格补线（不重跑 Freerouting）
 bash export_fab.sh A             # 测试 + Gerber/BOM/坐标/库存报告/渲染图 → variants/A/fab/
 python3 export_wiring.py --variant A                    # 接线表与外购清单
+$KP export_camera_check.py --variant C                  # C/D：1:1 摄像头实物核验稿（非生产文件）
 ```
 
 ## 版本状态
